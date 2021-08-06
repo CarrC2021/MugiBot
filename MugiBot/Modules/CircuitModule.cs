@@ -23,7 +23,7 @@ namespace PartyBot.Modules
 
         [Command("ListTeams")]
         [Summary("This will list all players that the bot is tracking the data of.")]
-        public async Task ListTeams(IGuild guild)
-            => await ReplyAsync(embed: await CircuitService.ListTeamAssignments(guild));
+        public async Task ListTeams()
+            => await ReplyAsync(embed: await CircuitService.ListTeamAssignments(Context.Guild));
     }
 }

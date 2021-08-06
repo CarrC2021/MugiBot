@@ -148,6 +148,7 @@ namespace PartyBot.Services
                 .AddSingleton<DBManager>()
                 .AddSingleton<HelpService>()
                 .AddSingleton<ReactionService>()
+                .AddSingleton<AMQCircuitService>()
                 .BuildServiceProvider();
         }
     }
