@@ -21,6 +21,21 @@ namespace PartyBot.Database
         public int StageNumber { get; set; }
         public int AnnID { get; set; }
 
+        public CircuitTeamTableObject()
+        {
+            Key = "";
+            TeamName = "";
+            TotalTimesPlayed = 0;
+            Artist = "";
+            TimesCorrect = 0;
+            FromList = 0;
+            Type = "";
+            Show = "";
+            SongName = "";
+            Romaji = "";
+
+        }
+
         public CircuitTeamTableObject(string showname, string roma, string songName, string t, string teamName, 
             string artist, int list, bool correct, int cNum, int sNum, int annId)
         {

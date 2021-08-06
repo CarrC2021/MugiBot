@@ -15,6 +15,52 @@ namespace PartyBot.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.6");
 
+            modelBuilder.Entity("PartyBot.Database.CircuitTeamTableObject", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AnnID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Artist")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CircuitNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FromList")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Romaji")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Show")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SongName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StageNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TeamName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TimesCorrect")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalTimesPlayed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("CircuitTeams");
+                });
+
             modelBuilder.Entity("PartyBot.Database.PlayerTableObject", b =>
                 {
                     b.Property<string>("Key")
