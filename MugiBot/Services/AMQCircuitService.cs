@@ -42,7 +42,7 @@ namespace PartyBot.Services
             return await EmbedHandler.CreateBasicEmbed("Data", $"Your team is now set to {team}.", Color.Blue);
         }
 
-        public async Task<Embed> RemovePlayer(IUserMessage message)
+        public async Task<Embed> RemoveTeam(IUserMessage message)
         {
             string contents = await File.ReadAllTextAsync(teamsPath);
             Console.WriteLine(contents);

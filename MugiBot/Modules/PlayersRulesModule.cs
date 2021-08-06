@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using PartyBot.Services;
 using System.Threading.Tasks;
 
@@ -45,5 +46,15 @@ namespace PartyBot.Modules
         [Summary("This will delete the rule you specify and the bot will stop keeping track of data based on that rule.")]
         public async Task DeleteRule(string rule)
             => await ReplyAsync(embed: await PlayersRulesService.DeleteRule(rule));
+
+        [Command("SetUsername")]
+        [Summary("This sets your AMQ username.")]
+        public async Task SetAMQUsername(IUserMessage message, string username)
+            => await ReplyAsync(embed: await PlayersRulesService.SetUsername(message, username));
+
+        [Command("RemovesUsername")]
+        [Summary("This removes your AMQ username.")]
+        public async Task RemovesAMQUsername(IUserMessage message)
+            => await ReplyAsync(embed: await PlayersRulesService.RemoveUsername(message));
     }
 }
