@@ -49,12 +49,12 @@ namespace PartyBot.Modules
 
         [Command("SetUsername")]
         [Summary("This sets your AMQ username.")]
-        public async Task SetAMQUsername(IUserMessage message, string username)
-            => await ReplyAsync(embed: await PlayersRulesService.SetUsername(message, username));
+        public async Task SetAMQUsername(string username)
+            => await ReplyAsync(embed: await PlayersRulesService.SetUsername(Context.Message, username));
 
         [Command("RemovesUsername")]
         [Summary("This removes your AMQ username.")]
-        public async Task RemovesAMQUsername(IUserMessage message)
-            => await ReplyAsync(embed: await PlayersRulesService.RemoveUsername(message));
+        public async Task RemovesAMQUsername()
+            => await ReplyAsync(embed: await PlayersRulesService.RemoveUsername(Context.Message));
     }
 }

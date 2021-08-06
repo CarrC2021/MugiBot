@@ -13,13 +13,13 @@ namespace PartyBot.Modules
 
         [Command("SetTeam")]
         [Summary("Provide the team that you are a part of.")]
-        public async Task SetCurrentTeam(IUserMessage message, string team)
-            => await ReplyAsync(embed: await CircuitService.SetTeam(message, team));
+        public async Task SetCurrentTeam(string team)
+            => await ReplyAsync(embed: await CircuitService.SetTeam(Context.Message, team));
 
         [Command("RemoveTeam")]
         [Summary("Removes you from the team you currently have.")]
-        public async Task RemoveCurrentTeam(IUserMessage message)
-            => await ReplyAsync(embed: await CircuitService.RemoveTeam(message));
+        public async Task RemoveCurrentTeam()
+            => await ReplyAsync(embed: await CircuitService.RemoveTeam(Context.Message));
 
         [Command("ListTeams")]
         [Summary("This will list all players that the bot is tracking the data of.")]
