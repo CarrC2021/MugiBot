@@ -114,7 +114,7 @@ namespace PartyBot.Handlers
                     toPrint += $"\n720 {songObjects[i]._720} ";
                 if (songObjects[i]._480 != null && printLinks)
                     toPrint += $"\n480 {songObjects[i]._480} ";
-                toPrint += $"\n Key for this song: {songObjects[i]}\n";
+                toPrint += $"\n Key for this song: {songObjects[i].Key}\n";
                 count++;
                 if (count % 10 == 0 && count == songObjects.Count - 1)
                 {
