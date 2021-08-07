@@ -42,7 +42,7 @@ public class DBSearchService
         return await EmbedHandler.PrintPlayerStats(playerObjects, playerName);
     }
 
-    public static async Task<SongTableObject> UseSongKey(string key)
+    public static async Task<SongTableObject> UseSongKey(int key)
     {
         using var db = new AMQDBContext();
         return await SearchHandler.UseSongKey(db, key);
@@ -135,7 +135,7 @@ public class DBSearchService
             .ToListAsync();
     }
 
-    public static async Task<List<SongTableObject>> ReturnAllSongObjects(string show, string type)
+    public static async Task<List<SongTableObject>> ReturnAllSongObjectsByShowByType(string show, string type)
     {
         using var db = new AMQDBContext();
         return await db.SongTableObject
@@ -143,6 +143,19 @@ public class DBSearchService
             .Where(f => f.Show.ToLower().Equals(show.ToLower()))
             .Where(f => f.Type.ToLower().Equals(type.ToLower()))
             .ToListAsync();
+    }
+
+    public static async Task<SongTableObject> ReturnSongFromQuery(int annID, string artist, string type, string songName)
+    {
+        using var db = new AMQDBContext();
+        var query = await db.SongTableObject
+            .AsNoTracking()
+            .Where(f => f.AnnID == annID)
+            .Where(f => f.Type.ToLower().Equals(type.ToLower()))
+            .Where(f => f.Artist.ToLower().Equals(artist.ToLower()))
+            .Where(j => j.SongName.ToLower().Equals(songName.ToLower()))
+            .ToListAsync();
+        return query.FirstOrDefault();
     }
 
 }

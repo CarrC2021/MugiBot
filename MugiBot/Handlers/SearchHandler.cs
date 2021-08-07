@@ -9,9 +9,9 @@ namespace PartyBot.Handlers
 
     public class SearchHandler
     {
-        public static async Task<SongTableObject> UseSongKey(AMQDBContext _db, string key)
+        public static async Task<SongTableObject> UseSongKey(AMQDBContext _db, int key)
         {
-            var song = await _db.FindAsync<SongTableObject>(key.ToLower());
+            var song = await _db.FindAsync<SongTableObject>(key);
             if (song != null)
             {
                 return song;
