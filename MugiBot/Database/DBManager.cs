@@ -10,6 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using PartyBot.Database;
 
 namespace PartyBot.Database
 {
@@ -106,23 +108,6 @@ namespace PartyBot.Database
             var playerDict = await _playersRulesService.GetPlayersTracked();
             foreach (SongData song in data)
             {
-                if (song.songNumber == 1)
-                    await _db.SaveChangesAsync();
-
-                if (song.urls == null)
-                    continue;
-
-                //update the songs since the urls are there
-                var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.anime.english, song.type, song.name, song.artist));
-                //if this song is not found in the database then we need to create a tableobject and add it
-                if (query == null)
-                {
-                    //SongTableObject temp = ConvertSongDataToTable(song);
-                    //await _db.AddAsync(temp);
-                }
-                if (songsOnly)
-                    continue;
-                //update the player stats when songsOnly is false
                 await UpdatePlayerStats(_playersRulesService, song, rules, playerDict);
             }
             await _db.SaveChangesAsync();
@@ -156,7 +141,7 @@ namespace PartyBot.Database
                             listnum = tempDict[player.name];
 
                         PlayerTableObject query = await _db.PlayerStats.FindAsync(PlayerTableObject.MakePlayerTableKey
-                            (song.anime.english, song.type, song.name, song.artist, playerDict[player.name], rule));
+                            (song.annId, song.type, song.name, song.artist, playerDict[player.name], rule));
                         if (query == null)
                         {
                             await _db.AddAsync(PlayerTableObject.ConvertSongToPlayerTable
@@ -180,8 +165,9 @@ namespace PartyBot.Database
             Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
                 {1, "Opening"},
                 {2, "Ending"},
-                {3, "Insert"}
+                {3, "Insert Song"}
             };
+            int count = 0;
             AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
             foreach (Question question in data.Questions)
             {
@@ -190,12 +176,22 @@ namespace PartyBot.Database
                     var result = await _db.SongTableObject.FindAsync(song.AnnSongId);
                     if (result == null)
                     {
-                        await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, $"{TypeConversion[song.Type]} {song.Number}",
-                            question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
+                        if (song.Number == 0)
+                        {
+                            await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, $"{TypeConversion[song.Type]}",
+                                question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
+                        }
+                        else{
+                            await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, $"{TypeConversion[song.Type]} {song.Number}",
+                                question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
+                        }
+                        continue;
                     }
+                    count++;    
                 }
             }
-            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
+            await _db.SaveChangesAsync();
+            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs. There were {count} songs that returned with a value", Color.Blue);
         }
     }
 

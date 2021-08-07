@@ -11,7 +11,6 @@ namespace PartyBot.Database
         private readonly char separator = Path.DirectorySeparatorChar;
         public virtual DbSet<SongTableObject> SongTableObject { get; set; }
         public virtual DbSet<PlayerTableObject> PlayerStats { get; set; }
-
         public virtual DbSet<CircuitTeamTableObject> CircuitTeams { get; set;}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -26,7 +25,7 @@ namespace PartyBot.Database
             var connectionStringBuilder = new SqliteConnectionStringBuilder
             {
                 DataSource =
-                Path.Combine(mainpath, "Database", "csharpi.db")
+                Path.Combine(mainpath, "Database", "MugiBotDatbase.db")
             };
             var connectionString = connectionStringBuilder.ToString();
             var connection = new SqliteConnection(connectionString);

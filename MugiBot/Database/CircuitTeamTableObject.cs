@@ -67,5 +67,19 @@ namespace PartyBot.Database
         }
     }
 
-
+    public class CircuitTeamTableObjectComparer : IEqualityComparer<CircuitTeamTableObject>
+    {
+        public bool Equals(CircuitTeamTableObject x, CircuitTeamTableObject y)
+        {
+            if (x.Key.Equals(y.Key))
+            {
+                return true;
+            }
+            return false;
+        }
+        public int GetHashCode(CircuitTeamTableObject obj)
+        {
+            return obj.Key.GetHashCode();
+        }
+    }
 }
