@@ -7,7 +7,8 @@ namespace PartyBot.Database
     public class SongTableObject
     {
         [Key]
-        public string Key { get; set; }
+        //This will be the songAnnId
+        public int Key { get; set; }
         public string SongName { get; set; }
         public string Artist { get; set; }
         public string Type { get; set; }
@@ -28,9 +29,9 @@ namespace PartyBot.Database
             _720 = "";
             _480 = "";
             AnnID = 0;
-            Key = "";
+            Key = 700000000;
         }
-        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, string v)
+        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, string v, int songAnnId)
         {
             SongName = song;
             Artist = art;
@@ -39,10 +40,10 @@ namespace PartyBot.Database
             Romaji = Roma;
             MP3 = u;
             _720 = v;
-            Key = MakeSongTableKey(Showname, t, song, art);
+            Key = songAnnId;
             AnnID = 0;
         }
-        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link)
+        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, int songAnnId)
         {
             SongName = song;
             Artist = art;
@@ -51,10 +52,10 @@ namespace PartyBot.Database
             Romaji = Roma;
             MP3 = u;
             _720 = _720link;
-            Key = MakeSongTableKey(Showname, t, song, art);
+            Key = songAnnId;
             AnnID = Id;
         }
-        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, string _480link)
+        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, string _480link, int songAnnId)
         {
             SongName = song;
             Artist = art;
@@ -64,7 +65,7 @@ namespace PartyBot.Database
             MP3 = u;
             _720 = _720link;
             _480 = _480link;
-            Key = MakeSongTableKey(Showname, t, song, art);
+            Key = songAnnId;
             AnnID = Id;
         }
         public static string MakeSongTableKey(string showname, string songtype, string songname, string artist)

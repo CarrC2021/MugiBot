@@ -19,7 +19,7 @@ namespace PartyBot.Handlers
 
             var result = await _db.SongTableObject
                 .AsNoTracking()
-                .Where(x => x.Key.ToLower().Equals(key.ToLower()))
+                //.Where(x => x.Key.ToLower().Equals(key.ToLower()))
                 .ToListAsync();
             return result[0];
         }

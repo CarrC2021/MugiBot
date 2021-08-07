@@ -1,4 +1,5 @@
 ﻿using Discord;
+using MugiBot.DataStructs;
 using PartyBot.DataStructs;
 using PartyBot.Handlers;
 using PartyBot.Services;
@@ -49,8 +50,7 @@ namespace PartyBot.Database
                 Console.WriteLine(s.Name);
                 if (s.Name.ToLower().Contains("teams") || s.Name.ToLower().Contains("co-op") || s.Name.ToLower().Contains("coop"))
                 {
-                    songsOnly = true;
-                    Console.WriteLine("Added only songs for this file" + s);
+                    continue;
                 }
                 await AddToDatabase(_rs, s.Name, songsOnly);
             }
@@ -80,8 +80,8 @@ namespace PartyBot.Database
                 //if it is not just that the show's name got changed in the database, then we want to add the new object
                 if (query == null)
                 {
-                    SongTableObject temp = ConvertSongListDataToTable(song);
-                    await _db.AddAsync(temp);
+                    //SongTableObject temp = ConvertSongListDataToTable(song);
+                    //await _db.AddAsync(temp);
                 }
                 //await _db.SaveChangesAsync();
             }
@@ -117,8 +117,8 @@ namespace PartyBot.Database
                 //if this song is not found in the database then we need to create a tableobject and add it
                 if (query == null)
                 {
-                    SongTableObject temp = ConvertSongDataToTable(song);
-                    await _db.AddAsync(temp);
+                    //SongTableObject temp = ConvertSongDataToTable(song);
+                    //await _db.AddAsync(temp);
                 }
                 if (songsOnly)
                     continue;
@@ -175,28 +175,27 @@ namespace PartyBot.Database
                 }
             }
         }
-
-        public async Task<Embed> UpdateLinks(string showkey, string videoLink, string mp3 = "default")
+        public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
         {
-            SongTableObject tableObject = await _db.SongTableObject.FindAsync(showkey);
-            tableObject._720 = videoLink;
-            tableObject.MP3 = mp3;
-            await _db.SaveChangesAsync();
-            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"Updated {showkey} with the links provided", Color.Blue);
-        }
-
-        private SongTableObject ConvertSongDataToTable(SongData songData)
-        {
-            return new SongTableObject(songData.name, songData.artist,
-            songData.type, songData.anime.english, songData.anime.romaji, songData.urls.catbox._0,
-            songData.annId, songData.urls.catbox._720, songData.urls.catbox._480);
-        }
-
-        private SongTableObject ConvertSongListDataToTable(SongListData songData)
-        {
-            return new SongTableObject(songData.songName, songData.artist,
-            songData.type, songData.animeEng, songData.animeRomaji, songData.LinkMp3,
-            songData.annId, songData.LinkVideo);
+            Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
+                {1, "Opening"},
+                {2, "Ending"},
+                {3, "Insert"}
+            };
+            AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
+            foreach (Question question in data.Questions)
+            {
+                foreach (Song song in  question.Songs)
+                {
+                    var result = await _db.SongTableObject.FindAsync(song.AnnSongId);
+                    if (result == null)
+                    {
+                        await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, $"{TypeConversion[song.Type]} {song.Number}",
+                            question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
+                    }
+                }
+            }
+            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
         }
     }
 
