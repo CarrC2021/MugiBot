@@ -26,22 +26,14 @@ namespace PartyBot.Handlers
 
         public static async Task<List<PlayerTableObject>> AllObjectsForPlayer(AMQDBContext _db, string name, bool onlyFromList = true)
         {
+            var Query = await _db.PlayerStats
+                   .AsNoTracking()
+                   .Where(f => f.Rule.Equals(""))
+                   .Where(j => j.PlayerName.ToLower().Equals(name.ToLower()))
+                   .ToListAsync();
             if (onlyFromList)
-            {
-                var Query = await _db.PlayerStats
-                   .AsNoTracking()
-                   .Where(f => f.Rule.Equals(""))
-                   .Where(j => j.PlayerName.ToLower().Equals(name.ToLower()))
-                   .Where(k => k.FromList > 0)
-                   .ToListAsync();
-                return Query;
-            }
-            var PlayerQuery = await _db.PlayerStats
-                   .AsNoTracking()
-                   .Where(f => f.Rule.Equals(""))
-                   .Where(j => j.PlayerName.ToLower().Equals(name.ToLower()))
-                   .ToListAsync();
-            return PlayerQuery;
+                Query = Query.Where(y => y.FromList > 0).ToList();
+            return Query;
         }
 
         public static async Task<List<PlayerTableObject>> PlayerStatsSearch(AMQDBContext _db, string playerName, string showName, string type, string exactMatch = "no")

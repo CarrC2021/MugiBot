@@ -31,6 +31,11 @@ namespace PartyBot.Modules
         public async Task UpdateSongDatabase(string expandLibraryFile)
             => await ReplyAsync(embed: await DataService.DBManager.UpdateSongDatabase(expandLibraryFile));
 
+        [Command("UpdateSongIds")]
+        [Summary("This command will update the player stats database to have the associated song Ids.")]
+        public async Task UpdateSongIds()
+            => await ReplyAsync(embed: await DataService.DBManager.UpdatePlayerAnnSongIds());
+
         [Command("CalcTotal")]
         [Summary("This will calculate and list all players' total success rate. There is an optional argument to calculate successrate by rule. Use !listrules to see what they are.")]
         public async Task CalcTotalCorrect([Remainder] string rule = "")
@@ -45,5 +50,7 @@ namespace PartyBot.Modules
         [Summary("Input a player name and a number of songs and this will give you songs from your list to practice.")]
         public async Task PracticeMyList(string playerName, int num = 5)
             => await ReplyAsync(embed: await DataService.RecommendPracticeSongs(Context.Channel, playerName, num, true));
+
+
     }
 }

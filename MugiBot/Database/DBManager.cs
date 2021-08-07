@@ -26,6 +26,12 @@ namespace PartyBot.Database
         public readonly string JsonFiles;
         public readonly string ArchivedFiles;
 
+        private readonly Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
+                {1, "Opening"},
+                {2, "Ending"},
+                {3, "Insert Song"}
+            };
+
         public async Task<Embed> MergeTest(string mergeFrom, string mergeInto)
             => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
 
@@ -76,9 +82,7 @@ namespace PartyBot.Database
             List<string> rules = await _playersRulesService.GetRules();
             var playerDict = await _playersRulesService.GetPlayersTracked();
             foreach (SongData song in data)
-            {
                 await UpdatePlayerStats(_playersRulesService, song, rules, playerDict);
-            }
             await _db.SaveChangesAsync();
             File.Move(filepath, Path.Combine(ArchivedFiles, filename), true);
         }
@@ -131,37 +135,51 @@ namespace PartyBot.Database
         }
         public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
         {
-            Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
-                {1, "Opening"},
-                {2, "Ending"},
-                {3, "Insert Song"}
-            };
-            int count = 0;
             AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
             foreach (Question question in data.Questions)
+                await AddSongsFromQuestion(question);
+
+            await _db.SaveChangesAsync();
+            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
+        }
+
+        private async Task AddSongsFromQuestion(Question question)
+        {
+            foreach (Song song in question.Songs)
             {
-                foreach (Song song in  question.Songs)
+                var result = await _db.SongTableObject.FindAsync(song.AnnSongId);
+                if (result == null)
                 {
-                    var result = await _db.SongTableObject.FindAsync(song.AnnSongId);
-                    if (result == null)
-                    {
-                        if (song.Number == 0)
-                        {
-                            await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, $"{TypeConversion[song.Type]}",
-                                question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
-                        }
-                        else{
-                            await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, $"{TypeConversion[song.Type]} {song.Number}",
-                                question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
-                        }
-                        continue;
-                    }
-                    count++;    
+                    string tempType = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
+
+                    await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, tempType,
+                        question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
                 }
             }
+        }
+
+        public async Task<Embed> UpdatePlayerAnnSongIds()
+        {
+            var AllSongs = await _db.SongTableObject
+                .AsNoTracking()
+                .ToListAsync();
+
+            foreach (SongTableObject song in AllSongs)
+            {
+                var SongMatches = await _db.PlayerStats
+                    .AsNoTracking()
+                    .Where(t => t.AnnID == song.AnnID)
+                    .Where(y => y.Artist.ToLower().Equals(song.Artist))
+                    .Where(j => j.Type.Equals(song.Type))
+                    .Where(f => f.SongName.Equals(song.SongName))
+                    .ToListAsync();
+                foreach (PlayerTableObject playerTable in SongMatches)
+                    playerTable.SongAnnID = song.Key;
+            }
             await _db.SaveChangesAsync();
-            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs. There were {count} songs that returned with a value", Color.Blue);
+            return await EmbedHandler.CreateBasicEmbed("Data, Keys", "Updated the player table objects to have the correct keys", Color.Green);
         }
     }
+
 
 }
