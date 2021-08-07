@@ -68,38 +68,6 @@ namespace PartyBot.Database
                 + $"\n\t There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs in the database.", Color.Blue);
         }
 
-        public async Task<Embed> AddGithubFilesToDataBase(List<string> jsonFiles)
-        {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            List<SongListData> data = await JsonHandler.ConvertSongJsons(jsonFiles);
-            foreach (SongListData song in data)
-            {
-                //update the songs since the urls are there
-                if (song.LinkMp3 == null)
-                    continue;
-                var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.animeEng, song.type, song.songName, song.artist));
-                //if it is not just that the show's name got changed in the database, then we want to add the new object
-                if (query == null)
-                {
-                    //SongTableObject temp = ConvertSongListDataToTable(song);
-                    //await _db.AddAsync(temp);
-                }
-                //await _db.SaveChangesAsync();
-            }
-            await _db.SaveChangesAsync();
-            stopWatch.Stop();
-            // Get the elapsed time as a TimeSpan value.
-            TimeSpan ts = stopWatch.Elapsed;
-            // Format and display the TimeSpan value.
-            string elapsedTime = string.Format("{0:00}:{1:00}.{2:00}",
-                ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            return await EmbedHandler.CreateBasicEmbed("Data", "All songs from the Json Files have been added to the Database and"
-                + $"player stats were updated \n RunTime: {elapsedTime}"
-                + $"\n\t There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs in the database.", Color.Blue);
-        }
-
         public async Task AddToDatabase(PlayersRulesService _playersRulesService, string filename, bool songsOnly)
         {
             string filepath = Path.Combine(JsonFiles, filename);
