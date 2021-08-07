@@ -52,6 +52,7 @@ namespace PartyBot.Database
                 Console.WriteLine(s.Name);
                 if (s.Name.ToLower().Contains("teams") || s.Name.ToLower().Contains("co-op") || s.Name.ToLower().Contains("coop"))
                 {
+                    File.Delete(s.FullName);
                     continue;
                 }
                 await AddToDatabase(_rs, s.Name, songsOnly);
