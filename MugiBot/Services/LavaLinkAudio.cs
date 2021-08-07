@@ -325,7 +325,7 @@ namespace PartyBot.Services
                     args.Player.TextChannel.Guild as SocketGuild
                 );
             string toPrint = "Now Playing";
-            if (temp != null && args.Player.Queue.Count < 2)
+            if (temp != null && args.Player.Queue.Count < 3)
             {
                 await RadioQueue(temp);
                 if (!temp.CurrPlayers.Equals("any"))

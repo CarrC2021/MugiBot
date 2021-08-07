@@ -117,6 +117,7 @@ namespace PartyBot.Database
         public string Romaji { get; set; }
         public string Rule { get; set; }
         public int AnnID { get; set; }
+        public int SongAnnID { get; set; }
 
         public PlayerTableObject()
         {
