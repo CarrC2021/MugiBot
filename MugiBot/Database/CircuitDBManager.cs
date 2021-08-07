@@ -1,17 +1,14 @@
 using Discord;
-using Discord.Net;
 using Discord.WebSocket;
 using PartyBot.DataStructs;
 using PartyBot.Handlers;
 using PartyBot.Services;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace PartyBot.Database

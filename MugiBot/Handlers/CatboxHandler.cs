@@ -13,8 +13,6 @@ namespace PartyBot.Handlers
 {
     public static class CatboxHandler
     {
-
-
         internal static readonly HttpClient HttpClient = new HttpClient();
         public static async Task<string> DownloadMP3(string query, string musicPath)
         {

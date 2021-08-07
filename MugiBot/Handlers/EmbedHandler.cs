@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace PartyBot.Handlers
 {
+
+
+    //Have the Print functions print out the songkey so you can use it
     public static class EmbedHandler
     {
         /* This file is where we can store all the Embed Helper Tasks (So to speak). 
