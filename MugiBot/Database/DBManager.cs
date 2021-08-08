@@ -57,12 +57,10 @@ namespace PartyBot.Database
                 bool songsOnly = false;
                 Console.WriteLine(s.Name);
                 if (s.Name.ToLower().Contains("teams") || s.Name.ToLower().Contains("co-op") || s.Name.ToLower().Contains("coop"))
-                {
-                    File.Delete(s.FullName);
-                    continue;
-                }
+                    songsOnly = true;
                 await AddToDatabase(_rs, s.Name, songsOnly);
             }
+            await _db.SaveChangesAsync();
             stopWatch.Stop();
             // Get the elapsed time as a TimeSpan value.
             TimeSpan ts = stopWatch.Elapsed;
