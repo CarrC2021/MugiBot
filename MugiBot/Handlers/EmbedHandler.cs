@@ -44,7 +44,7 @@ namespace PartyBot.Handlers
 
                 totalCorrect += player.TimesCorrect;
 
-                string temp = $"{player.Show} {player.Type} {player.SongName}";
+                string temp = $"{player.SongObject.Show} {player.SongObject.Type} {player.SongObject.SongName}";
 
                 if (objectsToPrint.Count < 10)
                     objectsToPrint.Add(temp, (float)(player.TimesCorrect / player.TotalTimesPlayed));
@@ -77,7 +77,7 @@ namespace PartyBot.Handlers
             {
                 //list = list + player.Key + " played: " +
                 //player.TotalTimesPlayed + " correct: " + player.TimesCorrect + "\n";
-                list = list + player.Show + " " + player.Type + " " + player.SongName + " by " + player.Artist +
+                list = list + player.SongObject.Show + " " + player.SongObject.Type + " " + player.SongObject.SongName + " by " + player.SongObject.Artist +
                     "\n" + "\t" + " Times Played: " + player.TotalTimesPlayed + " Times Correct: " + player.TimesCorrect + "\n";
                 count++;
                 if (count % 10 == 0)

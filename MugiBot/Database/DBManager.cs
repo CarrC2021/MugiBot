@@ -76,7 +76,7 @@ namespace PartyBot.Database
                 //update the songs since the urls are there
                 if (song.LinkMp3 == null)
                     continue;
-                var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.animeEng, song.type, song.songName, song.artist));
+                var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.annId, song.type, song.songName, song.artist));
                 //if it is not just that the show's name got changed in the database, then we want to add the new object
                 if (query == null)
                 {
@@ -113,7 +113,7 @@ namespace PartyBot.Database
                     continue;
 
                 //update the songs since the urls are there
-                var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.anime.english, song.type, song.name, song.artist));
+                var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.annId, song.type, song.name, song.artist));
                 //if this song is not found in the database then we need to create a tableobject and add it
                 if (query == null)
                 {
@@ -156,11 +156,10 @@ namespace PartyBot.Database
                             listnum = tempDict[player.name];
 
                         PlayerTableObject query = await _db.PlayerStats.FindAsync(PlayerTableObject.MakePlayerTableKey
-                            (song.anime.english, song.type, song.name, song.artist, playerDict[player.name], rule));
+                            (song.annId, song.type, song.name, song.artist, playerDict[player.name], rule));
                         if (query == null)
                         {
-                            await _db.AddAsync(PlayerTableObject.ConvertSongToPlayerTable
-                                (song, playerDict[player.name], listnum, rule, player.correct));
+                            await _db.AddAsync(new PlayerTableObject((song, playerDict[player.name], listnum, rule, player.correct));
                         }
                         else
                         {

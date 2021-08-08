@@ -4,6 +4,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PartyBot.Database
 {
+    //This is an object which represents a unique song and holds links to catbox files for 
+    //the LavalinkAudio class to play.
     public class SongTableObject
     {
         [Key]
@@ -39,7 +41,7 @@ namespace PartyBot.Database
             Romaji = Roma;
             MP3 = u;
             _720 = v;
-            Key = MakeSongTableKey(Showname, t, song, art);
+            Key = MakeSongTableKey(0, t, song, art);
             AnnID = 0;
         }
         public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link)
@@ -51,7 +53,7 @@ namespace PartyBot.Database
             Romaji = Roma;
             MP3 = u;
             _720 = _720link;
-            Key = MakeSongTableKey(Showname, t, song, art);
+            Key = MakeSongTableKey(Id, t, song, art);
             AnnID = Id;
         }
         public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, string _480link)
@@ -64,14 +66,14 @@ namespace PartyBot.Database
             MP3 = u;
             _720 = _720link;
             _480 = _480link;
-            Key = MakeSongTableKey(Showname, t, song, art);
+            Key = MakeSongTableKey(Id, t, song, art);
             AnnID = Id;
         }
-        public static string MakeSongTableKey(string showname, string songtype, string songname, string artist)
+        public static string MakeSongTableKey(int AnnID, string songtype, string songname, string artist)
         {
             try
             {
-                string key = showname.ToLower() + " " + songtype.ToLower() + " " + songname.ToLower() + " by " + artist.ToLower();
+                string key = AnnID + " " + songtype.ToLower() + " " + songname.ToLower() + " by " + artist.ToLower();
                 return key;
             }
             catch (Exception ex)
@@ -85,7 +87,7 @@ namespace PartyBot.Database
         {
             try
             {
-                string key = pt.Show.ToLower() + " " + pt.Type.ToLower() + " " + pt.SongName.ToLower() + " by " + pt.Artist.ToLower();
+                string key = pt.AnnID + " " + pt.Type.ToLower() + " " + pt.SongName.ToLower() + " by " + pt.Artist.ToLower();
                 return key;
             }
             catch (Exception ex)
@@ -101,21 +103,18 @@ namespace PartyBot.Database
         }
     }
 
+    //This class represents a player's stats on a given song when the "condition" or rule is met.
+    // For example the rule Ranked means this object represents a given players' stats on the specific song in ranked
     public class PlayerTableObject
     {
         [Key]
         public string Key { get; set; }
         public string PlayerName { get; set; }
         public int TotalTimesPlayed { get; set; }
-        public string Artist { get; set; }
         public int TimesCorrect { get; set; }
         public int FromList { get; set; }
-        public string Type { get; set; }
-        public string Show { get; set; }
-        public string SongName { get; set; }
-        public string Romaji { get; set; }
         public string Rule { get; set; }
-        public int AnnID { get; set; }
+        public SongTableObject SongObject { get; set; }
 
         public PlayerTableObject()
         {
@@ -125,28 +124,18 @@ namespace PartyBot.Database
             TimesCorrect = 0;
             FromList = 0;
         }
-        public PlayerTableObject(string showname, string roma, string SongName, string t, string artist, string player, int list, string rule, int annId)
+        public PlayerTableObject(SongTableObject song, string player, int list, string rule)
         {
-            Show = showname;
-            Romaji = roma;
-            Type = t;
             PlayerName = player;
             TotalTimesPlayed = 0;
             TimesCorrect = 0;
             FromList = list;
             Rule = rule;
-            Artist = artist;
-            AnnID = annId;
-            Key = MakePlayerTableKey(Show, Type, SongName, artist, PlayerName, Rule);
+            Key = MakePlayerTableKey(song.AnnID, song.Type, song.SongName, song.Artist, PlayerName, Rule);
         }
-        public PlayerTableObject(string showname, string roma, string songName, string t, string player, string artist, int list, bool correct, string rule, int annId)
+        public PlayerTableObject(SongTableObject song, string player, int list, bool correct, string rule)
         {
-            Show = showname;
-            Romaji = roma;
-            Type = t;
             PlayerName = player;
-            SongName = songName;
-            Artist = artist;
             TotalTimesPlayed = 1;
             if (correct)
             {
@@ -158,22 +147,21 @@ namespace PartyBot.Database
             }
             FromList = list;
             Rule = rule;
-            AnnID = annId;
-            Key = MakePlayerTableKey(Show, Type, SongName, artist, PlayerName, Rule);
+            Key = MakePlayerTableKey(song.AnnID, song.Type, song.SongName, song.Artist, PlayerName, Rule);
         }
         public PlayerTableObject(PlayerTableObject tableObject, string newName)
         {
-            Show = tableObject.Show;
-            Romaji = tableObject.Romaji;
-            Type = tableObject.Type;
-            SongName = tableObject.SongName;
+            Show = tableObject.SongObject.Show;
+            Romaji = tableObject.SongObject.Romaji;
+            Type = tableObject.SongObject.Type;
+            SongName = tableObject.SongObject.SongName;
             PlayerName = newName;
             TotalTimesPlayed = tableObject.TotalTimesPlayed;
             TimesCorrect = tableObject.TimesCorrect;
             FromList = tableObject.FromList;
             Rule = tableObject.Rule;
-            Artist = tableObject.Artist;
-            Key = MakePlayerTableKey(Show, Type, SongName, Artist, PlayerName, Rule);
+            Artist = tableObject.SongObject.Artist;
+            Key = MakePlayerTableKey(song.AnnID, song.Type, song.SongName, song.Artist, newName, Rule);
         }
         public void Update(bool correct, Dictionary<string, int> dict)
         {
@@ -189,16 +177,10 @@ namespace PartyBot.Database
                 TimesCorrect += 1;
             TotalTimesPlayed += 1;
         }
-        public static string MakePlayerTableKey(string showname, string songtype, string songname, string artist, string playername, string rule)
+        public static string MakePlayerTableKey(int AnnID, string songtype, string songname, string artist, string playername, string rule)
         {
-            return showname.ToLower() + " " + songtype.ToLower() + " " +
+            return AnnID + " " + songtype.ToLower() + " " +
                 songname.ToLower() + " by " + artist.ToLower() + " " + playername.ToLower() + " " + rule.ToLower();
-        }
-
-        public static PlayerTableObject ConvertSongToPlayerTable(SongData songData, string player, int list, string rule, bool correct)
-        {
-            return new PlayerTableObject(songData.anime.english, songData.anime.romaji,
-                songData.name, songData.type, player, songData.artist, list, correct, rule, songData.annId);
         }
     }
 

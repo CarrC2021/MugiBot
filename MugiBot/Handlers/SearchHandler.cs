@@ -56,14 +56,14 @@ namespace PartyBot.Handlers
                     Shows = await _db.PlayerStats
                         .AsNoTracking()
                         .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Show.ToLower().Equals(showName.ToLower()))
+                        .Where(x => x.SongObject.Show.ToLower().Equals(showName.ToLower()))
                         .Where(j => j.Rule.Equals(""))
                         .ToListAsync();
 
                     Romajis = await _db.PlayerStats
                         .AsNoTracking()
                         .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Equals(showName.ToLower()))
+                        .Where(x => x.SongObject.Romaji.ToLower().Equals(showName.ToLower()))
                         .Where(j => j.Rule.Equals(""))
                         .ToListAsync();
                 }
@@ -72,14 +72,14 @@ namespace PartyBot.Handlers
                     Shows = await _db.PlayerStats
                         .AsNoTracking()
                         .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Show.ToLower().Contains(showName.ToLower()))
+                        .Where(x => x.SongObject.Show.ToLower().Contains(showName.ToLower()))
                         .Where(j => j.Rule.Equals(""))
                         .ToListAsync();
 
                     Romajis = await _db.PlayerStats
                         .AsNoTracking()
                         .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Contains(showName.ToLower()))
+                        .Where(x => x.SongObject.Romaji.ToLower().Contains(showName.ToLower()))
                         .Where(j => j.Rule.Equals(""))
                         .ToListAsync();
                 }
@@ -93,16 +93,16 @@ namespace PartyBot.Handlers
                     Shows = await _db.PlayerStats
                         .AsNoTracking()
                         .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Show.ToLower().Equals(showName.ToLower()))
-                        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
+                        .Where(x => x.SongObject.Show.ToLower().Equals(showName.ToLower()))
+                        .Where(j => j.SongObject.Type.ToLower().Contains(type.ToLower()))
                         .Where(j => j.Rule.Equals(""))
                         .ToListAsync();
 
                     Romajis = await _db.PlayerStats
                         .AsNoTracking()
                         .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Equals(showName.ToLower()))
-                        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
+                        .Where(x => x.SongObject.Romaji.ToLower().Equals(showName.ToLower()))
+                        .Where(j => j.SongObject.Type.ToLower().Contains(type.ToLower()))
                         .Where(j => j.Rule.Equals(""))
                         .ToListAsync();
                 }
@@ -111,16 +111,16 @@ namespace PartyBot.Handlers
                     Shows = await _db.PlayerStats
                         .AsNoTracking()
                         .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Show.ToLower().Contains(showName.ToLower()))
-                        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
+                        .Where(x => x.SongObject.Show.ToLower().Contains(showName.ToLower()))
+                        .Where(j => j.SongObject.Type.ToLower().Contains(type.ToLower()))
                         .Where(j => j.Rule.Equals(""))
                         .ToListAsync();
 
                     Romajis = await _db.PlayerStats
                         .AsNoTracking()
                         .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Contains(showName.ToLower()))
-                        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
+                        .Where(x => x.SongObject.Romaji.ToLower().Contains(showName.ToLower()))
+                        .Where(j => j.SongObject.Type.ToLower().Contains(type.ToLower()))
                         .Where(j => j.Rule.Equals(""))
                         .ToListAsync();
                 }
