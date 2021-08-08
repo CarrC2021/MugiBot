@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace MugiBot.DataStructs
+namespace PartyBot.DataStructs
 {
 
     // Root myDeserializedClass = JsonSerializer.Deserialize<Root>(myJsonResponse);

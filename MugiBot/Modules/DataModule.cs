@@ -50,7 +50,17 @@ namespace PartyBot.Modules
         [Summary("Input a player name and a number of songs and this will give you songs from your list to practice.")]
         public async Task PracticeMyList(string playerName, int num = 5)
             => await ReplyAsync(embed: await DataService.RecommendPracticeSongs(Context.Channel, playerName, num, true));
+            
+        [Command("GithubTest")]
+        public async Task GithubTest(string repo, int page, int perPage)
+        {
+            await ReplyAsync(embed: await DataService.DBManager.AddGithubFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
+        }
 
+        [Command("UpdateSongDB")]
+        [Summary("This command will update the song database using all files the bot has downloaded and player stats too if the file name does not include co-op, coop, or teams.")]
+        public async Task UpdateSongDatabase(string expandLibraryFile)
+            => await ReplyAsync(embed: await DataService.DBManager.UpdateSongDatabase(expandLibraryFile));
 
     }
 }

@@ -60,7 +60,7 @@ public class DBSearchService
         using var db = new AMQDBContext();
         return await db.PlayerStats
         .AsNoTracking()
-        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
+        .Where(j => j.SongObject.Type.ToLower().Contains(type.ToLower()))
         .ToListAsync();
     }
     public static async Task<List<PlayerTableObject>> ReturnAllPlayerObjects(string player)
@@ -85,7 +85,7 @@ public class DBSearchService
         using var db = new AMQDBContext();
         return await db.PlayerStats
             .AsNoTracking()
-            .Where(j => j.Type.ToLower().Contains(type.ToLower()))
+            .Where(j => j.SongObject.Type.ToLower().Contains(type.ToLower()))
             .Where(f => f.PlayerName.ToLower().Equals(player.ToLower()))
             .ToListAsync();
     }
@@ -94,7 +94,7 @@ public class DBSearchService
         using var db = new AMQDBContext();
         return await db.PlayerStats
             .AsNoTracking()
-            .Where(j => j.Type.ToLower().Contains(type.ToLower()))
+            .Where(j => j.SongObject.Type.ToLower().Contains(type.ToLower()))
             .Where(j => j.FromList == list)
             .Where(f => f.PlayerName.ToLower().Equals(player.ToLower()))
             .ToListAsync();
@@ -104,7 +104,7 @@ public class DBSearchService
         using var db = new AMQDBContext();
         return await db.PlayerStats
             .AsNoTracking()
-            .Where(j => j.Type.ToLower().Contains(type.ToLower()))
+            .Where(j => j.SongObject.Type.ToLower().Contains(type.ToLower()))
             .Where(j => j.FromList == list)
             .Where(f => f.PlayerName.ToLower().Equals(player.ToLower()))
             .Where(t => t.Rule.Equals(rule))

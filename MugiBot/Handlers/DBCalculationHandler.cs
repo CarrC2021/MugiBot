@@ -62,7 +62,7 @@ namespace PartyBot.Handlers
                 {
                     Query = await db.PlayerStats
                         .AsNoTracking()
-                        .Where(k => k.Show.ToLower().Equals(show.ToLower()))
+                        .Where(k => k.SongObject.Show.ToLower().Equals(show.ToLower()))
                         .Where(f => f.Rule.Equals(""))
                         .ToListAsync();
                 }
@@ -70,7 +70,7 @@ namespace PartyBot.Handlers
                 {
                     Query = await db.PlayerStats
                         .AsNoTracking()
-                        .Where(k => k.Show.ToLower().Contains(show.ToLower()))
+                        .Where(k => k.SongObject.Show.ToLower().Contains(show.ToLower()))
                         .Where(f => f.Rule.Equals(""))
                         .ToListAsync();
                 }
@@ -80,7 +80,7 @@ namespace PartyBot.Handlers
             {
                 total += t.TotalTimesPlayed;
                 correct += t.TimesCorrect;
-                string key = SongTableObject.MakeSongTableKey(t.Show, t.Type, t.SongName, t.Artist);
+                string key = SongTableObject.MakeSongTableKey(t.SongObject.AnnID, t.SongObject.Type, t.SongObject.SongName, t.SongObject.Artist);
                 if (dict.ContainsKey(key))
                 {
                     dict.TryGetValue(key, out var currentCount);
@@ -120,23 +120,16 @@ namespace PartyBot.Handlers
 
                 foreach (PlayerTableObject tObject in PlayerQuery)
                 {
-                    temp = SongTableObject.MakeSongTableKey(tObject.Show, tObject.Type, tObject.SongName, tObject.Artist);
-                    try
-                    {
-                        total.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
-                        playerSpecific.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message + "\n" + ex.StackTrace);
-                    }
+                    temp = SongTableObject.MakeSongTableKey(tObject.SongObject.AnnID, tObject.SongObject.Type, tObject.SongObject.SongName, tObject.SongObject.Artist);
+                    total.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
+                    playerSpecific.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
                 }
 
                 OtherQuery = await db.PlayerStats
                             .AsAsyncEnumerable()
                             .Where(x => x.Rule.Equals(""))
                             .Where(j => !j.PlayerName.ToLower().Equals(name.ToLower()))
-                            .Where(y => total.ContainsKey(SongTableObject.MakeSongTableKey(y.Show, y.Type, y.SongName, y.Artist)))
+                            .Where(y => total.ContainsKey(SongTableObject.MakeSongTableKey(y.SongObject.AnnID, y.SongObject.Type, y.SongObject.SongName, y.SongObject.Artist)))
                             .ToListAsync();
             }
 
@@ -152,7 +145,7 @@ namespace PartyBot.Handlers
             //now we will go through all of those objects and increment the stats
             foreach (PlayerTableObject tableObject in OtherQuery)
             {
-                temp = SongTableObject.MakeSongTableKey(tableObject.Show, tableObject.Type, tableObject.SongName, tableObject.Artist);
+                temp = SongTableObject.MakeSongTableKey(tableObject.SongObject.AnnID, tableObject.SongObject.Type, tableObject.SongObject.SongName, tableObject.SongObject.Artist);
                 total.TryGetValue(temp, out var currentCount);
                 total[temp] = new int[] { currentCount[0] + tableObject.TotalTimesPlayed, currentCount[1] + tableObject.TimesCorrect };
             }
