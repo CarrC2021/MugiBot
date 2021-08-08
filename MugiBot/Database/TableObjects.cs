@@ -19,6 +19,7 @@ namespace PartyBot.Database
         public string _720 { get; set; }
         public string _480 { get; set; }
         public int AnnID { get; set; }
+        public int AnnSongID { get; set; }
 
         public SongTableObject()
         {
@@ -69,6 +70,27 @@ namespace PartyBot.Database
             Key = MakeSongTableKey(Id, t, song, art);
             AnnID = Id;
         }
+
+        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, string _480link, int annSongId)
+        {
+            SongName = song;
+            Artist = art;
+            Type = t;
+            Show = Showname;
+            Romaji = Roma;
+            MP3 = u;
+            _720 = _720link;
+            _480 = _480link;
+            Key = MakeSongTableKey(Id, t, song, art);
+            AnnID = Id;
+            AnnSongID = annSongId;
+        }
+        public static SongTableObject SongDataToSongTableObject(SongData data)
+        {
+            return new SongTableObject(data.name, data.artist, data.type, data.anime.english,
+             data.anime.romaji, data.urls.catbox._0, data.annId, data.urls.catbox._720, data.urls.catbox._480);
+
+        }
         public static string MakeSongTableKey(int AnnID, string songtype, string songname, string artist)
         {
             try
@@ -87,7 +109,8 @@ namespace PartyBot.Database
         {
             try
             {
-                string key = pt.AnnID + " " + pt.Type.ToLower() + " " + pt.SongName.ToLower() + " by " + pt.Artist.ToLower();
+                string key = pt.SongObject.AnnID + " " + pt.SongObject.Type.ToLower()
+                 + " " + pt.SongObject.SongName.ToLower() + " by " + pt.SongObject.Artist.ToLower();
                 return key;
             }
             catch (Exception ex)
@@ -151,17 +174,13 @@ namespace PartyBot.Database
         }
         public PlayerTableObject(PlayerTableObject tableObject, string newName)
         {
-            Show = tableObject.SongObject.Show;
-            Romaji = tableObject.SongObject.Romaji;
-            Type = tableObject.SongObject.Type;
-            SongName = tableObject.SongObject.SongName;
             PlayerName = newName;
             TotalTimesPlayed = tableObject.TotalTimesPlayed;
             TimesCorrect = tableObject.TimesCorrect;
             FromList = tableObject.FromList;
             Rule = tableObject.Rule;
-            Artist = tableObject.SongObject.Artist;
-            Key = MakePlayerTableKey(song.AnnID, song.Type, song.SongName, song.Artist, newName, Rule);
+            Key = MakePlayerTableKey(tableObject.SongObject.AnnID, tableObject.SongObject.Type,
+             tableObject.SongObject.SongName, tableObject.SongObject.Artist, newName, Rule);
         }
         public void Update(bool correct, Dictionary<string, int> dict)
         {

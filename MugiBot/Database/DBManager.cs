@@ -23,6 +23,12 @@ namespace PartyBot.Database
         public readonly string JsonFiles;
         public readonly string ArchivedFiles;
 
+        private readonly Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
+                {1, "Opening"},
+                {2, "Ending"},
+                {3, "Insert Song"}
+            };
+
         public async Task<Embed> MergeTest(string mergeFrom, string mergeInto)
             => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
 
@@ -159,7 +165,8 @@ namespace PartyBot.Database
                             (song.annId, song.type, song.name, song.artist, playerDict[player.name], rule));
                         if (query == null)
                         {
-                            await _db.AddAsync(new PlayerTableObject((song, playerDict[player.name], listnum, rule, player.correct));
+                            await _db.AddAsync(new PlayerTableObject(SongTableObject.SongDataToSongTableObject(song),
+                             playerDict[player.name], listnum, player.correct, rule));
                         }
                         else
                         {
@@ -171,6 +178,31 @@ namespace PartyBot.Database
                     {
                         Console.WriteLine(ex.Message);
                     }
+                }
+            }
+        }
+
+        public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
+        {
+            AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
+            foreach (Question question in data.Questions)
+                await AddSongsFromQuestion(question);
+
+            await _db.SaveChangesAsync();
+            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
+        }
+
+        private async Task AddSongsFromQuestion(Question question)
+        {
+            foreach (Song song in question.Songs)
+            {
+                var result = await _db.SongTableObject.FindAsync($"{question.AnnId} {song.Type} {song.Name} by {song.Artist}");
+                if (result == null)
+                {
+                    string tempType = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
+
+                    await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, tempType,
+                        question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
                 }
             }
         }
@@ -197,6 +229,7 @@ namespace PartyBot.Database
             songData.type, songData.animeEng, songData.animeRomaji, songData.LinkMp3,
             songData.annId, songData.LinkVideo);
         }
+        
     }
 
 }

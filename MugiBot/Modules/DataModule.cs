@@ -46,5 +46,10 @@ namespace PartyBot.Modules
         {
             await ReplyAsync(embed: await DataService.DBManager.AddGithubFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
         }
+
+        [Command("UpdateSongDB")]
+        [Summary("This command will update the song database using all files the bot has downloaded and player stats too if the file name does not include co-op, coop, or teams.")]
+        public async Task UpdateSongDatabase(string expandLibraryFile)
+            => await ReplyAsync(embed: await DataService.DBManager.UpdateSongDatabase(expandLibraryFile));
     }
 }

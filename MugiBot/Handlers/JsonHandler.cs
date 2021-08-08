@@ -80,6 +80,18 @@ namespace PartyBot.Handlers
             }
             return songs;
         }
+        public static async Task<AMQExpandData> ConvertJsonToAMQExpandData(FileInfo info)
+        {
+            string contents = File.ReadAllText(info.FullName);
+            var settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
+            var data = await Task.Run(() =>
+                JsonConvert.DeserializeObject<AMQExpandData>(contents, settings));
+            return data;
+        }
 
         public static async Task<FileInfo[]> GetAllJsonInFolder(string JsonFolder)
         {
