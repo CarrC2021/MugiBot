@@ -62,7 +62,7 @@ namespace PartyBot.Database
 
                 await AddToDatabase(_rs, s.Name, songsOnly);
                 //After the file has been used we can move it to archived files
-                File.Move(filepath, Path.Combine(ArchivedFiles, filename), true);
+                File.Move(Path.Combine(JsonFiles, s.Name), Path.Combine(ArchivedFiles, s.Name), true);
             }
             await _db.SaveChangesAsync();
             stopWatch.Stop();
