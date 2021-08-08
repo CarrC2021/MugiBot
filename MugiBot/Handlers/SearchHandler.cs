@@ -9,9 +9,9 @@ namespace PartyBot.Handlers
 
     public class SearchHandler
     {
-        public static async Task<SongTableObject> UseSongKey(AMQDBContext _db, string key)
+        public static async Task<SongTableObject> UseSongKey(AMQDBContext _db, int key)
         {
-            var song = await _db.FindAsync<SongTableObject>(key.ToLower());
+            var song = await _db.FindAsync<SongTableObject>(key);
             if (song != null)
             {
                 return song;
@@ -19,29 +19,21 @@ namespace PartyBot.Handlers
 
             var result = await _db.SongTableObject
                 .AsNoTracking()
-                .Where(x => x.Key.ToLower().Equals(key.ToLower()))
+                //.Where(x => x.Key.ToLower().Equals(key.ToLower()))
                 .ToListAsync();
             return result[0];
         }
 
         public static async Task<List<PlayerTableObject>> AllObjectsForPlayer(AMQDBContext _db, string name, bool onlyFromList = true)
         {
+            var Query = await _db.PlayerStats
+                   .AsNoTracking()
+                   .Where(f => f.Rule.Equals(""))
+                   .Where(j => j.PlayerName.ToLower().Equals(name.ToLower()))
+                   .ToListAsync();
             if (onlyFromList)
-            {
-                var Query = await _db.PlayerStats
-                   .AsNoTracking()
-                   .Where(f => f.Rule.Equals(""))
-                   .Where(j => j.PlayerName.ToLower().Equals(name.ToLower()))
-                   .Where(k => k.FromList > 0)
-                   .ToListAsync();
-                return Query;
-            }
-            var PlayerQuery = await _db.PlayerStats
-                   .AsNoTracking()
-                   .Where(f => f.Rule.Equals(""))
-                   .Where(j => j.PlayerName.ToLower().Equals(name.ToLower()))
-                   .ToListAsync();
-            return PlayerQuery;
+                Query = Query.Where(y => y.FromList > 0).ToList();
+            return Query;
         }
 
         public static async Task<List<PlayerTableObject>> PlayerStatsSearch(AMQDBContext _db, string playerName, string showName, string type, string exactMatch = "no")

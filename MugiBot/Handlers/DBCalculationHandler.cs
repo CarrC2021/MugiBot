@@ -118,8 +118,6 @@ namespace PartyBot.Handlers
                 //We will only look at songs that the player has seen in game at least once.
                 var PlayerQuery = await SearchHandler.AllObjectsForPlayer(db, name, onlyFromList);
 
-
-
                 foreach (PlayerTableObject tObject in PlayerQuery)
                 {
                     temp = SongTableObject.MakeSongTableKey(tObject.SongObject.AnnID, tObject.SongObject.Type, tObject.SongObject.SongName, tObject.SongObject.Artist);

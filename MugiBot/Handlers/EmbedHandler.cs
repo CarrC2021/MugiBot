@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace PartyBot.Handlers
 {
+
+
+    //Have the Print functions print out the songkey so you can use it
     public static class EmbedHandler
     {
         /* This file is where we can store all the Embed Helper Tasks (So to speak). 
@@ -106,12 +109,12 @@ namespace PartyBot.Handlers
             {
                 toPrint += SongTableObject.PrintSongTableObject(songObjects[i]);
                 if (songObjects[i].MP3 != null && printLinks)
-                    toPrint = toPrint + $"\n\t MP3 {songObjects[i].MP3} ";
+                    toPrint += $"\n\t MP3 {songObjects[i].MP3} ";
                 if (songObjects[i]._720 != null && printLinks)
-                    toPrint = toPrint + $"\n720 {songObjects[i]._720} ";
+                    toPrint += $"\n720 {songObjects[i]._720} ";
                 if (songObjects[i]._480 != null && printLinks)
-                    toPrint = toPrint + $"\n480 {songObjects[i]._480} ";
-                toPrint = toPrint + "\n";
+                    toPrint += $"\n480 {songObjects[i]._480} ";
+                toPrint += $"\n Key for this song: {songObjects[i].Key}\n";
                 count++;
                 if (count % 10 == 0 && count == songObjects.Count - 1)
                 {
@@ -135,7 +138,7 @@ namespace PartyBot.Handlers
             for (int i = 0; i < list.Count; i++)
             {
                 songsToRecommend.TryGetValue(list[i], out var curr);
-                toPrint = toPrint + list[i] + $"\n\t Total: {Math.Round(curr[1], 3)}  {name}: {Math.Round(curr[0], 3)}\n";
+                toPrint += list[i] + $"\n\t Total: {Math.Round(curr[1], 3)}  {name}: {Math.Round(curr[0], 3)}\n";
                 count++;
                 if (count % 10 == 0 && count == list.Count - 1)
                 {

@@ -1,4 +1,5 @@
-﻿using Discord;
+using Discord;
+using MugiBot.DataStructs;
 using PartyBot.DataStructs;
 using PartyBot.Handlers;
 using PartyBot.Services;
@@ -9,6 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using PartyBot.Database;
 
 namespace PartyBot.Database
 {
@@ -44,6 +47,7 @@ namespace PartyBot.Database
             JsonFiles = Path.Combine(mainpath, "LocalJson");
             ArchivedFiles = Path.Combine(mainpath, "archivedJsons");
         }
+      
         public async Task<Embed> AddAllToDatabase()
         {
             Stopwatch stopWatch = new Stopwatch();
@@ -55,8 +59,8 @@ namespace PartyBot.Database
                 Console.WriteLine(s.Name);
                 if (s.Name.ToLower().Contains("teams") || s.Name.ToLower().Contains("co-op") || s.Name.ToLower().Contains("coop"))
                 {
-                    songsOnly = true;
-                    Console.WriteLine("Added only songs for this file" + s);
+                    File.Delete(s.FullName);
+                    continue;
                 }
                 await AddToDatabase(_rs, s.Name, songsOnly);
             }
@@ -71,7 +75,7 @@ namespace PartyBot.Database
                 " been added to the Database and player stats were updated \n" + "RunTime: " + elapsedTime
                 + $"\n\t There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs in the database.", Color.Blue);
         }
-
+      
         public async Task<Embed> AddGithubFilesToDataBase(List<string> jsonFiles)
         {
             Stopwatch stopWatch = new Stopwatch();
@@ -130,7 +134,6 @@ namespace PartyBot.Database
                     continue;
                 //update the player stats when songsOnly is false
                 await UpdatePlayerStats(_playersRulesService, song, rules, playerDict);
-            }
             await _db.SaveChangesAsync();
             File.Move(filepath, Path.Combine(ArchivedFiles, filename), true);
         }
@@ -206,30 +209,54 @@ namespace PartyBot.Database
                 }
             }
         }
-
-        public async Task<Embed> UpdateLinks(string showkey, string videoLink, string mp3 = "default")
+        public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
         {
-            SongTableObject tableObject = await _db.SongTableObject.FindAsync(showkey);
-            tableObject._720 = videoLink;
-            tableObject.MP3 = mp3;
+            AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
+            foreach (Question question in data.Questions)
+                await AddSongsFromQuestion(question);
+
             await _db.SaveChangesAsync();
-            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"Updated {showkey} with the links provided", Color.Blue);
+            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
         }
 
-        private SongTableObject ConvertSongDataToTable(SongData songData)
+        private async Task AddSongsFromQuestion(Question question)
         {
-            return new SongTableObject(songData.name, songData.artist,
-            songData.type, songData.anime.english, songData.anime.romaji, songData.urls.catbox._0,
-            songData.annId, songData.urls.catbox._720, songData.urls.catbox._480);
+            foreach (Song song in question.Songs)
+            {
+                var result = await _db.SongTableObject.FindAsync(song.AnnSongId);
+                if (result == null)
+                {
+                    string tempType = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
+
+                    await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, tempType,
+                        question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
+                }
+            }
         }
 
-        private SongTableObject ConvertSongListDataToTable(SongListData songData)
+        public async Task<Embed> UpdatePlayerAnnSongIds()
         {
-            return new SongTableObject(songData.songName, songData.artist,
-            songData.type, songData.animeEng, songData.animeRomaji, songData.LinkMp3,
-            songData.annId, songData.LinkVideo);
+            var AllSongs = await _db.SongTableObject
+                .AsNoTracking()
+                .ToListAsync();
+
+            foreach (SongTableObject song in AllSongs)
+            {
+                var SongMatches = await _db.PlayerStats
+                    .AsNoTracking()
+                    .Where(t => t.AnnID == song.AnnID)
+                    .Where(y => y.Artist.ToLower().Equals(song.Artist))
+                    .Where(j => j.Type.Equals(song.Type))
+                    .Where(f => f.SongName.Equals(song.SongName))
+                    .ToListAsync();
+                foreach (PlayerTableObject playerTable in SongMatches)
+                    playerTable.SongAnnID = song.Key;
+            }
+            await _db.SaveChangesAsync();
+            return await EmbedHandler.CreateBasicEmbed("Data, Keys", "Updated the player table objects to have the correct keys", Color.Green);
         }
         
     }
+
 
 }

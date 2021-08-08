@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using MugiBot.DataStructs;
 using Newtonsoft.Json;
 using PartyBot.DataStructs;
 using System;
@@ -51,7 +52,18 @@ namespace PartyBot.Handlers
                 JsonConvert.DeserializeObject<List<SongData>>(contents, settings));
             return data;
         }
-
+        public static async Task<AMQExpandData> ConvertJsonToAMQExpandData(FileInfo info)
+        {
+            string contents = File.ReadAllText(info.FullName);
+            var settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
+            var data = await Task.Run(() =>
+                JsonConvert.DeserializeObject<AMQExpandData>(contents, settings));
+            return data;
+        }
         public static async Task<List<SongListData>> ConvertJsonToSongList(FileInfo info)
         {
             string contents = File.ReadAllText(info.FullName);

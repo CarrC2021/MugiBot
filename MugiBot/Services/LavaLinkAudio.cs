@@ -325,7 +325,7 @@ namespace PartyBot.Services
                     args.Player.TextChannel.Guild as SocketGuild
                 );
             string toPrint = "Now Playing";
-            if (temp != null && args.Player.Queue.Count < 2)
+            if (temp != null && args.Player.Queue.Count < 3)
             {
                 await RadioQueue(temp);
                 if (!temp.CurrPlayers.Equals("any"))
@@ -348,7 +348,7 @@ namespace PartyBot.Services
                 embed: await EmbedHandler.CreateBasicEmbed(toPrint, $"{track.Title} by {track.Author}", Color.Blue));
         }
 
-        public async Task<Embed> QueueCatboxFromDB(string key, SocketGuildUser user, IGuild guild)
+        public async Task<Embed> QueueCatboxFromDB(int key, SocketGuildUser user, IGuild guild)
         {
             var thing = await DBSearchService.UseSongKey(key);
             return await PlayAsync(user, guild, thing.MP3, thing);

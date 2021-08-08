@@ -83,12 +83,12 @@ namespace PartyBot.Services
                 songCollection.Add(line);
 
 
-            var outKey = songCollection.First();
-            var table = await DBSearchService.UseSongKey(outKey);
-            await tempChannel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Music", $"Now Playing {table.Show} {table.Type} {table.SongName} by {table.Artist}", Color.Blue));
-            songCollection.Remove(songCollection.First());
-            foreach (string songKey in songCollection)
-                await _audioservice.QueueCatboxFromDB(songKey, user, tempChannel.Guild);
+            //var outKey = songCollection.First();
+            //var table = await DBSearchService.UseSongKey(outKey);
+            //await tempChannel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Music", $"Now Playing {table.Show} {table.Type} {table.SongName} by {table.Artist}", Color.Blue));
+            //songCollection.Remove(songCollection.First());
+            //foreach (string songKey in songCollection)
+                //await _audioservice.QueueCatboxFromDB(songKey, user, tempChannel.Guild);
         }
 
         public async Task ReactionReceieved(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction reaction, DBManager _db, LavaLinkAudio _audioservice)
@@ -110,11 +110,11 @@ namespace PartyBot.Services
 
         public async Task OneToTenReceived(IUserMessage message, ISocketMessageChannel channel, SocketReaction reaction, DBManager _db, LavaLinkAudio _audioservice)
         {
-            var tempChannel = (SocketTextChannel)channel;
-            var user = await reaction.Channel.GetUserAsync(reaction.UserId) as SocketGuildUser;
-            var trimmedBody = ReturnTrimmedMessage(message);
-            await tempChannel.SendMessageAsync(embed: await _audioservice.QueueCatboxFromDB(
-                trimmedBody[Unicodes.IndexOf(reaction.Emote.Name)], user, tempChannel.Guild));
+            //var tempChannel = (SocketTextChannel)channel;
+            //var user = await reaction.Channel.GetUserAsync(reaction.UserId) as SocketGuildUser;
+            //var trimmedBody = ReturnTrimmedMessage(message);
+            //await tempChannel.SendMessageAsync(embed: await _audioservice.QueueCatboxFromDB(
+                //trimmedBody[Unicodes.IndexOf(reaction.Emote.Name)], user, tempChannel.Guild));
         }
 
         public string[] ReturnTrimmedMessage(IUserMessage message)

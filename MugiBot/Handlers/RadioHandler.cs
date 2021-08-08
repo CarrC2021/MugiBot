@@ -54,23 +54,21 @@ namespace PartyBot.Handlers
                     potentialSongs = Query
                         .ToList();
                     final.AddRange(potentialSongs);
+                    continue;
                 }
-                else
+                //loop through each desired list status
+                foreach (int num in listNums)
                 {
-                    //loop through each desired list status
-                    foreach (int num in listNums)
+                    //loop through each player set in the radio
+                    foreach (string player in radio.CurrPlayers.Split())
                     {
-                        //loop through each player set in the radio
-                        foreach (string player in radio.CurrPlayers.Split())
+                        var playersTracked = await _prs.GetPlayersTracked();
+                        var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
+                        foreach (PlayerTableObject pto in Query)
                         {
-                            var playersTracked = await _prs.GetPlayersTracked();
-                            var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
-                            foreach (PlayerTableObject pto in Query)
-                            {
-                                potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKeyFromPlayer(pto)));
-                            }
-                            final.AddRange(potentialSongs);
+                            potentialSongs.Add(await DBSearchService.ReturnSongFromQuery(pto.AnnID, pto.Artist, pto.Type, pto.SongName));
                         }
+                        final.AddRange(potentialSongs);
                     }
                 }
             }
