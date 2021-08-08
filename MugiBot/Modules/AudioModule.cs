@@ -68,7 +68,7 @@ namespace PartyBot.Modules
         [Summary("Takes a key and searches the database for the song."
             + " If the key is correct, then it will start playing. "
             + "If you don't know what the format for a key looks like use the searchdb command.")]
-        public async Task QueueCatboxFromDB([Remainder] int key)
+        public async Task QueueCatboxFromDB([Remainder] string key)
             => await ReplyAsync(embed: await AudioService.QueueCatboxFromDB(key, Context.User as SocketGuildUser, Context.Guild));
         [Command("RadioOff")]
         [Summary("Turns the Radio off.")]

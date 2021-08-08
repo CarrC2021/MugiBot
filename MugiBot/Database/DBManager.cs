@@ -1,5 +1,4 @@
-using Discord;
-using MugiBot.DataStructs;
+﻿using Discord;
 using PartyBot.DataStructs;
 using PartyBot.Handlers;
 using PartyBot.Services;
@@ -47,7 +46,7 @@ namespace PartyBot.Database
             JsonFiles = Path.Combine(mainpath, "LocalJson");
             ArchivedFiles = Path.Combine(mainpath, "archivedJsons");
         }
-      
+
         public async Task<Embed> AddAllToDatabase()
         {
             Stopwatch stopWatch = new Stopwatch();
@@ -75,7 +74,7 @@ namespace PartyBot.Database
                 " been added to the Database and player stats were updated \n" + "RunTime: " + elapsedTime
                 + $"\n\t There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs in the database.", Color.Blue);
         }
-      
+
         public async Task<Embed> AddGithubFilesToDataBase(List<string> jsonFiles)
         {
             Stopwatch stopWatch = new Stopwatch();
@@ -90,7 +89,7 @@ namespace PartyBot.Database
                 //if it is not just that the show's name got changed in the database, then we want to add the new object
                 if (query == null)
                 {
-                    SongTableObject temp = ConvertSongListDataToTable(song);
+                    SongTableObject temp = SongTableObject.SongListDataToTable(song);
                     await _db.AddAsync(temp);
                 }
                 //await _db.SaveChangesAsync();
@@ -127,15 +126,16 @@ namespace PartyBot.Database
                 //if this song is not found in the database then we need to create a tableobject and add it
                 if (query == null)
                 {
-                    SongTableObject temp = ConvertSongDataToTable(song);
+                    SongTableObject temp = SongTableObject.SongDataToSongTableObject(song);
                     await _db.AddAsync(temp);
                 }
                 if (songsOnly)
                     continue;
                 //update the player stats when songsOnly is false
                 await UpdatePlayerStats(_playersRulesService, song, rules, playerDict);
-            await _db.SaveChangesAsync();
-            File.Move(filepath, Path.Combine(ArchivedFiles, filename), true);
+                await _db.SaveChangesAsync();
+                File.Move(filepath, Path.Combine(ArchivedFiles, filename), true);
+            }
         }
 
         private async Task UpdatePlayerStats(PlayersRulesService _service, SongData song, List<string> rules, Dictionary<string, string> playerDict)
@@ -209,54 +209,6 @@ namespace PartyBot.Database
                 }
             }
         }
-        public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
-        {
-            AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
-            foreach (Question question in data.Questions)
-                await AddSongsFromQuestion(question);
 
-            await _db.SaveChangesAsync();
-            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
-        }
-
-        private async Task AddSongsFromQuestion(Question question)
-        {
-            foreach (Song song in question.Songs)
-            {
-                var result = await _db.SongTableObject.FindAsync(song.AnnSongId);
-                if (result == null)
-                {
-                    string tempType = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
-
-                    await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, tempType,
-                        question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
-                }
-            }
-        }
-
-        public async Task<Embed> UpdatePlayerAnnSongIds()
-        {
-            var AllSongs = await _db.SongTableObject
-                .AsNoTracking()
-                .ToListAsync();
-
-            foreach (SongTableObject song in AllSongs)
-            {
-                var SongMatches = await _db.PlayerStats
-                    .AsNoTracking()
-                    .Where(t => t.AnnID == song.AnnID)
-                    .Where(y => y.Artist.ToLower().Equals(song.Artist))
-                    .Where(j => j.Type.Equals(song.Type))
-                    .Where(f => f.SongName.Equals(song.SongName))
-                    .ToListAsync();
-                foreach (PlayerTableObject playerTable in SongMatches)
-                    playerTable.SongAnnID = song.Key;
-            }
-            await _db.SaveChangesAsync();
-            return await EmbedHandler.CreateBasicEmbed("Data, Keys", "Updated the player table objects to have the correct keys", Color.Green);
-        }
-        
     }
-
-
 }

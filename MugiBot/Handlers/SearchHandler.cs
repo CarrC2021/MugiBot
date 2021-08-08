@@ -9,9 +9,9 @@ namespace PartyBot.Handlers
 
     public class SearchHandler
     {
-        public static async Task<SongTableObject> UseSongKey(AMQDBContext _db, int key)
+        public static async Task<SongTableObject> UseSongKey(AMQDBContext _db, string key)
         {
-            var song = await _db.FindAsync<SongTableObject>(key);
+            var song = await _db.SongTableObject.FindAsync(key);
             if (song != null)
             {
                 return song;
@@ -19,7 +19,7 @@ namespace PartyBot.Handlers
 
             var result = await _db.SongTableObject
                 .AsNoTracking()
-                //.Where(x => x.Key.ToLower().Equals(key.ToLower()))
+                .Where(x => x.Key.ToLower().Equals(key.ToLower()))
                 .ToListAsync();
             return result[0];
         }

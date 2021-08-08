@@ -31,11 +31,6 @@ namespace PartyBot.Modules
         public async Task UpdateSongDatabase(string expandLibraryFile)
             => await ReplyAsync(embed: await DataService.DBManager.UpdateSongDatabase(expandLibraryFile));
 
-        [Command("UpdateSongIds")]
-        [Summary("This command will update the player stats database to have the associated song Ids.")]
-        public async Task UpdateSongIds()
-            => await ReplyAsync(embed: await DataService.DBManager.UpdatePlayerAnnSongIds());
-
         [Command("CalcTotal")]
         [Summary("This will calculate and list all players' total success rate. There is an optional argument to calculate successrate by rule. Use !listrules to see what they are.")]
         public async Task CalcTotalCorrect([Remainder] string rule = "")
@@ -56,11 +51,6 @@ namespace PartyBot.Modules
         {
             await ReplyAsync(embed: await DataService.DBManager.AddGithubFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
         }
-
-        [Command("UpdateSongDB")]
-        [Summary("This command will update the song database using all files the bot has downloaded and player stats too if the file name does not include co-op, coop, or teams.")]
-        public async Task UpdateSongDatabase(string expandLibraryFile)
-            => await ReplyAsync(embed: await DataService.DBManager.UpdateSongDatabase(expandLibraryFile));
 
     }
 }

@@ -42,7 +42,7 @@ public class DBSearchService
         return await EmbedHandler.PrintPlayerStats(playerObjects, playerName);
     }
 
-    public static async Task<SongTableObject> UseSongKey(int key)
+    public static async Task<SongTableObject> UseSongKey(string key)
     {
         using var db = new AMQDBContext();
         return await SearchHandler.UseSongKey(db, key);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using PartyBot.DataStructs;
 
 namespace PartyBot.Database
 {
@@ -10,7 +11,7 @@ namespace PartyBot.Database
     {
         [Key]
         //This will be the songAnnId
-        public int Key { get; set; }
+        public string Key { get; set; }
         public string SongName { get; set; }
         public string Artist { get; set; }
         public string Type { get; set; }
@@ -32,7 +33,7 @@ namespace PartyBot.Database
             _720 = "";
             _480 = "";
             AnnID = 0;
-            Key = 700000000;
+            Key = "";
         }
         public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, string v, int songAnnId)
         {
@@ -59,20 +60,6 @@ namespace PartyBot.Database
             Key = MakeSongTableKey(Id, t, song, art);
             AnnID = Id;
         }
-        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, string _480link, int songAnnId)
-        {
-            SongName = song;
-            Artist = art;
-            Type = t;
-            Show = Showname;
-            Romaji = Roma;
-            MP3 = u;
-            _720 = _720link;
-            _480 = _480link;
-            Key = MakeSongTableKey(Id, t, song, art);
-            AnnID = Id;
-        }
-
         public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, string _480link, int annSongId)
         {
             SongName = song;
@@ -90,7 +77,13 @@ namespace PartyBot.Database
         public static SongTableObject SongDataToSongTableObject(SongData data)
         {
             return new SongTableObject(data.name, data.artist, data.type, data.anime.english,
-             data.anime.romaji, data.urls.catbox._0, data.annId, data.urls.catbox._720, data.urls.catbox._480);
+             data.anime.romaji, data.urls.catbox._0, data.annId, data.urls.catbox._720, data.urls.catbox._480, -1);
+
+        }
+        public static SongTableObject SongListDataToTable(SongListData data)
+        {
+            return new SongTableObject(data.songName, data.artist, data.type, data.animeEng,
+             data.animeRomaji, data.LinkMp3, data.annId, data.LinkVideo, -1);
 
         }
         public static string MakeSongTableKey(int AnnID, string songtype, string songname, string artist)
