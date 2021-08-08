@@ -56,9 +56,13 @@ namespace PartyBot.Database
             {
                 bool songsOnly = false;
                 Console.WriteLine(s.Name);
+
                 if (s.Name.ToLower().Contains("teams") || s.Name.ToLower().Contains("co-op") || s.Name.ToLower().Contains("coop"))
                     songsOnly = true;
+
                 await AddToDatabase(_rs, s.Name, songsOnly);
+                //After the file has been used we can move it to archived files
+                File.Move(filepath, Path.Combine(ArchivedFiles, filename), true);
             }
             await _db.SaveChangesAsync();
             stopWatch.Stop();
@@ -84,7 +88,7 @@ namespace PartyBot.Database
                 if (song.LinkMp3 == null)
                     continue;
                 var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.annId, song.type, song.songName, song.artist));
-                //if it is not just that the show's name got changed in the database, then we want to add the new object
+               //If the song is not in the database we want to add it
                 if (query == null)
                 {
                     SongTableObject temp = SongTableObject.SongListDataToTable(song);
@@ -132,7 +136,6 @@ namespace PartyBot.Database
                 //update the player stats when songsOnly is false
                 await UpdatePlayerStats(_playersRulesService, song, rules, playerDict);
                 await _db.SaveChangesAsync();
-                File.Move(filepath, Path.Combine(ArchivedFiles, filename), true);
             }
         }
 
