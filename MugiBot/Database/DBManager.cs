@@ -204,9 +204,15 @@ namespace PartyBot.Database
                 if (result == null)
                 {
                     string tempType = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
-
-                    await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, tempType,
+                    try
+                    {
+                        await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, tempType,
                         question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
+                    }
+                    catch (Exception ex)
+                    {
+                        await LoggingService.LogAsync(ex.Source, LogSeverity.Error, ex.Message);
+                    }
                 }
             }
         }
