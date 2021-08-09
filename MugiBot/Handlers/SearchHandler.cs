@@ -36,7 +36,7 @@ namespace PartyBot.Handlers
             return Query;
         }
 
-        //
+        // Need to split this function up like was done below.
         public static async Task<List<PlayerTableObject>> PlayerStatsSearch(AMQDBContext _db, string playerName, string showName, string type, string exactMatch = "no")
         {
             List<PlayerTableObject> Shows;
@@ -132,6 +132,11 @@ namespace PartyBot.Handlers
             return Songs;
         }
 
+        /// <summary>
+        /// Searches the database for any show in the database whose name matches the string given by the parameter
+        /// <param name="name"/>. Additionally, if the parameter <param name="type"/> is not equal to "any"
+        /// then it will restrict the search to shows whose type contains this argument.
+        /// <summary>
         public static async Task<List<SongTableObject>> ExactShowSearch(AMQDBContext _db, string name, string type)
         {
             List<SongTableObject> Shows = await _db.SongTableObject
@@ -152,6 +157,7 @@ namespace PartyBot.Handlers
 
             return Shows.Union(Romajis, new SongTableObjectComparer()).ToList();
         }
+
         /// <summary>
         /// Searches the database for any show in the database whose name contains the substring
         /// <param name="name"/>. Additionally, if the parameter <param name="type"/> is not equal to "any"

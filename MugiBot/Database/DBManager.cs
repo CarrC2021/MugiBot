@@ -113,6 +113,8 @@ namespace PartyBot.Database
             var playerDict = await _rs.GetPlayersTracked();
             foreach (SongData song in data)
             {
+                // This indicates that a new game has begun. Since there is a chance that the
+                // same song is played we need to update the database. 
                 if (song.songNumber == 1)
                     await _db.SaveChangesAsync();
 
@@ -131,8 +133,8 @@ namespace PartyBot.Database
                     continue;
                 // Update the player stats when songsOnly is false.
                 await UpdatePlayerStats(song, playerDict);
-                await _db.SaveChangesAsync();
             }
+            await _db.SaveChangesAsync();
         }
 
         private async Task UpdatePlayerStats(SongData song, Dictionary<string, string> playerDict)
@@ -187,6 +189,7 @@ namespace PartyBot.Database
         public async Task<Embed> MergeTest(string mergeFrom, string mergeInto)
             => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
 
+        // This function is used to update the song database using a json that is created by exporting from the expand library.
         public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
         {
             AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
