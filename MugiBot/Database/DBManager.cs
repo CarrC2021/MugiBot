@@ -200,10 +200,10 @@ namespace PartyBot.Database
         {
             foreach (Song song in question.Songs)
             {
-                var result = await _db.SongTableObject.FindAsync($"{question.AnnId} {song.Type} {song.Name} by {song.Artist}");
+                string tempType = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
+                var result = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(question.AnnId, tempType, song.Name, song.Artist));
                 if (result == null)
                 {
-                    string tempType = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
                     try
                     {
                         await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, tempType,
