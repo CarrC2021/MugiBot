@@ -100,7 +100,7 @@ namespace PartyBot.Handlers
             }
         }
 
-
+        // Need to convert all these things to use the String Builder function.
         public static async Task<Embed> PrintSongs(ISocketMessageChannel ch, List<SongTableObject> songObjects, bool printLinks = false)
         {
             string toPrint = "";

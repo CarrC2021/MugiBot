@@ -16,7 +16,7 @@ namespace PartyBot.Handlers
             {
                 return song;
             }
-
+            // This will catch any weird cases where the casing has been changed in the game.
             List<SongTableObject> result = await _db.SongTableObject
                 .AsNoTracking()
                 .Where(x => x.Key.ToLower().Equals(key.ToLower()))
@@ -131,70 +131,57 @@ namespace PartyBot.Handlers
 
             return Songs;
         }
-        public static async Task<List<SongTableObject>> ShowSearch(AMQDBContext _db, string name, string type, bool exactMatch)
+
+        public static async Task<List<SongTableObject>> ExactShowSearch(AMQDBContext _db, string name, string type)
         {
-            List<SongTableObject> Shows;
-            List<SongTableObject> Romajis;
-            if (type.Equals("any"))
-            {
-                if (exactMatch)
-                {
-                    Shows = await _db.SongTableObject
+            List<SongTableObject> Shows = await _db.SongTableObject
                         .AsNoTracking()
                         .Where(x => x.Show.ToLower().Equals(name.ToLower()))
                         .ToListAsync();
 
-                    Romajis = await _db.SongTableObject
+            List<SongTableObject> Romajis = await _db.SongTableObject
                         .AsNoTracking()
                         .Where(x => x.Romaji.ToLower().Equals(name.ToLower()))
                         .ToListAsync();
-                }
-                else
-                {
-                    Shows = await _db.SongTableObject
-                        .AsNoTracking()
-                        .Where(x => x.Show.ToLower().Contains(name.ToLower()))
-                        .ToListAsync();
-
-                    Romajis = await _db.SongTableObject
-                        .AsNoTracking()
-                        .Where(x => x.Romaji.ToLower().Contains(name.ToLower()))
-                        .ToListAsync();
-                }
-            }
-            else
+            // If a type of show has been specified remove any song that does not match the specification.            
+            if (!type.Equals("any"))
             {
-                if (exactMatch)
-                {
-                    Shows = await _db.SongTableObject
-                        .AsNoTracking()
-                        .Where(k => k.Type.ToLower().Contains(type.ToLower()))
-                        .Where(x => x.Show.ToLower().Equals(name.ToLower()))
-                        .ToListAsync();
-
-                    Romajis = await _db.SongTableObject
-                        .AsNoTracking()
-                        .Where(k => k.Type.ToLower().Contains(type.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Equals(name.ToLower()))
-                        .ToListAsync();
-                }
-                else
-                {
-                    Shows = await _db.SongTableObject
-                        .AsNoTracking()
-                        .Where(k => k.Type.ToLower().Contains(type.ToLower()))
-                        .Where(x => x.Show.ToLower().Contains(name.ToLower()))
-                        .ToListAsync();
-
-                    Romajis = await _db.SongTableObject
-                        .AsNoTracking()
-                        .Where(k => k.Type.ToLower().Contains(type.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Contains(name.ToLower()))
-                        .ToListAsync();
-                }
+                Shows = Shows.Where(k => k.Type.ToLower().Contains(type.ToLower())).ToList();
+                Romajis = Romajis.Where(k => k.Type.ToLower().Contains(type.ToLower())).ToList();
             }
 
             return Shows.Union(Romajis, new SongTableObjectComparer()).ToList();
+        }
+        /// <summary>
+        /// Searches the database for any show in the database whose name contains the substring
+        /// <param name="name"/>. Additionally, if the parameter <param name="type"/> is not equal to "any"
+        /// then it will restrict the search to shows whose type contains this argument.
+        /// <summary>
+        public static async Task<List<SongTableObject>> ContainsShowSearch(AMQDBContext _db, string name, string type) 
+        {
+            List<SongTableObject> Shows = await _db.SongTableObject
+                        .AsNoTracking()
+                        .Where(x => x.Show.ToLower().Contains(name.ToLower()))
+                        .ToListAsync();
+
+            List<SongTableObject> Romajis = await _db.SongTableObject
+                        .AsNoTracking()
+                        .Where(x => x.Romaji.ToLower().Contains(name.ToLower()))
+                        .ToListAsync();
+            // If a type of show has been specified remove any song that does not match the specification.
+            if (!type.Equals("any"))
+            {
+                Shows = Shows.Where(k => k.Type.ToLower().Contains(type.ToLower())).ToList();
+                Romajis = Romajis.Where(k => k.Type.ToLower().Contains(type.ToLower())).ToList();
+            }
+            return Shows.Union(Romajis, new SongTableObjectComparer()).ToList();
+        }
+
+        public static async Task<List<SongTableObject>> ShowSearch(AMQDBContext _db, string name, string type, bool exactMatch)
+        {
+            if (exactMatch)
+                return await ExactShowSearch(_db, name, type);
+            return await ContainsShowSearch(_db, name, type);
         }
     }
 }

@@ -20,8 +20,6 @@ namespace PartyBot.Database
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 mainpath = separator + mainpath;
             Console.WriteLine(mainpath);
-            //when first building the database you have to hard code the path, it really does not like 
-            //the substring function
             var connectionStringBuilder = new SqliteConnectionStringBuilder
             {
                 DataSource =

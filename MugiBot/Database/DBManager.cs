@@ -4,7 +4,6 @@ using PartyBot.Handlers;
 using PartyBot.Services;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -64,7 +63,7 @@ namespace PartyBot.Database
                 // track the player statistics contained in this file.
                 if (s.Name.ToLower().Contains("teams") || s.Name.ToLower().Contains("co-op") || s.Name.ToLower().Contains("coop"))
                     songsOnly = true;
-                await AddToDatabase(_rs, s.Name, songsOnly);
+                await AddToDatabase(s.Name, songsOnly);
                 // After the file has been used we can move it to archived files
                 File.Move(Path.Combine(JsonFiles, s.Name), Path.Combine(ArchivedFiles, s.Name), true);
             }
@@ -86,9 +85,9 @@ namespace PartyBot.Database
             List<SongListData> data = await JsonHandler.ConvertSongJsons(jsonFiles);
             foreach (SongListData song in data)
             {
-                // If the song links are null then there is no point in adding it so just
+                // If the song links are null or the annId is 0 then there is no point in adding it so just
                 // continue on to the next song.
-                if (song.LinkMp3 == null)
+                if (song.LinkMp3 == null || song.annId == 0)
                     continue;
 
                 var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.annId, song.type, song.songName, song.artist));
@@ -104,13 +103,14 @@ namespace PartyBot.Database
                 + $"\n\t There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs in the database.", Color.Blue);
         }
 
-        public async Task AddToDatabase(PlayersRulesService _playersRulesService, string filename, bool songsOnly)
+
+        public async Task AddToDatabase(string filename, bool songsOnly)
         {
-            //Get the directpath to the file and then convert the contents to a List of SongData objects
+            // Get the directpath to the file and then convert the contents to a List of SongData objects.
             string filepath = Path.Combine(JsonFiles, filename);
             List<SongData> data = await JsonHandler.ConvertJsonToSongData(new FileInfo(filepath));
-            //Get the rules we want to check and get the players we are tracking
-            var playerDict = await _playersRulesService.GetPlayersTracked();
+            // Get the rules we want to check and get the players we are tracking.
+            var playerDict = await _rs.GetPlayersTracked();
             foreach (SongData song in data)
             {
                 if (song.songNumber == 1)
@@ -119,9 +119,9 @@ namespace PartyBot.Database
                 if (song.urls == null)
                     continue;
 
-                //update the songs since the urls are there
+                // Update the songs since the urls are there.
                 var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.annId, song.type, song.name, song.artist));
-                //if this song is not found in the database then we need to create a tableobject and add it
+                // If this song is not found in the database then we need to create a tableobject and add it.
                 if (query == null)
                 {
                     SongTableObject temp = SongTableObject.SongDataToSongTableObject(song);
@@ -129,45 +129,47 @@ namespace PartyBot.Database
                 }
                 if (songsOnly)
                     continue;
-                //update the player stats when songsOnly is false
-                await UpdatePlayerStats(_playersRulesService, song, playerDict);
+                // Update the player stats when songsOnly is false.
+                await UpdatePlayerStats(song, playerDict);
                 await _db.SaveChangesAsync();
             }
         }
 
-        private async Task UpdatePlayerStats(PlayersRulesService _service, SongData song, Dictionary<string, string> playerDict)
+        private async Task UpdatePlayerStats(SongData song, Dictionary<string, string> playerDict)
         {
-            Dictionary<string, int> tempDict = new Dictionary<string, int>();
-            var RulesMetList = await _service.RulesMetBySongData(song, playerDict);
+            Dictionary<string, int> listStatusDict = new Dictionary<string, int>();
+            var RulesMetList = await _rs.RulesMetBySongData(song, playerDict);
             RulesMetList.Add("");
-            //If the game is not a ranked game then we want to update everyone's list status
+            // If the game is not a ranked game then we want to update everyone's list status.
             if (!song.gameMode.Equals("Ranked"))
             {
                 foreach (Fromlist listInfo in song.fromList)
-                    tempDict.Add(listInfo.name, listInfo.listStatus);
+                    listStatusDict.Add(listInfo.name, listInfo.listStatus);
             }
             int listnum;
             foreach (string rule in RulesMetList)
             {
                 foreach (Player player in song.players)
                 {
-                    //If the player is not in the json of players to track then continue to the next player
+                    // If the player is not in the json of players to track then continue to the next player.
                     if (!playerDict.ContainsKey(player.name))
                         continue;
                     try
                     {
-                        //Try to find the player's list status from the game, if you cannot find it then it stays as 0
+                        // Try to find the player's list status from the game, if you cannot find it then it stays as 0.
                         listnum = 0;
-                        if (tempDict != null && tempDict.ContainsKey(player.name))
-                            listnum = tempDict[player.name];
+                        if (listStatusDict != null && listStatusDict.ContainsKey(player.name))
+                            listnum = listStatusDict[player.name];
 
                         PlayerTableObject query = await _db.PlayerStats.FindAsync(PlayerTableObject.MakePlayerTableKey
                             (song.annId, song.type, song.name, song.artist, playerDict[player.name], rule));
+                        // If you cannot find the PlayerTableObject then add it to the database.
                         if (query == null)
                         {
                             await _db.AddAsync(new PlayerTableObject(SongTableObject.SongDataToSongTableObject(song),
                              playerDict[player.name], listnum, player.correct, rule));
                         }
+                        // If you found the PlayerTableObject then increment the stats.
                         else
                         {
                             query.FromList = listnum;
@@ -199,13 +201,13 @@ namespace PartyBot.Database
         {
             foreach (Song song in question.Songs)
             {
-                string tempType = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
-                var result = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(question.AnnId, tempType, song.Name, song.Artist));
+                string Type = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
+                var result = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(question.AnnId, Type, song.Name, song.Artist));
                 if (result == null)
                 {
                     try
                     {
-                        await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, tempType,
+                        await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, Type,
                         question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
                     }
                     catch (Exception ex)

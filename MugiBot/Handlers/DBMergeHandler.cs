@@ -9,6 +9,8 @@ namespace PartyBot.Handlers
 {
     public class DBMergeHandler
     {
+
+        // Merges player objects into a new PlayerTableObject with a new player name.
         public static async Task<Embed> MergePlayers(AMQDBContext _db, string nameToFind, string nameToMergeTo)
         {
             var Query = await _db.PlayerStats
@@ -18,8 +20,8 @@ namespace PartyBot.Handlers
             foreach (PlayerTableObject tableObject in Query)
             {
                 var dbEntry = await _db.PlayerStats.FindAsync(tableObject.Key);
-                string newKey = tableObject.AnnID
-                 + " " + tableObject.Type + " " + tableObject.SongName + " " + nameToMergeTo + " " + tableObject.Rule;
+                string newKey = PlayerTableObject.MakePlayerTableKey(tableObject.AnnID,
+                 tableObject.Type, tableObject.SongName, tableObject.Artist, nameToMergeTo, tableObject.Rule);
                 var result = await _db.PlayerStats.FindAsync(newKey);
                 if (result == null)
                 {
