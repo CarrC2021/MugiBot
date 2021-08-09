@@ -49,7 +49,7 @@ namespace PartyBot.Modules
         [Command("GithubTest")]
         public async Task GithubTest(string repo, int page, int perPage)
         {
-            await ReplyAsync(embed: await DataService.DBManager.AddGithubFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
+            await ReplyAsync(embed: await DataService.DBManager.AddSongListFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
         }
 
     }

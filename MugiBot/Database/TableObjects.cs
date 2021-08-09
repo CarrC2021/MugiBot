@@ -5,12 +5,12 @@ using PartyBot.DataStructs;
 
 namespace PartyBot.Database
 {
-    //This is an object which represents a unique song and holds links to catbox files for 
-    //the LavalinkAudio class to play.
+    /// <summary>
+    /// SongTableObject is a class which represents a single song stored in the sql database.
+    /// </summary>
     public class SongTableObject
     {
         [Key]
-        //This will be the songAnnId
         public string Key { get; set; }
         public string SongName { get; set; }
         public string Artist { get; set; }
@@ -74,6 +74,9 @@ namespace PartyBot.Database
             AnnID = Id;
             AnnSongID = annSongId;
         }
+        /// <summary>
+        /// Initializes a new instance of a SongTableObject from a <see cref="PartyBot.DataStructs.SongData"> parameter.
+        /// </summary>
         public static SongTableObject SongDataToSongTableObject(SongData data)
         {
             return new SongTableObject(data.name, data.artist, data.type, data.anime.english,
@@ -215,7 +218,7 @@ namespace PartyBot.Database
                 TimesCorrect += 1;
             TotalTimesPlayed += 1;
         }
-      
+
         public static string MakePlayerTableKey(int AnnID, string songtype, string songname, string artist, string playername, string rule)
         {
             return AnnID + " " + songtype.ToLower() + " " +

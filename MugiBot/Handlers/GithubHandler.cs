@@ -9,8 +9,18 @@ using System.Threading.Tasks;
 
 namespace PartyBot.Handlers
 {
+    /// <summary>
+    /// A static class which will have functions to use the Github API.
+    /// <summary>
     public static class GithubHandler
     {
+        /// <summary>
+        /// This is an asynchronous function to download files using the github gist api.
+        /// There are three parameters. The first parameter is <param name="user"/> which 
+        /// is the user who has posted the gist. The second is <param name="page"/> which is 
+        /// the desired page of the request. The third is <param name="numPerPage"/>, the number
+        /// of things from the page you want. 
+        /// <returns> A list of strings which are the direct paths to the now downladed json files. </returns>
         public static async Task<List<string>> ReturnJsonGists(string user, int page, int numPerPage)
         {
             List<string> jsonData = new List<string>();

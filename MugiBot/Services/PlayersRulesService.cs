@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using PartyBot.DataStructs;
 
 namespace PartyBot.Services
 {
@@ -37,17 +38,24 @@ namespace PartyBot.Services
             usernamesPath = Path.Combine(mainpath, "Database", "usernames.json");
         }
 
-        public async Task<List<string>> RulesMetBySongData(SongData song, List<string> rules, Dictionary<string, string> dict)
+        public async Task<List<string>> RulesMetBySongData(SongData song, Dictionary<string, string> dict)
         {
             List<string> RulesMet = new List<string>();
             //If any of the rules is equivalent to the gamemode, i.e solo or ranked then add it
             if (song.gameMode == "Solo" || song.gameMode == "Ranked")
                 RulesMet.Add(song.gameMode);
-            return await Task.Run(() => AllPlayersInLobby(rules, RulesMet, song, dict));
+            return await Task.Run(() => AllPlayersInLobby(RulesMet, song, dict));
         }
 
-        private List<string> AllPlayersInLobby(List<string> rules, List<string> RulesMet, SongData song, Dictionary<string, string> dict)
+        /// <summary>
+        /// This function will iterate through every Player in the SongData object passed to it.
+        /// If one of the rules that specifies which players need to be in the lobby is met then,
+        /// that rule will be added to the RulesMet parameter and will be returned in its updated state.
+        /// <summary>
+        /// <returns> a List of strings once the asynchronous task is completed. </returns>
+        private async Task<List<string>> AllPlayersInLobby(List<string> RulesMet, SongData song, Dictionary<string, string> dict)
         {
+            List<string> rules = await GetRules();
             foreach (string rule in rules)
             {
                 List<string> list = rule.Split(" ").ToList();
@@ -59,20 +67,21 @@ namespace PartyBot.Services
                     if (list.Exists(p => p.Equals(value)))
                         correct += 1;
                 }
-                //If all of the players were in the lobby then the rule has been met
+                //If all of the players to keep track of were active in the lobby then the rule has been met for this song
                 if (correct >= list.Count())
                     RulesMet.Add(rule);
             }
             return RulesMet;
         }
-        public async Task<Embed> TrackPlayer(string key, string value)
+        // Tracks the given AMQ user name in the database under the second name provided
+        public async Task<Embed> TrackPlayer(string AMQUserName, string nameInDB)
         {
             string contents = await File.ReadAllTextAsync(playersPath);
             Dictionary<string, string> tempDict = await Task.Run(() =>
                 JsonConvert.DeserializeObject<Dictionary<string, string>>(contents, settings));
-            tempDict.TryAdd(key, value);
+            tempDict.TryAdd(AMQUserName, nameInDB);
             await File.WriteAllTextAsync(playersPath, JsonConvert.SerializeObject(tempDict));
-            return await EmbedHandler.CreateBasicEmbed("Data", $"{key} will now have their stats tracked in the database as {value}.", Color.Blue);
+            return await EmbedHandler.CreateBasicEmbed("Data", $"{AMQUserName} will now have their stats tracked in the database as {nameInDB}.", Color.Blue);
         }
 
         public async Task<Embed> RemovePlayer(string name)

@@ -18,7 +18,6 @@ namespace PartyBot.Database
     {
         private readonly AMQDBContext _db;
         public readonly PlayersRulesService _rs;
-        public readonly DBSearchService _search;
         private readonly char separator = Path.DirectorySeparatorChar;
         private readonly string mainpath;
 
@@ -31,89 +30,86 @@ namespace PartyBot.Database
                 {3, "Insert Song"}
             };
 
-        public async Task<Embed> MergeTest(string mergeFrom, string mergeInto)
-            => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
-
         public DBManager(AMQDBContext database, PlayersRulesService rulesService)
         {
             _db = database;
             _rs = rulesService;
+            // For now this is how the bot figures out its pathing. This is just pointing it to
+            // the correct directories regardless of platform or run method.
             mainpath = Path.GetDirectoryName(System.Reflection.
             Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 mainpath = separator + mainpath;
-            _search = new DBSearchService();
             JsonFiles = Path.Combine(mainpath, "LocalJson");
             ArchivedFiles = Path.Combine(mainpath, "archivedJsons");
         }
 
+        /// <summary>
+        /// This is an asynchronous function that iterates through all the json 
+        /// files the bot has downloaded. It adds any new songs it finds 
+        /// and new PlayerTableObjects when the player hears the song for the first time,
+        /// look at <see cref="PartyBot.Database.PlayerTableObject"> for reference.
+        /// It will also increment data in the PlayerTableObjects if the player has heard the song before.
+        /// <summary>
+        /// <returns> an <Embed> that the bot will print out once the asynchronous task is completed. </returns>
         public async Task<Embed> AddAllToDatabase()
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             FileInfo[] names = await JsonHandler.GetAllJsonInFolder(JsonFiles);
             foreach (FileInfo s in names)
             {
                 bool songsOnly = false;
                 Console.WriteLine(s.Name);
 
+                // Check if this file should only add songs to the database, or if we want to also
+                // track the player statistics contained in this file.
                 if (s.Name.ToLower().Contains("teams") || s.Name.ToLower().Contains("co-op") || s.Name.ToLower().Contains("coop"))
                     songsOnly = true;
-
                 await AddToDatabase(_rs, s.Name, songsOnly);
-                //After the file has been used we can move it to archived files
+                // After the file has been used we can move it to archived files
                 File.Move(Path.Combine(JsonFiles, s.Name), Path.Combine(ArchivedFiles, s.Name), true);
             }
-            await _db.SaveChangesAsync();
-            stopWatch.Stop();
-            // Get the elapsed time as a TimeSpan value.
-            TimeSpan ts = stopWatch.Elapsed;
-            // Format and display the TimeSpan value.
-            string elapsedTime = string.Format("{0:00}:{1:00}.{2:00}",
-                ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            return await EmbedHandler.CreateBasicEmbed("Data", "All songs from the Json Files have" +
-                " been added to the Database and player stats were updated \n" + "RunTime: " + elapsedTime
+            return await EmbedHandler.CreateBasicEmbed("Data", "All songs from the Json Files have been added to the Database and player stats were updated." 
                 + $"\n\t There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs in the database.", Color.Blue);
         }
 
-        public async Task<Embed> AddGithubFilesToDataBase(List<string> jsonFiles)
+        /// <summary>
+        /// This is an asynchronous function that iterates through a List of strings which are file paths
+        /// to json files that can be converted to a list of SongListData objects.
+        /// To see this object's structure go to <see cref="PartyBot.DataStructs.SongListData"/>.
+        /// It then iterates through a list of these SongListData objects and adds any song that is not in the 
+        /// database currently.
+        /// <summary>
+        /// <param name="jsonFiles">.</param>
+        /// <returns> an <Embed> once the asynchronous task is completed. </returns>
+        public async Task<Embed> AddSongListFilesToDataBase(List<string> jsonFiles)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
             List<SongListData> data = await JsonHandler.ConvertSongJsons(jsonFiles);
             foreach (SongListData song in data)
             {
-                //update the songs since the urls are there
+                // If the song links are null then there is no point in adding it so just
+                // continue on to the next song.
                 if (song.LinkMp3 == null)
                     continue;
+
                 var query = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(song.annId, song.type, song.songName, song.artist));
-               //If the song is not in the database we want to add it
+               //If the song was not found in the database then we want to add it
                 if (query == null)
                 {
                     SongTableObject temp = SongTableObject.SongListDataToTable(song);
                     await _db.AddAsync(temp);
                 }
-                //await _db.SaveChangesAsync();
             }
             await _db.SaveChangesAsync();
-            stopWatch.Stop();
-            // Get the elapsed time as a TimeSpan value.
-            TimeSpan ts = stopWatch.Elapsed;
-            // Format and display the TimeSpan value.
-            string elapsedTime = string.Format("{0:00}:{1:00}.{2:00}",
-                ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            return await EmbedHandler.CreateBasicEmbed("Data", "All songs from the Json Files have been added to the Database and"
-                + $"player stats were updated \n RunTime: {elapsedTime}"
+            return await EmbedHandler.CreateBasicEmbed("Data", "All songs from the Json Files have been added to the Database."
                 + $"\n\t There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs in the database.", Color.Blue);
         }
 
         public async Task AddToDatabase(PlayersRulesService _playersRulesService, string filename, bool songsOnly)
         {
+            //Get the directpath to the file and then convert the contents to a List of SongData objects
             string filepath = Path.Combine(JsonFiles, filename);
             List<SongData> data = await JsonHandler.ConvertJsonToSongData(new FileInfo(filepath));
-            List<string> rules = await _playersRulesService.GetRules();
+            //Get the rules we want to check and get the players we are tracking
             var playerDict = await _playersRulesService.GetPlayersTracked();
             foreach (SongData song in data)
             {
@@ -134,15 +130,15 @@ namespace PartyBot.Database
                 if (songsOnly)
                     continue;
                 //update the player stats when songsOnly is false
-                await UpdatePlayerStats(_playersRulesService, song, rules, playerDict);
+                await UpdatePlayerStats(_playersRulesService, song, playerDict);
                 await _db.SaveChangesAsync();
             }
         }
 
-        private async Task UpdatePlayerStats(PlayersRulesService _service, SongData song, List<string> rules, Dictionary<string, string> playerDict)
+        private async Task UpdatePlayerStats(PlayersRulesService _service, SongData song, Dictionary<string, string> playerDict)
         {
             Dictionary<string, int> tempDict = new Dictionary<string, int>();
-            var RulesMetList = await _service.RulesMetBySongData(song, rules, playerDict);
+            var RulesMetList = await _service.RulesMetBySongData(song, playerDict);
             RulesMetList.Add("");
             //If the game is not a ranked game then we want to update everyone's list status
             if (!song.gameMode.Equals("Ranked"))
@@ -160,7 +156,7 @@ namespace PartyBot.Database
                         continue;
                     try
                     {
-                        //Try to find the player's list status from the game, if you cannot set it to 0
+                        //Try to find the player's list status from the game, if you cannot find it then it stays as 0
                         listnum = 0;
                         if (tempDict != null && tempDict.ContainsKey(player.name))
                             listnum = tempDict[player.name];
@@ -185,6 +181,9 @@ namespace PartyBot.Database
                 }
             }
         }
+
+        public async Task<Embed> MergeTest(string mergeFrom, string mergeInto)
+            => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
 
         public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
         {

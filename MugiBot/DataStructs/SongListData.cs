@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 
-/*
- * This file is meant to contain all the necessary classes to deserialize
- * Jsons exported from the AMQ SongList user script made by TheJoseph98
- * can be found here https://github.com/TheJoseph98/AMQ-Scripts/blob/master/README.md
-*/
+/// <summary>
+/// This file is meant to contain all the necessary classes to deserialize
+/// Jsons exported from the AMQ SongList user script made by TheJoseph98 which
+/// can be found here https://github.com/TheJoseph98/AMQ-Scripts
+/// <summary>
 
 namespace PartyBot.DataStructs
 {

@@ -11,13 +11,13 @@ namespace PartyBot.Handlers
     {
         public static async Task<SongTableObject> UseSongKey(AMQDBContext _db, string key)
         {
-            var song = await _db.SongTableObject.FindAsync(key);
+            SongTableObject song = await _db.SongTableObject.FindAsync(key);
             if (song != null)
             {
                 return song;
             }
 
-            var result = await _db.SongTableObject
+            List<SongTableObject> result = await _db.SongTableObject
                 .AsNoTracking()
                 .Where(x => x.Key.ToLower().Equals(key.ToLower()))
                 .ToListAsync();
@@ -26,7 +26,7 @@ namespace PartyBot.Handlers
 
         public static async Task<List<PlayerTableObject>> AllObjectsForPlayer(AMQDBContext _db, string name, bool onlyFromList = true)
         {
-            var Query = await _db.PlayerStats
+            List<PlayerTableObject> Query = await _db.PlayerStats
                    .AsNoTracking()
                    .Where(f => f.Rule.Equals(""))
                    .Where(j => j.PlayerName.ToLower().Equals(name.ToLower()))
@@ -36,6 +36,7 @@ namespace PartyBot.Handlers
             return Query;
         }
 
+        //
         public static async Task<List<PlayerTableObject>> PlayerStatsSearch(AMQDBContext _db, string playerName, string showName, string type, string exactMatch = "no")
         {
             List<PlayerTableObject> Shows;
