@@ -18,8 +18,8 @@ namespace PartyBot.Handlers
             foreach (PlayerTableObject tableObject in Query)
             {
                 var dbEntry = await _db.PlayerStats.FindAsync(tableObject.Key);
-                string newKey = tableObject.SongObject.AnnID
-                 + " " + tableObject.SongObject.Type + " " + tableObject.SongObject.SongName + " " + nameToMergeTo + " " + tableObject.Rule;
+                string newKey = tableObject.AnnID
+                 + " " + tableObject.Type + " " + tableObject.SongName + " " + nameToMergeTo + " " + tableObject.Rule;
                 var result = await _db.PlayerStats.FindAsync(newKey);
                 if (result == null)
                 {

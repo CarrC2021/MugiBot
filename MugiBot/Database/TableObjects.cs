@@ -104,8 +104,8 @@ namespace PartyBot.Database
         {
             try
             {
-                string key = pt.SongObject.AnnID + " " + pt.SongObject.Type.ToLower()
-                 + " " + pt.SongObject.SongName.ToLower() + " by " + pt.SongObject.Artist.ToLower();
+                string key = pt.AnnID + " " + pt.Type.ToLower()
+                 + " " + pt.SongName.ToLower() + " by " + pt.Artist.ToLower();
                 return key;
             }
             catch (Exception ex)
@@ -132,7 +132,13 @@ namespace PartyBot.Database
         public int TimesCorrect { get; set; }
         public int FromList { get; set; }
         public string Rule { get; set; }
-        public SongTableObject SongObject { get; set; }
+        public int AnnID { get; set; }
+        public string Type { get; set; }
+        public string Artist { get; set; }
+        public string SongName { get; set; }
+        public int AnnSongID { get; set; }
+        public string Show { get; set; }
+        public string Romaji { get; set; }
 
         public PlayerTableObject()
         {
@@ -142,14 +148,18 @@ namespace PartyBot.Database
             TimesCorrect = 0;
             FromList = 0;
         }
-        public PlayerTableObject(SongTableObject song, string player, int list, string rule)
+        public PlayerTableObject(int annId, string type, string songname, string artist, string player, int list, string rule)
         {
             PlayerName = player;
             TotalTimesPlayed = 0;
             TimesCorrect = 0;
             FromList = list;
             Rule = rule;
-            Key = MakePlayerTableKey(song.AnnID, song.Type, song.SongName, song.Artist, PlayerName, Rule);
+            Type = type;
+            AnnID = annId;
+            SongName = songname;
+            Artist = artist;
+            Key = MakePlayerTableKey(annId, type, SongName, Artist, PlayerName, Rule);
         }
         public PlayerTableObject(SongTableObject song, string player, int list, bool correct, string rule)
         {
@@ -165,6 +175,12 @@ namespace PartyBot.Database
             }
             FromList = list;
             Rule = rule;
+            Show = song.Show;
+            Artist = song.Artist;
+            Type = song.Type;
+            SongName = song.SongName;
+            AnnID = song.AnnID;
+            Romaji = song.Romaji;
             Key = MakePlayerTableKey(song.AnnID, song.Type, song.SongName, song.Artist, PlayerName, Rule);
         }
         public PlayerTableObject(PlayerTableObject tableObject, string newName)
@@ -174,8 +190,16 @@ namespace PartyBot.Database
             TimesCorrect = tableObject.TimesCorrect;
             FromList = tableObject.FromList;
             Rule = tableObject.Rule;
-            Key = MakePlayerTableKey(tableObject.SongObject.AnnID, tableObject.SongObject.Type,
-             tableObject.SongObject.SongName, tableObject.SongObject.Artist, newName, Rule);
+            Show = tableObject.Show;
+            AnnID = tableObject.AnnID;
+            Artist = tableObject.Artist;
+            Show = tableObject.Show;
+            Type = tableObject.Type;
+            SongName = tableObject.SongName;
+            AnnSongID = tableObject.AnnSongID;
+            Romaji = tableObject.Romaji;
+            Key = MakePlayerTableKey(tableObject.AnnID, tableObject.Type,
+             tableObject.SongName, tableObject.Artist, newName, Rule);
         }
         public void Update(bool correct, Dictionary<string, int> dict)
         {

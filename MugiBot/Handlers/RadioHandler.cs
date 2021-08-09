@@ -67,7 +67,7 @@ namespace PartyBot.Handlers
                         foreach (PlayerTableObject pto in Query)
                         {
                             potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(
-                                pto.SongObject.AnnID, pto.SongObject.Type, pto.SongObject.SongName, pto.SongObject.Artist)));
+                                pto.AnnID, pto.Type, pto.SongName, pto.Artist)));
                         }
                         final.AddRange(potentialSongs);
                     }
