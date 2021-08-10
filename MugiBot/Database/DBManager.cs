@@ -221,5 +221,17 @@ namespace PartyBot.Database
             }
         }
 
+        public async Task<Embed> RemoveDeadSongs()
+        {
+            var toRemove = await _db.SongTableObject
+                    .AsTracking()
+                    .Where(f => f.AnnID == 0)
+                    .ToListAsync();
+
+            _db.RemoveRange(toRemove);  
+            await _db.SaveChangesAsync();
+            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);            
+        }
+
     }
 }

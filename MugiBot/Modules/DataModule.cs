@@ -52,5 +52,11 @@ namespace PartyBot.Modules
             await ReplyAsync(embed: await DataService.DBManager.AddSongListFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
         }
 
+
+        [Command("RemoveDeadSongs")]
+        public async Task RemoveDeadSongs()
+        {
+            await ReplyAsync(embed: await DataService.DBManager.RemoveDeadSongs());
+        }
     }
 }
