@@ -37,7 +37,6 @@ namespace PartyBot.Services
             playersPath = Path.Combine(mainpath, "Database", "players.json");
             usernamesPath = Path.Combine(mainpath, "Database", "usernames.json");
         }
-
         public async Task<List<string>> RulesMetBySongData(SongData song, Dictionary<string, string> dict)
         {
             List<string> RulesMet = new List<string>();
@@ -84,6 +83,7 @@ namespace PartyBot.Services
             return await EmbedHandler.CreateBasicEmbed("Data", $"{AMQUserName} will now have their stats tracked in the database as {nameInDB}.", Color.Blue);
         }
 
+        // Removes the player from the players.json file so that they will no longer be tracked.
         public async Task<Embed> RemovePlayer(string name)
         {
             string contents = await File.ReadAllTextAsync(playersPath);
@@ -102,6 +102,8 @@ namespace PartyBot.Services
             return await EmbedHandler.CreateBasicEmbed("Data", $"{name} will no longer have their stats tracked.", Color.Blue);
         }
 
+        // Returns the players.json file deserialized to a dictionary
+        // with string keys and string values.
         public async Task<Dictionary<string, string>> GetPlayersTracked()
         {
             string contents = await File.ReadAllTextAsync(playersPath);
@@ -110,16 +112,7 @@ namespace PartyBot.Services
             return tempDict;
         }
 
-        public async Task<Dictionary<string, string>> GetPlayersTrackedLower()
-        {
-            var players = await GetPlayersTracked();
-            Dictionary<string, string> lowerCase = new Dictionary<string, string>();
-            foreach (var key in players.Keys)
-                lowerCase.Add(key.ToLower(), players[key].ToLower());
-
-            return lowerCase;
-        }
-
+        // Returns an embed to print to discord which has all the players tracked in the database.
         public async Task<Embed> ListPlayersTracked()
         {
             var playersDict = await GetPlayersTracked();
@@ -129,6 +122,7 @@ namespace PartyBot.Services
             return await EmbedHandler.CreateBasicEmbed("Data", f, Color.Blue);
         }
 
+        // Returns the rules the bot currently keeps track of.
         public async Task<List<string>> GetRules()
         {
             string[] array = await File.ReadAllLinesAsync(rulesPath);
@@ -157,6 +151,7 @@ namespace PartyBot.Services
             return await EmbedHandler.CreateBasicEmbed("Data", rule + " has been deleted.", Color.Blue);
         }
 
+        // This will assign an amq username to the person who sent the message.
         public async Task<Embed> SetUsername(IUserMessage message, string username)
         {
             string contents = await File.ReadAllTextAsync(usernamesPath);
@@ -175,18 +170,7 @@ namespace PartyBot.Services
             return tempDict;
         }
 
-        public async Task<Embed> ListUsernameAssignments(IGuild guild)
-        {
-            var usernamesDict = await GetUsernameValues();
-            string f = "";
-            foreach (ulong ID in usernamesDict.Keys)
-            {
-                var user = await guild.GetUserAsync(ID, CacheMode.AllowDownload);
-                f += $"{user.Username} is on team {usernamesDict[user.Id]}\n";
-            }
-            return await EmbedHandler.CreateBasicEmbed("Data", f, Color.Blue);
-        }
-
+        // This will remove the amq username that was set to the person who sent the message.
         public async Task<Embed> RemoveUsername(IUserMessage message)
         {
             string contents = await File.ReadAllTextAsync(usernamesPath);

@@ -36,90 +36,59 @@ namespace PartyBot.Handlers
             return Query;
         }
 
-        // Need to split this function up like was done below.
+        public static async Task<List<PlayerTableObject>> ExactPlayerStatsSearch(AMQDBContext _db, string playerName, string showName, string type)
+        {
+            List<PlayerTableObject> Shows = await _db.PlayerStats
+                        .AsNoTracking()
+                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
+                        .Where(x => x.Show.ToLower().Equals(showName.ToLower()))
+                        .Where(j => j.Rule.Equals(""))
+                        .ToListAsync();
+
+            List<PlayerTableObject> Romajis = await _db.PlayerStats
+                        .AsNoTracking()
+                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
+                        .Where(x => x.Romaji.ToLower().Equals(showName.ToLower()))
+                        .Where(j => j.Rule.Equals(""))
+                        .ToListAsync();
+            if (!type.Equals("any"))
+            {
+                Shows = Shows.Where(j => j.Type.ToLower().Contains(type.ToLower())).ToList();
+                Romajis = Romajis.Where(j => j.Type.ToLower().Contains(type.ToLower())).ToList();
+            }
+            return Shows.Union(Romajis, new PlayerTableObjectComparer()).ToList();
+        }
+        // Finds PlayerTableObjects whose showname contains the substring specified and meets the other conditions.
+        public static async Task<List<PlayerTableObject>> ContainsPlayerStatsSearch(AMQDBContext _db, string playerName, string showName, string type)
+        {
+            List<PlayerTableObject> Shows = await _db.PlayerStats
+                        .AsNoTracking()
+                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
+                        .Where(x => x.Show.ToLower().Contains(showName.ToLower()))
+                        .Where(j => j.Rule.Equals(""))
+                        .ToListAsync();
+
+            List<PlayerTableObject> Romajis = await _db.PlayerStats
+                        .AsNoTracking()
+                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
+                        .Where(x => x.Romaji.ToLower().Contains(showName.ToLower()))
+                        .Where(j => j.Rule.Equals(""))
+                        .ToListAsync();
+            if (!type.Equals("any"))
+            {
+                Shows = Shows.Where(j => j.Type.ToLower().Contains(type.ToLower())).ToList();
+                Romajis = Romajis.Where(j => j.Type.ToLower().Contains(type.ToLower())).ToList();
+            }
+            return Shows.Union(Romajis, new PlayerTableObjectComparer()).ToList();
+        }
+
+        // Calls helper functions to perform a database query on the PlayerStats table.
         public static async Task<List<PlayerTableObject>> PlayerStatsSearch(AMQDBContext _db, string playerName, string showName, string type, string exactMatch = "no")
         {
-            List<PlayerTableObject> Shows;
-            List<PlayerTableObject> Romajis;
-            if (type.Equals("any"))
-            {
-                if (exactMatch.ToLower().Equals("exact") || exactMatch.ToLower().Equals("exactmatch"))
-                {
-                    //This will return player table objects where the showName is an exact match
-                    Shows = await _db.PlayerStats
-                        .AsNoTracking()
-                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Show.ToLower().Equals(showName.ToLower()))
-                        .Where(j => j.Rule.Equals(""))
-                        .ToListAsync();
-
-                    Romajis = await _db.PlayerStats
-                        .AsNoTracking()
-                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Equals(showName.ToLower()))
-                        .Where(j => j.Rule.Equals(""))
-                        .ToListAsync();
-                }
-                else
-                {
-                    Shows = await _db.PlayerStats
-                        .AsNoTracking()
-                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Show.ToLower().Contains(showName.ToLower()))
-                        .Where(j => j.Rule.Equals(""))
-                        .ToListAsync();
-
-                    Romajis = await _db.PlayerStats
-                        .AsNoTracking()
-                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Contains(showName.ToLower()))
-                        .Where(j => j.Rule.Equals(""))
-                        .ToListAsync();
-                }
-
-            }
-            else
-            {
-                if (exactMatch.ToLower().Equals("exact") || exactMatch.ToLower().Equals("exactmatch"))
-                {
-                    //this will return player table objects where the showname is an exact match
-                    Shows = await _db.PlayerStats
-                        .AsNoTracking()
-                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Show.ToLower().Equals(showName.ToLower()))
-                        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
-                        .Where(j => j.Rule.Equals(""))
-                        .ToListAsync();
-
-                    Romajis = await _db.PlayerStats
-                        .AsNoTracking()
-                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Equals(showName.ToLower()))
-                        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
-                        .Where(j => j.Rule.Equals(""))
-                        .ToListAsync();
-                }
-                else
-                {
-                    Shows = await _db.PlayerStats
-                        .AsNoTracking()
-                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Show.ToLower().Contains(showName.ToLower()))
-                        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
-                        .Where(j => j.Rule.Equals(""))
-                        .ToListAsync();
-
-                    Romajis = await _db.PlayerStats
-                        .AsNoTracking()
-                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
-                        .Where(x => x.Romaji.ToLower().Contains(showName.ToLower()))
-                        .Where(j => j.Type.ToLower().Contains(type.ToLower()))
-                        .Where(j => j.Rule.Equals(""))
-                        .ToListAsync();
-                }
-            }
-
-            return Shows.Union(Romajis, new PlayerTableObjectComparer()).ToList();
+            if (exactMatch.ToLower().Equals("exact") || exactMatch.ToLower().Equals("exactmatch"))
+                return await ExactPlayerStatsSearch(_db, playerName, showName, type);
+            
+            return await ContainsPlayerStatsSearch(_db, playerName, showName, type);
         }
         public static async Task<List<SongTableObject>> SearchAuthor(AMQDBContext _db, string author)
         {

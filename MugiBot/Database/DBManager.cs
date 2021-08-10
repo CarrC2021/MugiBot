@@ -9,7 +9,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using PartyBot.Database;
 
 namespace PartyBot.Database
 {
@@ -200,6 +199,7 @@ namespace PartyBot.Database
             return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
         }
 
+        // This function updates the database using the file you receive when exporting all songs from expand library.
         private async Task AddSongsFromQuestion(Question question)
         {
             foreach (Song song in question.Songs)
