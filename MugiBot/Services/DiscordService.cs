@@ -24,6 +24,7 @@ namespace PartyBot.Services
         private readonly ReactionService _reactionService;
         private readonly DBManager _dbManager;
         private readonly AMQDBContext _db;
+        private readonly AnilistService _anilistService;
 
         public DiscordService()
         {
@@ -39,6 +40,7 @@ namespace PartyBot.Services
             _audioService = _services.GetRequiredService<LavaLinkAudio>();
             _dataService = _services.GetRequiredService<DataService>();
             _helpService = new HelpService(_services.GetRequiredService<CommandService>());
+            _anilistService = new AnilistService();
 
             SubscribeLavaLinkEvents();
             SubscribeDiscordEvents();
@@ -47,25 +49,12 @@ namespace PartyBot.Services
         /* Initialize the Discord Client. */
         public async Task InitializeAsync()
         {
-            //string jarPath = Path.GetDirectoryName(System.Reflection.
-            //Assembly.GetExecutingAssembly().GetName().CodeBase).Replace("\\bin\\Debug\\netcoreapp3.1", "").Replace("file:\\", "") + "\\";
-            //Console.WriteLine(jarPath);
-
-            //Process clientProcess = new Process();
-            //clientProcess.StartInfo.FileName = "java";
-            //clientProcess.StartInfo.Arguments = @"-jar " + jarPath + "Lavalink.jar";
-            //clientProcess.Start();
-            //clientProcess.WaitForExit();
-            //int code = clientProcess.ExitCode;
-
             await InitializeGlobalDataAsync();
 
             await _client.LoginAsync(TokenType.Bot, GlobalData.Config.DiscordToken);
             await _client.StartAsync();
 
             await _commandHandler.InitializeAsync();
-
-
             await Task.Delay(-1);
         }
 
@@ -94,6 +83,7 @@ namespace PartyBot.Services
         {
             try
             {
+                _anilistService.SetEndpoint(GlobalData.Config.LocalEndPoint);
                 await _lavaNode.ConnectAsync();
                 await _client.SetGameAsync(GlobalData.Config.GameStatus);
             }
@@ -149,6 +139,7 @@ namespace PartyBot.Services
                 .AddSingleton<HelpService>()
                 .AddSingleton<ReactionService>()
                 .AddSingleton<AMQCircuitService>()
+                .AddSingleton<AnilistService>()
                 .BuildServiceProvider();
         }
     }

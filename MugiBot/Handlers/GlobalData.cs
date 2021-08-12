@@ -41,7 +41,8 @@ namespace PartyBot.Handlers
             DiscordToken = "",
             DefaultPrefix = "!",
             GameStatus = "CHANGE ME IN CONFIG",
-            BlacklistedChannels = new List<ulong>()
+            BlacklistedChannels = new List<ulong>(),
+            LocalEndPoint = "Not Assigned"
         };
     }
 }
