@@ -58,5 +58,11 @@ namespace PartyBot.Modules
         {
             await ReplyAsync(embed: await DataService.DBManager.RemoveDeadSongs());
         }
+
+        [Command("TestEmbed")]
+        public async Task TestEmbed()
+        {
+            await ReplyAsync(embed: await EmbedHandler.TestingEmbedStuff());
+        }
     }
 }

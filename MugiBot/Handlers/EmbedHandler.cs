@@ -26,6 +26,20 @@ namespace PartyBot.Handlers
             return embed;
         }
 
+
+        public static async Task<Embed> TestingEmbedStuff(){
+
+            var embed1 = await Task.Run(() => new EmbedBuilder()
+                    .WithImageUrl("https://i.ibb.co/VW3XFxT/Emilia-megumin.jpg")
+                    .WithThumbnailUrl("https://wallpapers.com/images/high/rider-of-black-hd-wallpaper-rhgylnd0bxhutg4d.jpg")
+                    .Build());
+            
+            var embed = await Task.Run(() => new EmbedBuilder()
+                    .WithImageUrl("https://wallpapers.com/images/high/rider-of-black-hd-wallpaper-rhgylnd0bxhutg4d.jpg")
+                    .WithThumbnailUrl("https://i.ibb.co/VW3XFxT/Emilia-megumin.jpg")
+                    .Build());
+            return embed;
+        }
         public static async Task<Embed> CreateErrorEmbed(string source, string error)
         {
             var embed = await Task.Run(() => new EmbedBuilder()

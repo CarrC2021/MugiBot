@@ -1,16 +1,19 @@
 .vs/*
 .vscode/*
+MugiBot/.vscode/*
 MugiBot/obj/*
 MugiBot/bin/*
 config.json
 MugiBot/archivedJsons/*
 MugiBot/DataBase/*.json
+MugiBot/DataBase/*.txt
 /MugiBot/LavaLink/*
 /MugiBot/Properties/*
 MugiBot/PartyBot.csproj.user
+MugiBot/logs/*
 MugiBot/logs
 MugiBot/tempMusic
-MugiBot/Migrations/*
+MugiBot/Migrations
 MugiBot/DataBase/csharpi.db
 MugiBot/DataBase/csharpi.db-wal
 MugiBot/DataBase/csharpi.db-shm
@@ -19,3 +22,6 @@ MugiBot/DataBase/*.txt
 *.jar
 *.yml
 *.db
+*.db-shm
+*.db-wal
+*.log

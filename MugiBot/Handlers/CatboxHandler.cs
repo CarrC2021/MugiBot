@@ -19,7 +19,7 @@ namespace PartyBot.Handlers
             Console.WriteLine("where to download");
             Console.WriteLine(Path.Combine(musicPath, "tempMusic"));
 
-            HttpClient client = new HttpClient();
+            using var client = new HttpClient();
             HttpResponseMessage response = await client.GetAsync(query);
             response.EnsureSuccessStatusCode();
 
