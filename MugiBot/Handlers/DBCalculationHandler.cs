@@ -120,7 +120,7 @@ namespace PartyBot.Handlers
 
                 foreach (PlayerTableObject tObject in PlayerQuery)
                 {
-                    temp = SongTableObject.MakeSongTableKey(tObject.AnnID, tObject.Type, tObject.SongName, tObject.Artist);
+                    temp = SongTableObject.PrintSong(tObject);
                     total.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
                     playerSpecific.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
                 }
@@ -145,7 +145,7 @@ namespace PartyBot.Handlers
             //now we will go through all of those objects and increment the stats
             foreach (PlayerTableObject tableObject in OtherQuery)
             {
-                temp = SongTableObject.MakeSongTableKey(tableObject.AnnID, tableObject.Type, tableObject.SongName, tableObject.Artist);
+                temp = SongTableObject.PrintSong(tableObject);
                 total.TryGetValue(temp, out var currentCount);
                 total[temp] = new int[] { currentCount[0] + tableObject.TotalTimesPlayed, currentCount[1] + tableObject.TimesCorrect };
             }

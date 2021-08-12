@@ -93,7 +93,7 @@ namespace PartyBot.Database
         {
             try
             {
-                string key = AnnID + " " + songtype.ToLower() + " " + songname.ToLower() + " by " + artist.ToLower();
+                string key = $"AnnID {songtype.ToLower()} {songname.ToLower()} by {artist.ToLower()}";
                 return key;
             }
             catch (Exception ex)
@@ -118,7 +118,12 @@ namespace PartyBot.Database
             }
         }
 
-        public static string PrintSongTableObject(SongTableObject tableObject)
+        public static string PrintSong(SongTableObject tableObject)
+        {
+            return $"{tableObject.Show} {tableObject.Type} {tableObject.SongName} by {tableObject.Artist}";
+        }
+
+        public static string PrintSong(PlayerTableObject tableObject)
         {
             return $"{tableObject.Show} {tableObject.Type} {tableObject.SongName} by {tableObject.Artist}";
         }

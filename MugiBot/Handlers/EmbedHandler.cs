@@ -121,7 +121,7 @@ namespace PartyBot.Handlers
             int count = 0;
             for (int i = 0; i < songObjects.Count; i++)
             {
-                toPrint += SongTableObject.PrintSongTableObject(songObjects[i]);
+                toPrint += SongTableObject.PrintSong(songObjects[i]);
                 if (songObjects[i].MP3 != null && printLinks)
                     toPrint += $"\n\t MP3 {songObjects[i].MP3} ";
                 if (songObjects[i]._720 != null && printLinks)
