@@ -122,10 +122,17 @@ namespace PartyBot.Handlers
 
                 foreach (PlayerTableObject tObject in PlayerQuery)
                 {
-                    temp = SongTableObject.PrintSong(tObject);
-                    total.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
-                    playerSpecific.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
-                    songsToKeys.Add(temp, SongTableObject.MakeSongTableKey(tObject));
+                    try
+                    {
+                        temp = SongTableObject.PrintSong(tObject);
+                        total.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
+                        playerSpecific.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
+                        songsToKeys.Add(temp, SongTableObject.MakeSongTableKey(tObject));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Source + ex.Message);
+                    }
                 }
 
                 OtherQuery = await db.PlayerStats
@@ -145,7 +152,7 @@ namespace PartyBot.Handlers
                 num++;
             }
 
-            //now we will go through all of those objects and increment the stats
+            // Now we will go through all of those objects and increment the stats
             foreach (PlayerTableObject tableObject in OtherQuery)
             {
                 temp = SongTableObject.PrintSong(tableObject);
@@ -174,8 +181,15 @@ namespace PartyBot.Handlers
                         songsToRecommend.TryGetValue(songKey, out var curr);
                         if (diff > (curr[1] - curr[0]))
                         {
-                            songsToRecommend.Remove(songKey);
-                            songsToRecommend.Add(key, new float[] { playerSuccessRate, totalSuccessRate });
+                            try
+                            {
+                                songsToRecommend.Remove(songKey);
+                                songsToRecommend.Add(key, new float[] { playerSuccessRate, totalSuccessRate });
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Source + ex.StackTrace + ex.Message);
+                            }
                             break;
                         }
                     }
