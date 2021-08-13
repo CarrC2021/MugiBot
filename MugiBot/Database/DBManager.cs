@@ -226,6 +226,7 @@ namespace PartyBot.Database
             var toRemove = await _db.SongTableObject
                     .AsTracking()
                     .Where(f => f.AnnID == 0)
+                    .Where(k => k.Key.Contains("AnnID "))
                     .ToListAsync();
 
             _db.RemoveRange(toRemove);  
