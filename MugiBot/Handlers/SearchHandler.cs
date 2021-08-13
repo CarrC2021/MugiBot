@@ -119,9 +119,9 @@ namespace PartyBot.Handlers
         public static async Task<List<PlayerTableObject>> PlayerStatsSearchByArtist(AMQDBContext _db, string playerName, string artist, string type = "any", string exactMatch = "no")
         {
             if (exactMatch.ToLower().Equals("exact") || exactMatch.ToLower().Equals("exactmatch"))
-                return await ExactPlayerStatsSearch(_db, playerName, artist, type);
+                return await ExactArtistStatsSearch(_db, playerName, artist, type);
             
-            return await ContainsPlayerStatsSearch(_db, playerName, artist, type);
+            return await ContainsArtistStatsSearch(_db, playerName, artist, type);
         }
 
         public static async Task<List<SongTableObject>> SearchAuthor(AMQDBContext _db, string author)

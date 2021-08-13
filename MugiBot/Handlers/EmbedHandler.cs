@@ -93,7 +93,7 @@ namespace PartyBot.Handlers
                 //list = list + player.Key + " played: " +
                 //player.TotalTimesPlayed + " correct: " + player.TimesCorrect + "\n";
                 sb.Append(PlayerTableObject.PrintPlayer(player) + $"\n\t Times Played: {player.TotalTimesPlayed} Times Correct: {player.TimesCorrect}\n\n");
-                keys.Append(player.Key+"\n");
+                keys.Append(SongTableObject.PrintSong(player)+"\n");
                 count++;
                 if (count % 10 == 0)
                 {
