@@ -161,7 +161,7 @@ namespace PartyBot.Handlers
                 }
                 if (count % 10 == 0)
                 {
-                    var message = await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}" + allKeys.ToString(), Color.Blue));
+                    var message = await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue));
                     sb.Clear();
                     allKeys.Clear();
                 }
