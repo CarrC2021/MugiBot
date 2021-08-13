@@ -93,7 +93,7 @@ namespace PartyBot.Database
         {
             try
             {
-                string key = $"AnnID {songtype.ToLower()} {songname.ToLower()} by {artist.ToLower()}";
+                string key = $"{AnnID} {songtype.ToLower()} {songname.ToLower()} by {artist.ToLower()}";
                 return key;
             }
             catch (Exception ex)

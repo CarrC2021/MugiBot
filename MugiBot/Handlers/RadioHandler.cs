@@ -66,8 +66,7 @@ namespace PartyBot.Handlers
                         var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
                         foreach (PlayerTableObject pto in Query)
                         {
-                            potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(
-                                pto.AnnID, pto.Type, pto.SongName, pto.Artist)));
+                            potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(pto)));
                         }
                         final.AddRange(potentialSongs);
                     }
