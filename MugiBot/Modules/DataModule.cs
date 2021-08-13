@@ -68,7 +68,7 @@ namespace PartyBot.Modules
         [Command("SearchAnilist")]
         public async Task TestAnilist()
         {
-            await DataService.anilistService.SearchSeriesOnAL("Show By Rock!!");
+            await DataService.anilistService.SearchSeriesOnAL("Show By Rock!!", 16311);
         }
     }
 }
