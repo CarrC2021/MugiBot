@@ -64,5 +64,11 @@ namespace PartyBot.Modules
         {
             await ReplyAsync(embed: await EmbedHandler.TestingEmbedStuff());
         }
+
+        [Command("SearchAnilist")]
+        public async Task TestAnilist()
+        {
+            await DataService.anilistService.SearchSeriesOnAL("Show By Rock!!");
+        }
     }
 }

@@ -41,6 +41,7 @@ namespace PartyBot.Services
             _dataService = _services.GetRequiredService<DataService>();
             _helpService = new HelpService(_services.GetRequiredService<CommandService>());
             _anilistService = new AnilistService();
+            _dataService.anilistService = _anilistService;
 
             SubscribeLavaLinkEvents();
             SubscribeDiscordEvents();

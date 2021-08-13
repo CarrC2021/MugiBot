@@ -11,6 +11,7 @@ namespace PartyBot.Services
     public sealed class DataService
     {
         public DBManager DBManager { get; set; }
+        public AnilistService anilistService { get; set; }
         public DataService(DBManager _db)
         {
             DBManager = _db;

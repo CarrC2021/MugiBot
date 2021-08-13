@@ -3,36 +3,26 @@ using Discord;
 using PartyBot.Database;
 using PartyBot.Services;
 using System;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Victoria;
 using System.Collections.Generic;
-using Miki.GraphQL;
-using Miki.Net;
 using Newtonsoft.Json;
+using Anilist4Net;
 
 namespace PartyBot.Services
 {
     public class AnilistService
     {
         private string myEndPoint = "";
-        private GraphQLClient _client;
+        private Anilist4Net.Client _anilistClient;
         public AnilistService()
         {
-
-        }
-        public AnilistService(string endPoint)
-        {
-            myEndPoint = endPoint;
-            _client = new GraphQLClient(myEndPoint);
+            _anilistClient = new Client(new HttpClient());
         }
         public void SetEndpoint(string endPoint)
         {
             myEndPoint = endPoint;
-            _client = new GraphQLClient(myEndPoint);
         }
         public async Task SearchSeriesOnAL(string show)
         {
@@ -52,13 +42,25 @@ namespace PartyBot.Services
                         "native\n"+
                     "}\n"+
                     "coverImage\n"+
-                    "bannerImage\n"
+                    "bannerImage\n"+
+                    "}}}"
                     );
 
             Console.WriteLine(sb.ToString());
-            string response = await _client.QueryAsync(sb.ToString(), 22);
-            Console.WriteLine(response);
-            var finalResponse = JsonConvert.DeserializeObject(response);
+            Media response = null;
+            MediaCoverImage image = null;
+            try
+            {
+                response = await _anilistClient.GetMediaBySearch(show);
+                Console.WriteLine(response.CoverImageLarge);
+                image = response.CoverImage;
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                Console.WriteLine(ex.StackTrace, ex.Message);
+            }
+            Console.WriteLine(response.Title.ToString());
         }
     }
 }
