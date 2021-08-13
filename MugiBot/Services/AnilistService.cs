@@ -1,3 +1,4 @@
+using System.Security.AccessControl;
 using System.Text;
 using Discord;
 using PartyBot.Database;
@@ -17,11 +18,11 @@ namespace PartyBot.Services
 {
     public class AnilistService
     {
-        private string myEndPoint = "";
+        public string MyEndPoint { get; set; }
         private Anilist4Net.Client _anilistClient;
-        private HttpClient httpClient = new HttpClient();
         private readonly char separator = Path.DirectorySeparatorChar;
         private readonly string path;
+        private readonly Dictionary<string, string> FolderToExtension;
         public AnilistService()
         {
             path = Path.GetDirectoryName(System.Reflection.
@@ -29,40 +30,53 @@ namespace PartyBot.Services
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 path = separator + path;
             _anilistClient = new Client(new HttpClient());
+
+            FolderToExtension = new Dictionary<string, string>
+            {
+                {"CoverImages", ".png"},
+                {"AniLists", ".json"},
+                {"Statistics", ".json"},
+                {"MediaFiles", ".json"}
+            };
         }
         public void SetEndpoint(string endPoint)
         {
-            myEndPoint = endPoint;
+            MyEndPoint = endPoint;
         }
-        public async Task SearchSeriesOnAL(string show, int annId)
+        public async Task<string> GetCoverArtAsync(string show, int annId)
+        {
+            Media response = await GetMediaAsync(show);
+            Console.WriteLine(response.Title.ToString());
+            return response.CoverImageLarge;
+        }
+        public async Task DownloadMediaAsync(string Show, string folder, int annId)
+        {
+            Media media = await GetMediaAsync(Show);
+            await DownloadFromURL(media.SiteUrl, folder, annId);
+        }
+        public async Task<Media> GetMediaAsync(string Show)
         {
             Media response = null;
             try
             {
-                response = await _anilistClient.GetMediaBySearch(show);
-                Console.WriteLine(response.CoverImageLarge);
-                using var client = new HttpClient();
-                HttpResponseMessage responseMessage = await client.GetAsync(response.CoverImageLarge);
-                responseMessage.EnsureSuccessStatusCode();
-
-                int LastIndexOf = response.CoverImageLarge.LastIndexOf("/");
-                Console.WriteLine(LastIndexOf);
-                string cutString = response.CoverImageLarge.Substring(LastIndexOf-1);
-                Console.WriteLine(cutString);
-
-                string localpath = Path.Combine(path, "CoverImages", $"{annId}.png");
-
-                using var wc = new WebClient();
-                Uri tempurl = new Uri(response.CoverImageLarge);
-                var audio = await wc.DownloadDataTaskAsync(tempurl);
-                File.WriteAllBytes(localpath, audio);
+                response = await _anilistClient.GetMediaBySearch(Show);
             }
             catch (Exception ex)
             {
                 await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
                 Console.WriteLine(ex.StackTrace, ex.Message);
             }
-            Console.WriteLine(response.Title.ToString());
+            return response;
+        }
+        public async Task DownloadFromURL(string urlToDownload, string folder, int annId)
+        {
+            using var client = new HttpClient();
+            HttpResponseMessage responseMessage = await client.GetAsync(urlToDownload);
+            responseMessage.EnsureSuccessStatusCode();
+            string localpath = Path.Combine(path, $"{folder}", $"{annId}.{FolderToExtension[folder]}");
+            using var wc = new WebClient();
+            string jsonResponse = await wc.DownloadStringTaskAsync(new Uri(urlToDownload));
+            await File.WriteAllTextAsync(localpath, jsonResponse);
         }
     }
 }

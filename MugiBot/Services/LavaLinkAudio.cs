@@ -54,6 +54,33 @@ namespace PartyBot.Services
             }
         }
 
+        public async Task<LavaTrack> FindTrackAsync(string query)
+        {
+            //Find The Track the User requested.
+            LavaTrack track;
+            SearchResponse search;
+            if (query.Contains("catbox.moe"))
+            {
+                query = await CatboxHandler.DownloadMP3(query, path);
+                search = await _lavaNode.SearchAsync(query);
+            }
+            else
+            {
+                search = Uri.IsWellFormedUriString(query, UriKind.Absolute) ?
+                await _lavaNode.SearchAsync(query)
+                : await _lavaNode.SearchYouTubeAsync(query);
+            }
+
+            //If we couldn't find anything, tell the user.
+            if (search.LoadStatus == LoadStatus.NoMatches)
+                return null;
+
+            //Get the first track from the search results.
+            //TODO: Add a 1-5 list for the user to pick from. (Like Fredboat)
+            track = search.Tracks.FirstOrDefault();
+            return track;
+        }
+
         /*This is ran when a user uses either the command Join or Play
             I decided to put these two commands as one, will probably change it in future. 
             Task Returns an Embed which is used in the command call.. */
@@ -74,28 +101,11 @@ namespace PartyBot.Services
 
                 //Find The Track the User requested.
                 LavaTrack track;
-                SearchResponse search;
                 if (sto == null)
                 {
-                    if (query.Contains("catbox.moe"))
-                    {
-                        query = await CatboxHandler.DownloadMP3(query, path);
-                        search = await _lavaNode.SearchAsync(query);
-                    }
-                    else
-                    {
-                        search = Uri.IsWellFormedUriString(query, UriKind.Absolute) ?
-                        await _lavaNode.SearchAsync(query)
-                        : await _lavaNode.SearchYouTubeAsync(query);
-                    }
-
-                    //If we couldn't find anything, tell the user.
-                    if (search.LoadStatus == LoadStatus.NoMatches)
-                        return await EmbedHandler.CreateErrorEmbed("Music", $"I wasn't able to find anything for {query}.");
-
-                    //Get the first track from the search results.
-                    //TODO: Add a 1-5 list for the user to pick from. (Like Fredboat)
-                    track = search.Tracks.FirstOrDefault();
+                    track = await FindTrackAsync(query);
+                    if (track == null)
+                        return await EmbedHandler.CreateErrorEmbed("Music", $"I wasn't able to find anything for {query}.");   
                 }
                 else
                 {
@@ -167,9 +177,9 @@ namespace PartyBot.Services
                     In this situation we simply return an embed that displays the current track instead. */
                 if (player.Queue.Count < 1 && player.Track != null)
                     return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", "Nothing Else Is Queued.", Color.Blue);
-                    /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
-                     *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
-                        This trackNum variable is used to display the number in which the song is in place. (Start at 2 because we're including the current song.*/
+                /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
+                 *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
+                    This trackNum variable is used to display the number in which the song is in place. (Start at 2 because we're including the current song.*/
                 var trackNum = 2;
                 foreach (LavaTrack track in player.Queue)
                 {
@@ -325,7 +335,7 @@ namespace PartyBot.Services
                     args.Player.TextChannel.Guild as SocketGuild
                 );
             string toPrint = "Now Playing:";
-            if (temp != null && args.Player.Queue.Count < 2)
+            if (temp != null && args.Player.Queue.Count < 3)
             {
                 await RadioQueue(temp);
                 if (!temp.CurrPlayers.Equals("any"))
@@ -350,8 +360,8 @@ namespace PartyBot.Services
 
         public async Task<Embed> QueueCatboxFromDB(string key, SocketGuildUser user, IGuild guild)
         {
-            var thing = await DBSearchService.UseSongKey(key);
-            return await PlayAsync(user, guild, thing.MP3, thing);
+            SongTableObject song = await DBSearchService.UseSongKey(key);
+            return await PlayAsync(user, guild, song.MP3, song);
         }
 
         public async Task<Embed> StartRadio(Radio radio, SocketGuildUser user)
@@ -359,10 +369,10 @@ namespace PartyBot.Services
             try
             {
                 var randomSong = await RadioHandler.GetRandomRadioSong(radio, _db._rs);
-                if (randomSong._720 != null && Uri.IsWellFormedUriString(randomSong._720, UriKind.Absolute))
-                {
-                    return await PlayAsync(user, radio.Guild, randomSong._720, randomSong);
-                }
+                //if (randomSong._720 != null && Uri.IsWellFormedUriString(randomSong._720, UriKind.Absolute))
+                //{
+                    //return await PlayAsync(user, radio.Guild, randomSong._720, randomSong);
+                //}
                 if (Uri.IsWellFormedUriString(randomSong.MP3, UriKind.Absolute))
                 {
                     return await PlayAsync(user, radio.Guild, randomSong.MP3, randomSong);

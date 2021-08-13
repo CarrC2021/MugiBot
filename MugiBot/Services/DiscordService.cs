@@ -84,7 +84,7 @@ namespace PartyBot.Services
         {
             try
             {
-                _anilistService.SetEndpoint(GlobalData.Config.LocalEndPoint);
+                _anilistService.MyEndPoint = GlobalData.Config.LocalEndPoint;
                 await _lavaNode.ConnectAsync();
                 await _client.SetGameAsync(GlobalData.Config.GameStatus);
             }

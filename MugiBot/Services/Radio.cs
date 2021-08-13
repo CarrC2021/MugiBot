@@ -1,9 +1,13 @@
+using System.Text;
 using Discord;
 using Discord.WebSocket;
 using PartyBot.Handlers;
 using PartyBot.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
+using PartyBot.Database;
+using Victoria;
 
 public class Radio
 {
@@ -78,11 +82,11 @@ public class Radio
             if (!listNums.Contains(value))
                 listNums.Add(value);
         }
-        string toPrint = "";
+        StringBuilder toPrint = new StringBuilder();
         foreach (int thing in listNums)
-            toPrint += $"{listStatusReverse[thing]}\n";
+            toPrint.Append($"{listStatusReverse[thing]}\n");
 
-        return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint}", Color.Blue);
+        return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint.ToString()}", Color.Blue);
     }
     public async Task<Embed> RemoveListStatus(string[] listArray)
     {
@@ -92,25 +96,36 @@ public class Radio
             if (listNums.Contains(outVal))
                 listNums.Remove(outVal);
         }
-        string toPrint = "";
+        StringBuilder toPrint = new StringBuilder();
         foreach (int thing in listNums)
-            toPrint += listStatusReverse[thing] + "\n";
+            toPrint.Append($"{listStatusReverse[thing]}\n");
 
-        return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint}", Color.Blue);
+        return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint.ToString()}", Color.Blue);
     }
     public async Task<Embed> PrintRadio()
     {
-        string toPrint = $"{CurrPlayers}\n{CurrType}";
+        string toPrint = $"Current Players:\n{CurrPlayers}Current Types:\n{CurrType}\n";
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint, Color.Blue);
     }
     public async Task<Embed> ListTypes()
     {
-        string toPrint = "";
+        StringBuilder toPrint = new StringBuilder();
         foreach (string s in SongTypes)
-            toPrint += $"{s}\n";
+            toPrint.Append("{s}\n");
 
-        return await EmbedHandler.CreateBasicEmbed("Radio", toPrint, Color.Blue);
+        return await EmbedHandler.CreateBasicEmbed("Radio", toPrint.ToString(), Color.Blue);
     }
 
-
+    public async Task RadioQueue(DBManager _db, LavaNode _lavaNode, string path)
+    {
+        try
+        {
+            var randomSong = await RadioHandler.GetRandomRadioSong(this, _db._rs);
+            await CatboxHandler.QueueRadioSong(randomSong, Guild, _lavaNode, path);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
 }
