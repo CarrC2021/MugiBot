@@ -94,6 +94,11 @@ namespace PartyBot.Modules
         public async Task ListTypes()
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild).ListTypes());
+        [Command("RInfo")]
+        [Summary("Print out information about the radio in this server.")]
+        public async Task PrintRadioInfo()
+        => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
+                AudioService.radios, Context.Channel, Context.Guild).PrintRadio());
         [Command("RAL")]
         [Summary("This will add to the radio a condition to play the songs from the specified list status. For example, !ral Watching Completed Dropped Paused " +
             "will play songs that meet those conditions in the database. By default this is set Watching or completed")]

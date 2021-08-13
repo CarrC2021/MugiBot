@@ -111,7 +111,7 @@ public class Radio
     {
         StringBuilder toPrint = new StringBuilder();
         foreach (string s in SongTypes)
-            toPrint.Append("{s}\n");
+            toPrint.Append($"{s}\n");
 
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint.ToString(), Color.Blue);
     }
