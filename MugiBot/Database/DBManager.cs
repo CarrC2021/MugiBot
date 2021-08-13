@@ -226,11 +226,18 @@ namespace PartyBot.Database
             var toRemove = await _db.SongTableObject
                     .AsTracking()
                     .Where(f => f.AnnID == 0)
-                    .Where(k => k.Key.Contains("AnnID "))
                     .ToListAsync();
 
             _db.RemoveRange(toRemove);  
             await _db.SaveChangesAsync();
+
+            var alsoToRemove = await _db.SongTableObject
+                    .AsTracking()
+                    .Where(k => k.Key.Contains("AnnID "))
+                    .ToListAsync();
+            _db.RemoveRange(alsoToRemove);  
+            await _db.SaveChangesAsync();
+            
             return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);            
         }
 
