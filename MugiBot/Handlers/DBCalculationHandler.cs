@@ -113,9 +113,11 @@ namespace PartyBot.Handlers
             Dictionary<string, int[]> playerSpecific = new Dictionary<string, int[]>();
             Dictionary<string, int[]> total = new Dictionary<string, int[]>();
             List<PlayerTableObject> OtherQuery = new List<PlayerTableObject>();
+            Dictionary<string, string> songsToKeys = new Dictionary<string, string>();
             using (var db = new AMQDBContext())
             {
-                //We will only look at songs that the player has seen in game at least once.
+                
+                // We will only look at songs that the player has seen in game at least once.
                 var PlayerQuery = await SearchHandler.AllObjectsForPlayer(db, name, onlyFromList);
 
                 foreach (PlayerTableObject tObject in PlayerQuery)
@@ -123,13 +125,14 @@ namespace PartyBot.Handlers
                     temp = SongTableObject.PrintSong(tObject);
                     total.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
                     playerSpecific.Add(temp, new int[] { tObject.TotalTimesPlayed, tObject.TimesCorrect });
+                    songsToKeys.Add(temp, SongTableObject.MakeSongTableKey(tObject));
                 }
 
                 OtherQuery = await db.PlayerStats
                             .AsAsyncEnumerable()
                             .Where(x => x.Rule.Equals(""))
                             .Where(j => !j.PlayerName.ToLower().Equals(name.ToLower()))
-                            .Where(y => total.ContainsKey(SongTableObject.MakeSongTableKey(y.AnnID, y.Type, y.SongName, y.Artist)))
+                            .Where(y => total.ContainsKey(SongTableObject.PrintSong(y)))
                             .ToListAsync();
             }
 
@@ -178,7 +181,7 @@ namespace PartyBot.Handlers
                     }
                 }
             }
-            return await EmbedHandler.PrintRecommendedSongs(ch, songsToRecommend, name);
+            return await EmbedHandler.PrintRecommendedSongs(ch, songsToRecommend, name, songsToKeys);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Text;
+using Discord;
 using Discord.WebSocket;
 using PartyBot.Database;
 using System;
@@ -144,27 +146,30 @@ namespace PartyBot.Handlers
         }
 
         public static async Task<Embed> PrintRecommendedSongs(ISocketMessageChannel ch,
-            Dictionary<string, float[]> songsToRecommend, string name)
+            Dictionary<string, float[]> songsToRecommend, string name, Dictionary<string,string> songsToKeys)
         {
-            string toPrint = "";
+            StringBuilder sb = new StringBuilder();
+            StringBuilder allKeys = new StringBuilder("All Keys:");
             int count = 0;
             var list = songsToRecommend.Keys.ToList();
             for (int i = 0; i < list.Count; i++)
             {
                 songsToRecommend.TryGetValue(list[i], out var curr);
-                toPrint += list[i] + $"\n\t Total: {Math.Round(curr[1], 3)}  {name}: {Math.Round(curr[0], 3)}\n";
+                sb.Append(list[i] + $"\n-  Total: {Math.Round(curr[1], 3)}  -  {name}: {Math.Round(curr[0], 3)}\n\n");
+                allKeys.Append($"\n{songsToKeys[list[i]]}");
                 count++;
                 if (count % 10 == 0 && count == list.Count - 1)
                 {
-                    return await CreateBasicEmbed("Data, Recommendation", toPrint, Color.Blue);
+                    return await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
                 }
                 if (count % 10 == 0)
                 {
-                    var message = await ch.SendMessageAsync(embed: await CreateBasicEmbed("Data, Recommendation", toPrint, Color.Blue));
-                    toPrint = "";
+                    var message = await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}" + allKeys.ToString(), Color.Blue));
+                    sb.Clear();
+                    allKeys.Clear();
                 }
             }
-            return await CreateBasicEmbed("Data, Recommendation", toPrint, Color.Blue);
+            return await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
         }
 
     }

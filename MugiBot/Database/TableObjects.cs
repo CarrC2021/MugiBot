@@ -103,12 +103,11 @@ namespace PartyBot.Database
             }
         }
 
-        public static string MakeSongTableKeyFromPlayer(PlayerTableObject pt)
+        public static string MakeSongTableKey(PlayerTableObject pt)
         {
             try
             {
-                string key = pt.AnnID + " " + pt.Type.ToLower()
-                 + " " + pt.SongName.ToLower() + " by " + pt.Artist.ToLower();
+                string key = $"{pt.AnnID} {pt.Type.ToLower()} {pt.SongName.ToLower()} by {pt.Artist.ToLower()}";
                 return key;
             }
             catch (Exception ex)
@@ -226,8 +225,7 @@ namespace PartyBot.Database
 
         public static string MakePlayerTableKey(int AnnID, string songtype, string songname, string artist, string playername, string rule)
         {
-            return AnnID + " " + songtype.ToLower() + " " +
-                songname.ToLower() + " by " + artist.ToLower() + " " + playername.ToLower() + " " + rule.ToLower();
+            return $"{AnnID} {songtype.ToLower()} {songname.ToLower()} by {artist.ToLower()} {playername.ToLower()} {rule.ToLower()}";
         }
     }
 

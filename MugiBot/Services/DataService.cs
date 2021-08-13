@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿using System.Linq;
+using System.Collections.Generic;
+using Discord;
 using Discord.WebSocket;
 using PartyBot.Database;
 using PartyBot.Handlers;
@@ -46,7 +48,11 @@ namespace PartyBot.Services
         {
             if (numSongs > 30)
                 numSongs = 30;
-            return await DBCalculationHandler.RecommendPracticeSongs(ch, name, numSongs, onlyFromList);
+            Dictionary<string, string> players = await DBManager._rs.GetPlayersTracked();
+            if (!players.Keys.Contains(name))
+                return await EmbedHandler.CreateBasicEmbed("Name Error", "Could not find any players by that name in the database.", Color.Red);
+            
+            return await DBCalculationHandler.RecommendPracticeSongs(ch, players[name], numSongs, onlyFromList);
         }
     }
 }
