@@ -58,7 +58,7 @@ namespace PartyBot.Handlers
 
                 totalCorrect += player.TimesCorrect;
 
-                string temp = $"{player.Show} {player.Type} {player.SongName}";
+                string temp = SongTableObject.PrintSong(player);
 
                 if (objectsToPrint.Count < 10)
                     objectsToPrint.Add(temp, (float)(player.TimesCorrect / player.TotalTimesPlayed));
@@ -85,24 +85,26 @@ namespace PartyBot.Handlers
 
         public static async Task<Embed> OtherPlayerStats(ISocketMessageChannel ch, List<PlayerTableObject> playerObjects, string playerName)
         {
-            string list = "";
+            StringBuilder sb = new StringBuilder();
+            StringBuilder keys = new StringBuilder("\n All keys:\n");
             int count = 0;
             foreach (PlayerTableObject player in playerObjects)
             {
                 //list = list + player.Key + " played: " +
                 //player.TotalTimesPlayed + " correct: " + player.TimesCorrect + "\n";
-                list = list + player.Show + " " + player.Type + " " + player.SongName + " by " + player.Artist +
-                    "\n" + "\t" + " Times Played: " + player.TotalTimesPlayed + " Times Correct: " + player.TimesCorrect + "\n";
+                sb.Append(PlayerTableObject.PrintPlayer(player) + $"\n\t Times Played: {player.TotalTimesPlayed} Times Correct: {player.TimesCorrect}\n\n");
+                keys.Append(player.Key+"\n");
                 count++;
                 if (count % 10 == 0)
                 {
-                    await ch.SendMessageAsync(embed: await CreateBasicEmbed($"{playerName}'s Stats", list, Color.Blue));
-                    list = "";
+                    await ch.SendMessageAsync(embed: await CreateBasicEmbed($"{playerName}'s Stats", $"{sb.ToString()} {keys.ToString()}", Color.Blue));
+                    sb.Clear();
+                    keys.Clear();
                 }
             }
             try
             {
-                return await CreateBasicEmbed("Data, Search", list, Color.Blue);
+                return await CreateBasicEmbed($"{playerName}'s Stats", $"{sb.ToString()} {keys.ToString()}", Color.Blue);
             }
             catch (Exception ex)
             {

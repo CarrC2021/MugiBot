@@ -227,6 +227,11 @@ namespace PartyBot.Database
         {
             return $"{AnnID} {songtype.ToLower()} {songname.ToLower()} by {artist.ToLower()} {playername.ToLower()} {rule.ToLower()}";
         }
+
+        public static string PrintPlayer(PlayerTableObject player)
+        {
+            return $"{player.Show} {player.Type} {player.SongName} by {player.Artist} {player.PlayerName} {player.Rule}";
+        }
     }
 
 
