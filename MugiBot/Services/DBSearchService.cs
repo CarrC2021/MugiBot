@@ -42,6 +42,13 @@ public class DBSearchService
         return await EmbedHandler.PrintPlayerStats(playerObjects, playerName);
     }
 
+    public static async Task<Embed> PlayerStatsByArtist(ISocketMessageChannel message, string playerName, string artist, string type = "any", string exactMatch = "no")
+    {
+        using var db = new AMQDBContext();
+        var playerObjects = await SearchHandler.PlayerStatsSearchByArtist(db, playerName, artist, type, exactMatch);
+        return await EmbedHandler.OtherPlayerStats(message, playerObjects, playerName);
+    }
+
     public static async Task<SongTableObject> UseSongKey(string key)
     {
         using var db = new AMQDBContext();

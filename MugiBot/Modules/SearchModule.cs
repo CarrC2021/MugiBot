@@ -72,11 +72,12 @@ namespace PartyBot.Modules
         [Command("ShowStats")]
         [Summary("This will list the total stats from the database for each show that contains the string you specify.")]
         public async Task GetShowStats([Remainder] string showName)
-            => await ReplyAsync(embed: await DBCalculationHandler.ShowStats(Context.Channel, showName, false));
+            => await ReplyAsync(embed: await DBCalculationHandler.CalcShowStats(Context.Channel, showName, false));
+
         [Command("ShowStatsExact")]
         [Summary("This will list the total stats from the database for each show that exactly matches the string you specify.")]
         public async Task GetShowStatsExact([Remainder] string showName)
-            => await ReplyAsync(embed: await DBCalculationHandler.ShowStats(Context.Channel, showName, true));
+            => await ReplyAsync(embed: await DBCalculationHandler.CalcShowStats(Context.Channel, showName, true));
 
         [Command("PlayerStats")]
         [Summary("This will list the stats for the specified player on all shows that contain the string you specify." +
@@ -89,6 +90,13 @@ namespace PartyBot.Modules
             " For example, !liststats dingus naruto will list dingus' stats on all songs from naruto.")]
         public async Task GetPlayerStatsExact(string playerName, string showName, string type = "any")
             => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(playerName, showName, type, "exact"));
+
+        [Command("PlayerStatsArtist")]
+        [Summary("This will list the stats for the specified player on all shows that contain the string you specify." +
+            " For example, !liststats dingus naruto will list dingus' stats on all songs from anime whose title contain naruto.")]
+        public async Task GetPlayerStatsByAuthor(string playerName, string artist, string type = "any")
+            => await ReplyAsync(embed: await DBSearchService.PlayerStatsByArtist(Context.Channel, playerName, artist, type, "no"));
+
         [Command("ListAll")]
         [Summary("This will list the stats for the specified player on all shows that contain the string you specify.")]
         public async Task ListAllPlayers(string playerName, string showName)

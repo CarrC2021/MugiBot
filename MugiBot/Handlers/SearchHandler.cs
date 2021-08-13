@@ -90,6 +90,40 @@ namespace PartyBot.Handlers
             
             return await ContainsPlayerStatsSearch(_db, playerName, showName, type);
         }
+
+        public static async Task<List<PlayerTableObject>> ExactArtistStatsSearch(AMQDBContext _db, string playerName, string artist, string type)
+        {
+            List<PlayerTableObject> Shows = await _db.PlayerStats
+                        .AsNoTracking()
+                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
+                        .Where(x => x.Artist.ToLower().Equals(artist.ToLower()))
+                        .Where(j => j.Rule.Equals(""))
+                        .ToListAsync();
+            return Shows;
+        }
+
+
+        // Finds PlayerTableObjects whose Artist contains the substring specified and meets the other conditions.
+        public static async Task<List<PlayerTableObject>> ContainsArtistStatsSearch(AMQDBContext _db, string playerName, string artist, string type)
+        {
+            List<PlayerTableObject> Shows = await _db.PlayerStats
+                        .AsNoTracking()
+                        .Where(k => k.PlayerName.ToLower().Equals(playerName.ToLower()))
+                        .Where(x => x.Artist.ToLower().Contains(artist.ToLower()))
+                        .Where(j => j.Rule.Equals(""))
+                        .ToListAsync();
+            return Shows;
+        }
+
+        // Calls helper functions to perform a database query on the PlayerStats table.
+        public static async Task<List<PlayerTableObject>> PlayerStatsSearchByArtist(AMQDBContext _db, string playerName, string artist, string type = "any", string exactMatch = "no")
+        {
+            if (exactMatch.ToLower().Equals("exact") || exactMatch.ToLower().Equals("exactmatch"))
+                return await ExactPlayerStatsSearch(_db, playerName, artist, type);
+            
+            return await ContainsPlayerStatsSearch(_db, playerName, artist, type);
+        }
+
         public static async Task<List<SongTableObject>> SearchAuthor(AMQDBContext _db, string author)
         {
             List<SongTableObject> Songs;
