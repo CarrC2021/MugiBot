@@ -87,20 +87,32 @@ namespace PartyBot.Handlers
         {
             StringBuilder sb = new StringBuilder();
             StringBuilder keys = new StringBuilder("\n All keys:\n");
+            List<Embed> embeds = new List<Embed>();
+            float totalTimes = 0;
+            float totalCorrect = 0;
             int count = 0;
             foreach (PlayerTableObject player in playerObjects)
             {
-                //list = list + player.Key + " played: " +
-                //player.TotalTimesPlayed + " correct: " + player.TimesCorrect + "\n";
+                totalTimes += player.TotalTimesPlayed;
+                totalCorrect += player.TimesCorrect;
                 sb.Append(PlayerTableObject.PrintPlayer(player) + $"\n\t Times Played: {player.TotalTimesPlayed} Times Correct: {player.TimesCorrect}\n\n");
-                keys.Append(SongTableObject.PrintSong(player)+"\n");
+                keys.Append(SongTableObject.MakeSongTableKey(player)+"\n");
                 count++;
                 if (count % 10 == 0)
                 {
-                    await ch.SendMessageAsync(embed: await CreateBasicEmbed($"{playerName}'s Stats", $"{sb.ToString()} {keys.ToString()}", Color.Blue));
+                    embeds.Append(await CreateBasicEmbed($"{playerName}'s Stats", $"{sb.ToString()} {keys.ToString()}", Color.Blue));
                     sb.Clear();
                     keys.Clear();
+                    keys.Append($"All keys:\n");
                 }
+            }
+            string body = $"Success rate for this query: {Math.Round(totalCorrect/totalTimes, 3)}"
+            + $"\n Total times correct: {totalCorrect} Total times played: {totalTimes}";
+            // Later I can use the cover images here and give the best and worst song from the query
+            await ch.SendMessageAsync(embed: await CreateBasicEmbed($"{playerName}'s Stats", body, Color.Blue));
+            for (int i = 0; i < embeds.Count - 1; i++)
+            {
+                await ch.SendMessageAsync(embed: embeds[i]);
             }
             try
             {
