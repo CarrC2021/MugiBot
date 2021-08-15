@@ -4,6 +4,7 @@ using PartyBot.Handlers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PartyBot.DataStructs;
 
 namespace PartyBot.Services
 {
@@ -11,11 +12,13 @@ namespace PartyBot.Services
     {
         private readonly CommandService _commands;
         private List<CommandInfo> _commandList;
+        private readonly HelpEmbeds help;
 
         public HelpService(CommandService c)
         {
             _commands = c;
             _commandList = _commands.Commands.ToList();
+            help = new HelpEmbeds();
         }
 
         public async Task<Embed> GetSummary(string search, CommandService cs)
@@ -43,6 +46,26 @@ namespace PartyBot.Services
             }
             s = s + "\n" + "For more info on a specific command, call !help [COMMAND]";
             return await EmbedHandler.CreateBasicEmbed("List of commands:", s, Color.Blue);
+        }
+
+        public async Task<Embed> MainHelp()
+        {
+            return await EmbedHandler.CreateBasicEmbed("Main Help", help.MainHelpString, Color.Green);
+        }
+
+        public async Task<Embed> AudioHelp()
+        {
+            return await EmbedHandler.CreateBasicEmbed("Audio Help", help.AudioHelpString, Color.Green);
+        }
+
+        public async Task<Embed> DatabaseTrackingHelp() 
+        {
+            return await EmbedHandler.CreateBasicEmbed("Database Help", help.DatabaseTrackingHelpString, Color.Green);
+        }
+
+        public async Task<Embed> DatabaseSearchHelp()
+        {
+            return await EmbedHandler.CreateBasicEmbed("Database Search Help", help.DBSearchHelpString, Color.Green);
         }
     }
 }

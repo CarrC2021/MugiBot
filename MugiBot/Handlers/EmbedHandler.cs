@@ -69,7 +69,8 @@ namespace PartyBot.Handlers
                     objectsToPrint.Add(temp, (float)(player.TimesCorrect / player.TotalTimesPlayed));
                 }
             }
-            string list = $"{playerName}: Total Success Rate for this query: {totalCorrect / totalTimes} \n";
+            string list = $"{playerName}: Total Success Rate for this query: {totalCorrect / totalTimes} \n"
+            ;
             foreach (string key in objectsToPrint.Keys)
                 list += $"{key} \n \t Success Rate: {objectsToPrint[key]}\n";
             try
@@ -88,6 +89,7 @@ namespace PartyBot.Handlers
             StringBuilder sb = new StringBuilder();
             StringBuilder keys = new StringBuilder("\n All keys:\n");
             List<Embed> embeds = new List<Embed>();
+            List<string> uniqueShows = new List<string>();
             float totalTimes = 0;
             float totalCorrect = 0;
             int count = 0;
@@ -95,22 +97,30 @@ namespace PartyBot.Handlers
             {
                 totalTimes += player.TotalTimesPlayed;
                 totalCorrect += player.TimesCorrect;
-                sb.Append(PlayerTableObject.PrintPlayer(player) + $"\n\t Times Played: {player.TotalTimesPlayed} Times Correct: {player.TimesCorrect}\n\n");
+                sb.Append(SongTableObject.PrintSong(player) + $"\n\t Times Played: {player.TotalTimesPlayed} Times Correct: {player.TimesCorrect}\n\n");
                 keys.Append(SongTableObject.MakeSongTableKey(player)+"\n");
                 count++;
+                if (!uniqueShows.Contains(player.Show))
+                    uniqueShows.Add(player.Show);
                 if (count % 10 == 0)
                 {
-                    embeds.Append(await CreateBasicEmbed($"{playerName}'s Stats", $"{sb.ToString()} {keys.ToString()}", Color.Blue));
+                    var embed = await CreateBasicEmbed($"{playerName}'s Stats", $"{sb.ToString()} {keys.ToString()}", Color.Blue);
+                    embeds.Add(embed);
                     sb.Clear();
                     keys.Clear();
                     keys.Append($"All keys:\n");
                 }
             }
-            string body = $"Success rate for this query: {Math.Round(totalCorrect/totalTimes, 3)}"
-            + $"\n Total times correct: {totalCorrect} Total times played: {totalTimes}";
+            StringBuilder titleCard = new StringBuilder();
+            titleCard.Append($"Success rate for this query: {Math.Round(totalCorrect/totalTimes, 3)}"
+              + $"\n Total times correct: {totalCorrect} Total times played: {totalTimes}\n");
+            titleCard.Append("Unique shows found:\n");
+            foreach (string showFound in uniqueShows)
+                titleCard.Append(showFound + "\n");
+            
             // Later I can use the cover images here and give the best and worst song from the query
-            await ch.SendMessageAsync(embed: await CreateBasicEmbed($"{playerName}'s Stats", body, Color.Blue));
-            for (int i = 0; i < embeds.Count - 1; i++)
+            await ch.SendMessageAsync(embed: await CreateBasicEmbed($"{playerName}'s Stats", titleCard.ToString(), Color.Blue));
+            for (int i = 0; i < embeds.Count; i++)
             {
                 await ch.SendMessageAsync(embed: embeds[i]);
             }
