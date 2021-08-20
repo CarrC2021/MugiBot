@@ -35,11 +35,11 @@ public class DBSearchService
         return await EmbedHandler.PrintSongs(message.Channel, songList, true);
     }
 
-    public static async Task<Embed> ListPlayerStats(string playerName, string showName, string type = "any", string exactMatch = "no")
+    public static async Task<Embed> ListPlayerStats(ISocketMessageChannel channel, string playerName, string showName, string type = "any", string exactMatch = "no")
     {
         using var db = new AMQDBContext();
         var playerObjects = await SearchHandler.PlayerStatsSearch(db, playerName, showName, type, exactMatch);
-        return await EmbedHandler.PrintPlayerStats(playerObjects, playerName);
+        return await EmbedHandler.OtherPlayerStats(channel, playerObjects, playerName);
     }
 
     public static async Task<Embed> PlayerStatsByArtist(ISocketMessageChannel message, string playerName, string artist, string type = "any", string exactMatch = "no")

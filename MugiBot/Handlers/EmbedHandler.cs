@@ -47,43 +47,6 @@ namespace PartyBot.Handlers
             return embed;
         }
 
-        public static async Task<Embed> PrintPlayerStats(List<PlayerTableObject> playerObjects, string playerName)
-        {
-            Dictionary<string, float> objectsToPrint = new Dictionary<string, float>();
-            float totalTimes = 0;
-            float totalCorrect = 0;
-            foreach (PlayerTableObject player in playerObjects)
-            {
-                totalTimes += player.TotalTimesPlayed;
-
-                totalCorrect += player.TimesCorrect;
-
-                string temp = SongTableObject.PrintSong(player);
-
-                if (objectsToPrint.Count < 10)
-                    objectsToPrint.Add(temp, (float)(player.TimesCorrect / player.TotalTimesPlayed));
-
-                else if (objectsToPrint.Values.All(x => x < (float)(player.TimesCorrect / player.TotalTimesPlayed)))
-                {
-                    objectsToPrint.Remove(objectsToPrint.Max().Key);
-                    objectsToPrint.Add(temp, (float)(player.TimesCorrect / player.TotalTimesPlayed));
-                }
-            }
-            string list = $"{playerName}: Total Success Rate for this query: {totalCorrect / totalTimes} \n"
-            ;
-            foreach (string key in objectsToPrint.Keys)
-                list += $"{key} \n \t Success Rate: {objectsToPrint[key]}\n";
-            try
-            {
-                return await CreateBasicEmbed("Data, Search", list, Color.Blue);
-            }
-            catch (Exception ex)
-            {
-                return await CreateBasicEmbed("Data, Search",
-                 "That is a lot of songs, please try and be more specific. Try typing the name of the exact season." + ex.Message, Color.Blue);
-            }
-        }
-
         public static async Task<Embed> OtherPlayerStats(ISocketMessageChannel ch, List<PlayerTableObject> playerObjects, string playerName)
         {
             StringBuilder sb = new StringBuilder();
