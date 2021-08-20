@@ -52,12 +52,12 @@ namespace PartyBot.Modules
                         => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", true));
         [Command("SearchDBLinks")]
         [Summary("This functions exactly the same as SearchDB except it will print the links out as well.")]
-        public async Task SearchForSongLinks(string showName, string type = "any", string exactMatch = "no")
-                => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, type, false, "yes"));
+        public async Task SearchForSongLinks([Remainder] string showName)
+                => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "any", false, "yes"));
         [Command("SearchDBLinksExact")]
         [Summary("This functions exactly the same as SearchDB except it will print the links out as well.")]
-        public async Task SearchForSongLinks(string showName, string type = "any")
-                => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, type, true, "yes"));
+        public async Task SearchForSongLinksExact([Remainder] string showName)
+                => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "any", true, "yes"));
 
         [Command("SearchArtist")]
         [Summary("Will return every song in the database by that author.")]
@@ -82,14 +82,14 @@ namespace PartyBot.Modules
         [Command("PlayerStats")]
         [Summary("This will list the stats for the specified player on all shows that contain the string you specify." +
             " For example, !liststats dingus naruto will list dingus' stats on all songs from anime whose title contain naruto.")]
-        public async Task GetPlayerStats(string playerName, string showName, string type = "any")
-            => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(playerName, showName, type, "no"));
+        public async Task GetPlayerStats(string playerName, [Remainder] string showName)
+            => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(playerName, showName, "any", "no"));
 
         [Command("PlayerStatsExact")]
         [Summary("This will list the stats for the specified player on all shows that contain the string you specify." +
             " For example, !liststats dingus naruto will list dingus' stats on all songs from naruto.")]
-        public async Task GetPlayerStatsExact(string playerName, string showName, string type = "any")
-            => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(playerName, showName, type, "exact"));
+        public async Task GetPlayerStatsExact(string playerName, [Remainder] string showName)
+            => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(playerName, showName, "any", "exact"));
 
         [Command("PlayerStatsArtist")]
         [Summary("This will list the stats for the specified player on all songs done by any artist that contains that substring." +
