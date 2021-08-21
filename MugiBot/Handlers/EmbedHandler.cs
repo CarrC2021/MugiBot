@@ -29,8 +29,9 @@ namespace PartyBot.Handlers
         }
 
 
-        public static async Task<Embed> TestingEmbedStuff(){
-            
+        public static async Task<Embed> TestingEmbedStuff()
+        {
+
             var embed = await Task.Run(() => new EmbedBuilder()
                     .WithImageUrl("https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20843-bk5OtUiP8htg.png")
                     .WithThumbnailUrl("https://i.ibb.co/VW3XFxT/Emilia-megumin.jpg")
@@ -61,41 +62,21 @@ namespace PartyBot.Handlers
                 totalTimes += player.TotalTimesPlayed;
                 totalCorrect += player.TimesCorrect;
                 sb.Append(SongTableObject.PrintSong(player) + $"\n\t Times Played: {player.TotalTimesPlayed} Times Correct: {player.TimesCorrect}\n\n");
-                keys.Append(SongTableObject.MakeSongTableKey(player)+"\n");
+                keys.Append(SongTableObject.MakeSongTableKey(player) + "\n");
                 count++;
                 if (!uniqueShows.Contains(player.Show))
                     uniqueShows.Add(player.Show);
-                if (count % 10 == 0)
-                {
-                    var embed = await CreateBasicEmbed($"{playerName}'s Stats", $"{sb.ToString()} {keys.ToString()}", Color.Blue);
-                    embeds.Add(embed);
-                    sb.Clear();
-                    keys.Clear();
-                    keys.Append($"All keys:\n");
-                }
+                if (count % 10 == 0 || sb.Length + keys.Length > 1850)    
+                    embeds = await AppendEmbedAndClear(embeds, sb, keys);
             }
             StringBuilder titleCard = new StringBuilder();
-            titleCard.Append($"Success rate for this query: {Math.Round(totalCorrect/totalTimes, 3)}"
+            titleCard.Append($"Success rate for this query: {Math.Round(totalCorrect / totalTimes, 3)}"
               + $"\n Total times correct: {totalCorrect} Total times played: {totalTimes}\n");
             titleCard.Append("Unique shows found:\n");
             foreach (string showFound in uniqueShows)
                 titleCard.Append(showFound + "\n");
-            
-            // Later I can use the cover images here and give the best and worst song from the query
-            await ch.SendMessageAsync(embed: await CreateBasicEmbed($"{playerName}'s Stats", titleCard.ToString(), Color.Blue));
-            for (int i = 0; i < embeds.Count; i++)
-            {
-                await ch.SendMessageAsync(embed: embeds[i]);
-            }
-            try
-            {
-                return await CreateBasicEmbed($"{playerName}'s Stats", $"{sb.ToString()} {keys.ToString()}", Color.Blue);
-            }
-            catch (Exception ex)
-            {
-                return await CreateBasicEmbed("Data, Search",
-                "That is a lot of songs, please try and be more specific. Try typing the name of the exact season." + ex.Message, Color.Blue);
-            }
+
+            return await PrintEmbeds(ch, embeds, sb, keys, titleCard);
         }
 
         // Need to convert all these things to use the String Builder function.
@@ -109,6 +90,7 @@ namespace PartyBot.Handlers
             for (int i = 0; i < songObjects.Count; i++)
             {
                 sb.Append($"{SongTableObject.PrintSong(songObjects[i])}\n\n");
+                // If any of the links are not null and we want to print the links then append them
                 if (songObjects[i].MP3 != null && printLinks)
                     sb.Append($"\n\t MP3 {songObjects[i].MP3} ");
                 if (songObjects[i]._720 != null && printLinks)
@@ -119,56 +101,32 @@ namespace PartyBot.Handlers
                 count++;
                 if (!uniqueShows.Contains(songObjects[i].Show))
                     uniqueShows.Add(songObjects[i].Show);
-                if (count % 10 == 0 || sb.Length > 1900)
-                {
-                    var embed = await CreateBasicEmbed($"Data, Search", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
-                    embeds.Add(embed);
-                    sb.Clear();
-                    allKeys.Clear();
-                    allKeys.Append($"All keys:\n");
-                }
+                if (count % 10 == 0 || sb.Length + allKeys.Length > 1850)
+                    embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
             }
             StringBuilder titleCard = new StringBuilder();
             titleCard.Append($"Found {songObjects.Count} songs for this query.\n\n");
             titleCard.Append("Unique shows found:\n");
             foreach (string showFound in uniqueShows)
                 titleCard.Append(showFound + "\n");
-            
-            // Later I can use the cover images here and give the best and worst song from the query
-            await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Data, Search", titleCard.ToString(), Color.Blue));
-            for (int i = 0; i < embeds.Count; i++)
-            {
-                await ch.SendMessageAsync(embed: embeds[i]);
-            }
-            try
-            {
-                return await CreateBasicEmbed($"Data, Search", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
-            }
-            catch (Exception ex)
-            {
-                return await CreateBasicEmbed("Data, Search",
-                "That is a lot of songs, please try and be more specific. Try typing the name of the exact season." + ex.Message, Color.Blue);
-            }
+
+            return await PrintEmbeds(ch, embeds, sb, allKeys, titleCard);
         }
 
         public static async Task<Embed> PrintRecommendedSongs(ISocketMessageChannel ch,
-            Dictionary<string, float[]> songsToRecommend, string name, Dictionary<string,string> songsToKeys)
+            Dictionary<string, float[]> songsToRecommend, string name, Dictionary<string, string> songsToKeys)
         {
             StringBuilder sb = new StringBuilder();
             StringBuilder allKeys = new StringBuilder("All Keys:");
-            int count = 0;
             var list = songsToRecommend.Keys.ToList();
             for (int i = 0; i < list.Count; i++)
             {
                 songsToRecommend.TryGetValue(list[i], out var curr);
                 sb.Append(list[i] + $"\n-  Total: {Math.Round(curr[1], 3)}  -  {name}: {Math.Round(curr[0], 3)}\n\n");
                 allKeys.Append($"\n{songsToKeys[list[i]]}");
-                count++;
-                if (count % 10 == 0 && count == list.Count - 1)
-                {
+                if (i == list.Count - 1)
                     return await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
-                }
-                if (count % 10 == 0)
+                if (i + 1 % 10 == 0)
                 {
                     var message = await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue));
                     sb.Clear();
@@ -178,7 +136,8 @@ namespace PartyBot.Handlers
             return await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
         }
 
-        public static async Task<Embed> PrintArtistStats(ISocketMessageChannel ch, Dictionary<string, int[]> artistStats, Dictionary<string,string> keysToSongs)
+        // Iterates through an artist stats dictionary to print out all the stats for an artist
+        public static async Task<Embed> PrintArtistStats(ISocketMessageChannel ch, Dictionary<string, int[]> artistStats, Dictionary<string, string> keysToSongs)
         {
             StringBuilder sb = new StringBuilder();
             var allKeys = new StringBuilder("\n All Keys: \n");
@@ -188,25 +147,25 @@ namespace PartyBot.Handlers
             for (int i = 0; i < list.Count; i++)
             {
                 artistStats.TryGetValue(list[i], out var curr);
-                sb.Append(keysToSongs[list[i]] + $"\n-  Total Success: {Math.Round((float)curr[0]/curr[1], 3)}  -  Times Played: {curr[1]} -  Times Correct: {curr[0]}\n\n");
+                sb.Append(keysToSongs[list[i]] + $"\n-  Total Success: {Math.Round((float)curr[0] / curr[1], 3)}  -  Times Played: {curr[1]} -  Times Correct: {curr[0]}\n\n");
                 allKeys.Append($"\n{list[i]}");
                 totals[0] += artistStats[list[i]][0];
                 totals[1] += artistStats[list[i]][1];
-                if (i + 1 % 10 == 0 || sb.Length > 1900)
-                {
-                    var embed = await CreateBasicEmbed($"Artist Stats", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
-                    embeds.Append(embed);
-                    sb.Clear();
-                    allKeys.Clear();
-                    allKeys.Append("\n All Keys: \n");
-                }
+                if (i + 1 % 10 == 0 || sb.Length + allKeys.Length > 1850)
+                    embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
             }
             StringBuilder titleCard = new StringBuilder();
             titleCard.Append($"Found {artistStats.Count} songs for this query.\n\n");
-            titleCard.Append($"Total success rate for this artist: {Math.Round(totals[0]/totals[1], 3)} \n");
-            if (Math.Round(totals[0]/totals[1], 3) < .333)
+            titleCard.Append($"Total success rate for this artist: {Math.Round(totals[0] / totals[1], 3)} \n"
+              + $"\n Total times correct: {totals[0]} Total times played: {totals[1]}\n");
+            if (Math.Round(totals[0] / totals[1], 3) < .333)
                 titleCard.Append("Must be a tough one 😨\n");
-            
+
+            return await PrintEmbeds(ch, embeds, sb, allKeys, titleCard);
+        }
+
+        private static async Task<Embed> PrintEmbeds(ISocketMessageChannel ch, List<Embed> embeds, StringBuilder sb, StringBuilder allKeys, StringBuilder titleCard)
+        {
             // Later I can use the cover images here and give the best and worst song from the query
             await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Data, Search", titleCard.ToString(), Color.Blue));
             for (int i = 0; i < embeds.Count; i++)
@@ -222,6 +181,16 @@ namespace PartyBot.Handlers
                 return await CreateBasicEmbed("Data, Search",
                 "That is a lot of songs, please try and be more specific. Try typing the name of the exact season." + ex.Message, Color.Blue);
             }
+        }
+
+        private static async Task<List<Embed>> AppendEmbedAndClear(List<Embed> embeds, StringBuilder sb, StringBuilder allKeys)
+        {
+            var embed = await CreateBasicEmbed($"Artist Stats", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
+            embeds.Add(embed);
+            sb.Clear();
+            allKeys.Clear();
+            allKeys.Append("\n All Keys: \n");
+            return embeds;
         }
     }
 }
