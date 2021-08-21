@@ -12,11 +12,6 @@ namespace PartyBot.Handlers
 {
     public static class DBCalculationHandler
     {
-
-        public static async Task<Embed> ShowStats(ISocketMessageChannel ch, string show, bool exact = false)
-        {
-            return await CalcShowStats(ch, show, exact);
-        }
         public static async Task<Embed> CalcTotalCorrect(PlayersRulesService _service, string rule = "")
         {
             using (var db = new AMQDBContext())
@@ -49,6 +44,23 @@ namespace PartyBot.Handlers
                 }
                 return await EmbedHandler.CreateBasicEmbed($"Rule: {rule}", successRates, Color.Blue);
             }
+        }
+
+        public static Tuple<Dictionary<string, int[]>, Dictionary<string, string>> ArtistStatsFromList(List<PlayerTableObject> artistStats)
+        {
+            var SongStats = new Dictionary<string, int[]>(); 
+            var keysToSongs = new Dictionary<string, string>();
+            foreach (PlayerTableObject song in artistStats)
+            {
+                if (!SongStats.ContainsKey(SongTableObject.MakeSongTableKey(song)))
+                    SongStats.Add(SongTableObject.MakeSongTableKey(song), new int[] { 0, 0 });
+                if(!keysToSongs.ContainsKey(SongTableObject.MakeSongTableKey(song)))
+                    keysToSongs.Add(SongTableObject.MakeSongTableKey(song), SongTableObject.PrintSong(song));
+                var array = SongStats[SongTableObject.MakeSongTableKey(song)];
+                array[0] += song.TimesCorrect;
+                array[1] += song.TotalTimesPlayed;
+            }
+            return new Tuple<Dictionary<string, int[]>, Dictionary<string, string>>(SongStats, keysToSongs);
         }
 
         public static async Task<Embed> CalcShowStats(ISocketMessageChannel ch, string show, bool exact)

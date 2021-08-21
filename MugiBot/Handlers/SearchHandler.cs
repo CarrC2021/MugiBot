@@ -135,6 +135,38 @@ namespace PartyBot.Handlers
             return Songs;
         }
 
+        public static async Task<List<PlayerTableObject>> StatsSearchArtistContains(AMQDBContext _db, string author, string type)
+        {
+            List<PlayerTableObject> Songs;
+            Songs = await _db.PlayerStats
+                .AsNoTracking()
+                .Where(x => x.Artist.ToLower().Contains(author.ToLower()))
+                .Where(x => x.Rule.Equals(""))
+                .ToListAsync();
+
+            return Songs;
+        }
+
+        
+
+        public static async Task<List<PlayerTableObject>> StatsSearchArtistExact(AMQDBContext _db, string artist, string type)
+        {
+            List<PlayerTableObject> Songs;
+            Songs = await _db.PlayerStats
+                .AsNoTracking()
+                .Where(x => x.Artist.ToLower().Equals(artist.ToLower()))
+                .Where(x => x.Rule.Equals(""))
+                .ToListAsync();
+
+            return Songs;
+        }
+
+        public static async Task<List<PlayerTableObject>> StatsSearchArtist(AMQDBContext _db, string artist, string type = "any", bool exact = false)
+        {
+            if (exact)
+                return await StatsSearchArtistExact(_db, artist, type);
+            return await StatsSearchArtistContains(_db, artist, type);
+        }
         /// <summary>
         /// Searches the database for any show in the database whose name matches the string given by the parameter
         /// <param name="name"/>. Additionally, if the parameter <param name="type"/> is not equal to "any"

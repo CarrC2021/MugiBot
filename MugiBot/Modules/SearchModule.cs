@@ -112,6 +112,11 @@ namespace PartyBot.Modules
         [Summary("This will list the stats for the specified player and specified show.")]
         public async Task ListAllPlayerStatsExact(string playerName, [Remainder] string showName)
             => await ReplyAsync(embed: await DBSearchService.OtherPlayerStats(Context.Channel, playerName, showName, "yes"));
+
+        [Command("ArtistStats")]
+        [Summary("This will list the stats for the specified artist on all songs done by the artist.")]
+        public async Task ArtistStats([Remainder] string artist)
+            => await ReplyAsync(embed: await DBSearchService.StatsByArtist(Context.Channel, artist));
     }
 
 }

@@ -178,5 +178,50 @@ namespace PartyBot.Handlers
             return await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
         }
 
+        public static async Task<Embed> PrintArtistStats(ISocketMessageChannel ch, Dictionary<string, int[]> artistStats, Dictionary<string,string> keysToSongs)
+        {
+            StringBuilder sb = new StringBuilder();
+            var allKeys = new StringBuilder("\n All Keys: \n");
+            var list = artistStats.Keys.ToList();
+            var embeds = new List<Embed>();
+            float[] totals = new float[] { 0, 0 };
+            for (int i = 0; i < list.Count; i++)
+            {
+                artistStats.TryGetValue(list[i], out var curr);
+                sb.Append(keysToSongs[list[i]] + $"\n-  Total Success: {Math.Round((float)curr[0]/curr[1], 3)}  -  Times Played: {curr[1]} -  Times Correct: {curr[0]}\n\n");
+                allKeys.Append($"\n{list[i]}");
+                totals[0] += artistStats[list[i]][0];
+                totals[1] += artistStats[list[i]][1];
+                if (i + 1 % 10 == 0 || sb.Length > 1900)
+                {
+                    var embed = await CreateBasicEmbed($"Artist Stats", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
+                    embeds.Append(embed);
+                    sb.Clear();
+                    allKeys.Clear();
+                    allKeys.Append("\n All Keys: \n");
+                }
+            }
+            StringBuilder titleCard = new StringBuilder();
+            titleCard.Append($"Found {artistStats.Count} songs for this query.\n\n");
+            titleCard.Append($"Total success rate for this artist: {Math.Round(totals[0]/totals[1], 3)} \n");
+            if (Math.Round(totals[0]/totals[1], 3) < .333)
+                titleCard.Append("Must be a tough one 😨\n");
+            
+            // Later I can use the cover images here and give the best and worst song from the query
+            await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Data, Search", titleCard.ToString(), Color.Blue));
+            for (int i = 0; i < embeds.Count; i++)
+            {
+                await ch.SendMessageAsync(embed: embeds[i]);
+            }
+            try
+            {
+                return await CreateBasicEmbed($"Data, Search", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
+            }
+            catch (Exception ex)
+            {
+                return await CreateBasicEmbed("Data, Search",
+                "That is a lot of songs, please try and be more specific. Try typing the name of the exact season." + ex.Message, Color.Blue);
+            }
+        }
     }
 }
