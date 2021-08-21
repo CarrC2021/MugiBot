@@ -101,30 +101,54 @@ namespace PartyBot.Handlers
         // Need to convert all these things to use the String Builder function.
         public static async Task<Embed> PrintSongs(ISocketMessageChannel ch, List<SongTableObject> songObjects, bool printLinks = false)
         {
-            string toPrint = "";
             int count = 0;
+            StringBuilder sb = new StringBuilder();
+            StringBuilder allKeys = new StringBuilder("\n For !playkey use the corresponding key: \n");
+            List<Embed> embeds = new List<Embed>();
+            List<string> uniqueShows = new List<string>();
             for (int i = 0; i < songObjects.Count; i++)
             {
-                toPrint += SongTableObject.PrintSong(songObjects[i]);
+                sb.Append($"{SongTableObject.PrintSong(songObjects[i])}\n\n");
                 if (songObjects[i].MP3 != null && printLinks)
-                    toPrint += $"\n\t MP3 {songObjects[i].MP3} ";
+                    sb.Append($"\n\t MP3 {songObjects[i].MP3} ");
                 if (songObjects[i]._720 != null && printLinks)
-                    toPrint += $"\n720 {songObjects[i]._720} ";
+                    sb.Append($"\n 720 {songObjects[i]._720} ");
                 if (songObjects[i]._480 != null && printLinks)
-                    toPrint += $"\n480 {songObjects[i]._480} ";
-                toPrint += $"\n Key for this song: {songObjects[i].Key}\n";
+                    sb.Append($"\n 480 {songObjects[i]._480} ");
+                allKeys.Append($"{songObjects[i].Key}\n");
                 count++;
-                if (count % 10 == 0 && count == songObjects.Count - 1)
+                if (!uniqueShows.Contains(songObjects[i].Show))
+                    uniqueShows.Add(songObjects[i].Show);
+                if (count % 10 == 0 || sb.Length > 1900)
                 {
-                    return await CreateBasicEmbed("Data, Recommendation", toPrint, Color.Blue);
-                }
-                if (count % 10 == 0)
-                {
-                    await ch.SendMessageAsync(embed: await CreateBasicEmbed("Data, Recommendation", toPrint, Color.Blue));
-                    toPrint = "";
+                    var embed = await CreateBasicEmbed($"Data, Search", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
+                    embeds.Add(embed);
+                    sb.Clear();
+                    allKeys.Clear();
+                    allKeys.Append($"All keys:\n");
                 }
             }
-            return await CreateBasicEmbed("Data, Search", toPrint, Color.Blue);
+            StringBuilder titleCard = new StringBuilder();
+            titleCard.Append($"Found {songObjects.Count} songs for this query.\n\n");
+            titleCard.Append("Unique shows found:\n");
+            foreach (string showFound in uniqueShows)
+                titleCard.Append(showFound + "\n");
+            
+            // Later I can use the cover images here and give the best and worst song from the query
+            await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Data, Search", titleCard.ToString(), Color.Blue));
+            for (int i = 0; i < embeds.Count; i++)
+            {
+                await ch.SendMessageAsync(embed: embeds[i]);
+            }
+            try
+            {
+                return await CreateBasicEmbed($"Data, Search", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
+            }
+            catch (Exception ex)
+            {
+                return await CreateBasicEmbed("Data, Search",
+                "That is a lot of songs, please try and be more specific. Try typing the name of the exact season." + ex.Message, Color.Blue);
+            }
         }
 
         public static async Task<Embed> PrintRecommendedSongs(ISocketMessageChannel ch,
