@@ -50,6 +50,7 @@ namespace PartyBot.Services
 
         public async Task<Embed> MainHelp()
         {
+            var embed = await EmbedHandler.CreateBasicEmbed("Main Help", help.MainHelpString, Color.Green);
             return await EmbedHandler.CreateBasicEmbed("Main Help", help.MainHelpString, Color.Green);
         }
 

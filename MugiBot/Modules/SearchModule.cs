@@ -83,13 +83,13 @@ namespace PartyBot.Modules
         [Summary("This will list the stats for the specified player on all shows that contain the string you specify." +
             " For example, !liststats dingus naruto will list dingus' stats on all songs from anime whose title contain naruto.")]
         public async Task GetPlayerStats(string playerName, [Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(Context.Channel, playerName, showName, "any", "no"));
+            => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(Context.Channel, playerName, showName, DataService.DBManager._rs, "any", "no"));
 
         [Command("PlayerStatsExact")]
         [Summary("This will list the stats for the specified player on all shows that contain the string you specify." +
             " For example, !liststats dingus naruto will list dingus' stats on all songs from naruto.")]
         public async Task GetPlayerStatsExact(string playerName, [Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(Context.Channel, playerName, showName, "any", "exact"));
+            => await ReplyAsync(embed: await DBSearchService.ListPlayerStats(Context.Channel, playerName, showName, DataService.DBManager._rs, "any", "exact"));
 
         [Command("PlayerStatsArtist")]
         [Summary("This will list the stats for the specified player on all songs done by any artist that contains that substring." +

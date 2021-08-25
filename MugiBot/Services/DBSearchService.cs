@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using PartyBot.Database;
+using PartyBot.Services;
 using PartyBot.Handlers;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,8 +36,11 @@ public class DBSearchService
         return await EmbedHandler.PrintSongs(message.Channel, songList, true);
     }
 
-    public static async Task<Embed> ListPlayerStats(ISocketMessageChannel channel, string playerName, string showName, string type = "any", string exactMatch = "no")
+    public static async Task<Embed> ListPlayerStats(ISocketMessageChannel channel, string playerName, string showName, PlayersRulesService rulesService, string type = "any", string exactMatch = "no")
     {
+        var players = await rulesService.GetPlayersTracked();
+        if (!players.Keys.Contains(playerName))
+            return await EmbedHandler.CreateErrorEmbed("PlayerStats Error", "Found no one in the database with that username.");
         using var db = new AMQDBContext();
         var playerObjects = await SearchHandler.PlayerStatsSearch(db, playerName, showName, type, exactMatch);
         return await EmbedHandler.OtherPlayerStats(channel, playerObjects, playerName);

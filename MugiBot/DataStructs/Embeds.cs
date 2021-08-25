@@ -32,7 +32,9 @@ namespace PartyBot.DataStructs
         "If you want help with a specific command use !help {yourcommand} to get information about the command."
         + " Otherwise, look below and react with the relevant emote to get info on that part of the bot."
         + $"\n For help with basic audio commands react with the {"1️⃣"} or use !audiohelp."
-        + $"\n For help with database tracking react with the {"2️⃣"} or use !trackinghelp.";
+        + $"\n For help with database tracking react with the {"2️⃣"} or use !trackinghelp."
+        + $"\n For help with searching the database react with the {"3️⃣"} or use !searchhelp."
+        + $"\n To see a list of all commands use react with {"4️⃣"} !commandshelp.";
 
         public readonly string DBSearchHelpString = 
         "First, use a command like !searchdb or !searchop and type out the name of a show or some substring of a show. For example, " +

@@ -55,7 +55,7 @@ public class Radio
         foreach (string player in playerArr)
         {
             if (!playersTracked.ContainsKey(player))
-                return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {CurrPlayers}", Color.Blue);
+                return await EmbedHandler.CreateErrorEmbed("Radio Service", $"Could not find {player} in the database. Radio is still set to {CurrPlayers}.");
         }
         CurrPlayers = players;
         return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {CurrPlayers}", Color.Blue);

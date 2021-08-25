@@ -10,19 +10,19 @@ namespace PartyBot.Modules
         public CommandService CommandService { get; set; }
 
         [Command("Help")]
-        [Summary("Returns the summary for some command")]
+        [Summary("Returns the summary for some command.")]
         public async Task Help([Remainder] string command)
             => await ReplyAsync(embed: await HelpService.GetSummary(command, CommandService));
 
         [Command("Help")]
-        [Summary("List all commands")]
+        [Summary("Presents the main help message.")]
         public async Task Help()
-            => await ReplyAsync(embed: await HelpService.AllCommands(CommandService));
-
-        [Command("TestHelp")]
-        [Summary("List all commands")]
-        public async Task TestHelp()
-            => await ReplyAsync(embed: await HelpService.MainHelp());     
+            => await ReplyAsync(embed: await HelpService.MainHelp());
+        
+        [Command("CommandsHelp")]
+        [Summary("List all commands.")]
+        public async Task CommandsHelp()
+            => await ReplyAsync(embed: await HelpService.AllCommands(CommandService));  
 
         [Command("AudioHelp")]
         [Summary("List all commands")]
