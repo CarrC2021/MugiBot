@@ -1,5 +1,5 @@
-using System.Security.AccessControl;
-using System.Text;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using Discord;
 using PartyBot.Database;
 using PartyBot.Services;
@@ -13,6 +13,7 @@ using Anilist4Net;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Net;
+using PartyBot.Queries;
 
 namespace PartyBot.Services
 {
@@ -27,6 +28,7 @@ namespace PartyBot.Services
             NullValueHandling = NullValueHandling.Ignore,
             MissingMemberHandling = MissingMemberHandling.Ignore
         };
+        private HttpClient _client = new HttpClient();
         public AnilistService()
         {
             path = Path.GetDirectoryName(System.Reflection.
@@ -52,14 +54,20 @@ namespace PartyBot.Services
         public async Task GetUserAsync(string userName)
         {
             var user = await _anilistClient.GetUserByName(userName);
-            var animeList = user.AnimeList;
-            string json = JsonConvert.SerializeObject(animeList, settings);
-            Console.WriteLine(json);
+            string query = AniListQueryCreator.MediaListQuery(user.Name);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://anilist-graphql.com/"),
+                Content = new StringContent(query)
+            };
+            await DownloadFromURL(user.SiteUrl + "/animelist", "AniLists", user.Name);
+
         }
         public async Task DownloadMediaAsync(string Show, string folder, int annId)
         {
             Media media = await GetMediaAsync(Show);
-            await DownloadFromURL(media.SiteUrl, folder, annId);
+            await DownloadFromURL(media.SiteUrl, folder, $"{annId}");
         }
         public async Task<Media> GetMediaAsync(string Show)
         {
@@ -75,12 +83,14 @@ namespace PartyBot.Services
             }
             return response;
         }
-        public async Task DownloadFromURL(string urlToDownload, string folder, int annId)
+        public async Task DownloadFromURL(string urlToDownload, string folder, string fileName)
         {
             using var client = new HttpClient();
             HttpResponseMessage responseMessage = await client.GetAsync(urlToDownload);
             responseMessage.EnsureSuccessStatusCode();
-            string localpath = Path.Combine(path, $"{folder}", $"{annId}.{FolderToExtension[folder]}");
+            var body = await responseMessage.Content.ReadAsStringAsync();
+            Console.WriteLine(body);
+            string localpath = Path.Combine(path, $"{folder}", $"{fileName}.{FolderToExtension[folder]}");
             using var wc = new WebClient();
             string jsonResponse = await wc.DownloadStringTaskAsync(new Uri(urlToDownload));
             await File.WriteAllTextAsync(localpath, jsonResponse);
