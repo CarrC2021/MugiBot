@@ -45,7 +45,7 @@ public class Radio
         };
         SongTypes = new List<string> {"Opening",
             "Opening Ending", "Ending", "Opening Ending Insert", "Insert", "Opening Insert", "Ending Insert"};
-        RadioMode = true;
+        RadioMode = false;
     }
 
     public async Task<Embed> ChangePlayer(string players, PlayersRulesService _prs)

@@ -17,7 +17,7 @@ namespace PartyBot.Handlers
             if (radio == null)
                 return await EmbedHandler.CreateBasicEmbed("Radio Service", $"There is no radio in this server", Color.Blue);
 
-            radio.RadioMode = !radio.RadioMode;
+            radio.RadioMode = false;
             return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio has been turned off", Color.Blue);
         }
         public static Radio FindRadio(List<Radio> radios, SocketGuild guild)

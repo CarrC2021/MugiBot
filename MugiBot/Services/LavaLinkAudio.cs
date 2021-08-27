@@ -329,17 +329,16 @@ namespace PartyBot.Services
 
             await CheckDeleteTempMusicFile(args.Track.Url);
 
-            Radio temp = RadioHandler.FindOrCreateRadio(
+            Radio guildRadio = RadioHandler.FindRadio(
                     radios,
-                    args.Player.TextChannel as ISocketMessageChannel,
                     args.Player.TextChannel.Guild as SocketGuild
                 );
             string toPrint = "Now Playing:";
-            if (temp != null && args.Player.Queue.Count < 3)
+            if (guildRadio != null && args.Player.Queue.Count < 3)
             {
-                await RadioQueue(temp);
-                if (!temp.CurrPlayers.Equals("any"))
-                    toPrint = $"You are Listening to {temp.CurrPlayers} Radio. Now Playing:";
+                await RadioQueue(guildRadio);
+                if (!guildRadio.CurrPlayers.Equals("any"))
+                    toPrint = $"You are Listening to {guildRadio.CurrPlayers} Radio. Now Playing:";
             }
 
             if (!args.Player.Queue.TryDequeue(out var queueable))
@@ -368,6 +367,7 @@ namespace PartyBot.Services
         {
             try
             {
+                radio.RadioMode = true;
                 var randomSong = await RadioHandler.GetRandomRadioSong(radio, _db._rs);
                 //if (randomSong._720 != null && Uri.IsWellFormedUriString(randomSong._720, UriKind.Absolute))
                 //{
