@@ -18,11 +18,15 @@ namespace PartyBot.Services
 {
     public class AnilistService
     {
-        public string MyEndPoint { get; set; }
         private Anilist4Net.Client _anilistClient;
         private readonly char separator = Path.DirectorySeparatorChar;
         private readonly string path;
         private readonly Dictionary<string, string> FolderToExtension;
+        private JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore
+        };
         public AnilistService()
         {
             path = Path.GetDirectoryName(System.Reflection.
@@ -39,15 +43,18 @@ namespace PartyBot.Services
                 {"MediaFiles", ".json"}
             };
         }
-        public void SetEndpoint(string endPoint)
-        {
-            MyEndPoint = endPoint;
-        }
         public async Task<string> GetCoverArtAsync(string show, int annId)
         {
             Media response = await GetMediaAsync(show);
             Console.WriteLine(response.Title.ToString());
             return response.CoverImageLarge;
+        }
+        public async Task GetUserAsync(string userName)
+        {
+            var user = await _anilistClient.GetUserByName(userName);
+            var animeList = user.AnimeList;
+            string json = JsonConvert.SerializeObject(animeList, settings);
+            Console.WriteLine(json);
         }
         public async Task DownloadMediaAsync(string Show, string folder, int annId)
         {
