@@ -65,6 +65,11 @@ namespace PartyBot.Services
                 RequestUri = new Uri("https://graphql.anilist.co"),
                 Content = new StringContent(query)
             };
+            using var client = new HttpClient();
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var body = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(body);
             await DownloadFromURL(user.SiteUrl + "/animelist", "AniLists", user.Name);
 
         }
