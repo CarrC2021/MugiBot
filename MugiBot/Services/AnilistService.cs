@@ -57,8 +57,12 @@ namespace PartyBot.Services
             string query = AniListQueryCreator.MediaListQuery(user.Name);
             var request = new HttpRequestMessage
             {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri("https://anilist-graphql.com/"),
+                Method = HttpMethod.Post,
+                Headers = {
+                    {"Content-Type", "application/json"},
+                    {"Accept", "application/json"}
+                },
+                RequestUri = new Uri("https://graphql.anilist.co"),
                 Content = new StringContent(query)
             };
             await DownloadFromURL(user.SiteUrl + "/animelist", "AniLists", user.Name);
