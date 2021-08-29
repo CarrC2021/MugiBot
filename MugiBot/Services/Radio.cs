@@ -20,6 +20,7 @@ public class Radio
     public List<int> listNums = new List<int>();
     public Dictionary<string, int> listStatus = new Dictionary<string, int>();
     public Dictionary<int, string> listStatusReverse = new Dictionary<int, string>();
+    private List<SongTableObject> SongSelection = new List<SongTableObject>();
     public Radio(IMessageChannel c, SocketGuild g)
     {
         Guild = g;
@@ -48,9 +49,9 @@ public class Radio
         RadioMode = false;
     }
 
-    public async Task<Embed> ChangePlayer(string players, PlayersRulesService _prs)
+    public async Task<Embed> ChangePlayer(string players, DBManager _db)
     {
-        var playersTracked = await _prs.GetPlayersTracked();
+        var playersTracked = await _db._rs.GetPlayersTracked();
         var playerArr = players.Split();
         foreach (string player in playerArr)
         {
@@ -58,23 +59,28 @@ public class Radio
                 return await EmbedHandler.CreateErrorEmbed("Radio Service", $"Could not find {player} in the database. Radio is still set to {CurrPlayers}.");
         }
         CurrPlayers = players;
+
+        await UpdatePotentialSongs(_db);
         return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {CurrPlayers}", Color.Blue);
     }
-    public async Task<Embed> SetType(int type)
+    public async Task<Embed> SetType(int type, DBManager _db)
     {
         if (type > 0)
             CurrType = SongTypes[type - 1];
         else
             CurrType = SongTypes[type];
+
+        await UpdatePotentialSongs(_db);
         return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio song type now set to {CurrType}", Color.Blue);
     }
-    public async Task<Embed> SetType(string type)
+    public async Task<Embed> SetType(string type, DBManager _db)
     {
         if (SongTypes.Contains(type))
             CurrType = type;
+        await UpdatePotentialSongs(_db);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio song type now set to {CurrType}", Color.Blue);
     }
-    public async Task<Embed> AddListStatus(string[] listArray)
+    public async Task<Embed> AddListStatus(string[] listArray, DBManager _db)
     {
         foreach (string listType in listArray)
         {
@@ -86,13 +92,14 @@ public class Radio
         foreach (int thing in listNums)
             toPrint.Append($"{listStatusReverse[thing]}\n");
 
+        await UpdatePotentialSongs(_db);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint.ToString()}", Color.Blue);
     }
-    public async Task<Embed> RemoveListStatus(string[] listArray)
+    public async Task<Embed> RemoveListStatus(string[] listArray, DBManager _db)
     {
         foreach (string listType in listArray)
         {
-            listStatus.TryGetValue(listType, out int outVal);
+            listStatus.TryGetValue(listType.ToLower(), out int outVal);
             if (listNums.Contains(outVal))
                 listNums.Remove(outVal);
         }
@@ -100,11 +107,12 @@ public class Radio
         foreach (int thing in listNums)
             toPrint.Append($"{listStatusReverse[thing]}\n");
 
+        await UpdatePotentialSongs(_db);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint.ToString()}", Color.Blue);
     }
     public async Task<Embed> PrintRadio()
     {
-        string toPrint = $"Current Players:\n{CurrPlayers}Current Types:\n{CurrType}\n";
+        string toPrint = $"Current Players:\n{CurrPlayers}\nCurrent Types:\n{CurrType}\n";
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint, Color.Blue);
     }
     public async Task<Embed> ListTypes()
@@ -116,16 +124,43 @@ public class Radio
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint.ToString(), Color.Blue);
     }
 
-    public async Task RadioQueue(DBManager _db, LavaNode _lavaNode, string path)
+    public async Task UpdatePotentialSongs(DBManager _db)
     {
-        try
+        string[] types = CurrType.Split(" ");
+        List<SongTableObject> potentialSongs = new List<SongTableObject>();
+        List<SongTableObject> final = new List<SongTableObject>();
+        //loop through each desired type
+        foreach (string type in types)
         {
-            var randomSong = await RadioHandler.GetRandomRadioSong(this, _db._rs);
-            await CatboxHandler.QueueRadioSong(randomSong, Guild, _lavaNode, path);
+            if (CurrPlayers.Equals("any"))
+            {
+                var Query = await DBSearchService.ReturnAllSongObjectsByType(type);
+                final.AddRange(Query);
+                continue;
+            }
+            //loop through each desired list status
+            foreach (int num in listNums)
+            {
+                //loop through each player set in the radio
+                foreach (string player in CurrPlayers.Split())
+                {
+                    var playersTracked = await _db._rs.GetPlayersTracked();
+                    var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
+                    foreach (PlayerTableObject pto in Query)
+                    {
+                        potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(pto)));
+                    }
+                    final.AddRange(potentialSongs);
+                }
+            }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
+        SongSelection = final;
+    }
+
+    public SongTableObject GetRandomSong()
+    {
+        Random rnd = new Random();
+        int r = rnd.Next(SongSelection.Count);
+        return SongSelection[r];
     }
 }

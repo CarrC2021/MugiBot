@@ -368,14 +368,14 @@ namespace PartyBot.Services
             try
             {
                 radio.RadioMode = true;
-                var randomSong = await RadioHandler.GetRandomRadioSong(radio, _db._rs);
                 //if (randomSong._720 != null && Uri.IsWellFormedUriString(randomSong._720, UriKind.Absolute))
                 //{
                     //return await PlayAsync(user, radio.Guild, randomSong._720, randomSong);
                 //}
-                if (Uri.IsWellFormedUriString(randomSong.MP3, UriKind.Absolute))
+                var song = radio.GetRandomSong();
+                if (Uri.IsWellFormedUriString(song.MP3, UriKind.Absolute))
                 {
-                    return await PlayAsync(user, radio.Guild, randomSong.MP3, randomSong);
+                    return await PlayAsync(user, radio.Guild, song.MP3, song);
                 }
             }
             catch (Exception ex)
@@ -389,11 +389,12 @@ namespace PartyBot.Services
         {
             try
             {
-                var randomSong = await RadioHandler.GetRandomRadioSong(radio, _db._rs);
-                await CatboxHandler.QueueRadioSong(randomSong, radio.Guild, _lavaNode, path);
+                await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);
             }
             catch (Exception ex)
             {
+                await radio.Channel.SendMessageAsync(embed: await 
+                    EmbedHandler.CreateErrorEmbed("Radio", "Something went wrong trying to queue a song from the radio."));
                 Console.WriteLine(ex.Message);
             }
         }
