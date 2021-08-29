@@ -55,13 +55,10 @@ namespace PartyBot.Services
         {
             var user = await _anilistClient.GetUserByName(userName);
             string query = AniListQueryCreator.MediaListQuery(user.Name);
+            Console.WriteLine(query);
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
-                Headers = {
-                    {"Content-Type", "application/json"},
-                    {"Accept", "application/json"}
-                },
                 RequestUri = new Uri("https://graphql.anilist.co"),
                 Content = new StringContent(query)
             };
