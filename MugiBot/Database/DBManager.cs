@@ -196,6 +196,8 @@ namespace PartyBot.Database
                 await AddSongsFromQuestion(question);
 
             await _db.SaveChangesAsync();
+            await UpdateSongIDs();
+            await _db.SaveChangesAsync();
             return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
         }
 
@@ -222,9 +224,20 @@ namespace PartyBot.Database
                 {
                     result.AnnSongID = song.AnnSongId;
                 }
-                if (result.AnnSongID == 0)
+            }
+        }
+
+        private async Task UpdateSongIDs()
+        {
+            var songs = await _db.SongTableObject
+                .AsTracking()
+                .ToListAsync();
+
+            foreach (SongTableObject song in songs)
+            {
+                if (song.AnnSongID == 0)
                 {
-                    result.AnnSongID = -1;
+                    song.AnnSongID = -1;
                 }
             }
         }
