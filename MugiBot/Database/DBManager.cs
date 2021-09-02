@@ -222,6 +222,10 @@ namespace PartyBot.Database
                 {
                     result.AnnSongID = song.AnnSongId;
                 }
+                if (result.AnnSongID == 0)
+                {
+                    result.AnnSongID = -1;
+                }
             }
         }
 

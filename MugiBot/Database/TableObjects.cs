@@ -81,13 +81,11 @@ namespace PartyBot.Database
         {
             return new SongTableObject(data.name, data.artist, data.type, data.anime.english,
              data.anime.romaji, data.urls.catbox._0, data.annId, data.urls.catbox._720, data.urls.catbox._480, -1);
-
         }
         public static SongTableObject SongListDataToTable(SongListData data)
         {
             return new SongTableObject(data.songName, data.artist, data.type, data.animeEng,
              data.animeRomaji, data.LinkMp3, data.annId, data.LinkVideo, -1);
-
         }
         public static string MakeSongTableKey(int AnnID, string songtype, string songname, string artist)
         {
