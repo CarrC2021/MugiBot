@@ -218,6 +218,10 @@ namespace PartyBot.Database
                         await LoggingService.LogAsync(ex.Source, LogSeverity.Error, ex.Message);
                     }
                 }
+                else
+                {
+                    result.AnnSongID = song.AnnSongId;
+                }
             }
         }
 
