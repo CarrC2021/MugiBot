@@ -126,7 +126,7 @@ namespace PartyBot.Handlers
                 allKeys.Append($"\n{songsToKeys[list[i]]}");
                 if (i == list.Count - 1)
                     return await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
-                if (i + 1 % 10 == 0)
+                if ((i + 1) % 10 == 0)
                 {
                     var message = await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue));
                     sb.Clear();
