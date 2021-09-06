@@ -2,7 +2,7 @@
 using Discord.Commands;
 using PartyBot.Handlers;
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +19,7 @@ namespace PartyBot.Modules
         [Summary("Type in the name of a character and they will be rated.")]
         public async Task RateWaifu([Remainder] string name)
         {
-            ArrayList vals = new ArrayList();
+            var vals = new List<int>();
 
             foreach (char c in name)
             {
@@ -32,10 +32,10 @@ namespace PartyBot.Modules
             {
                 val = 2;
             }
-            await EmbedHandler.CreateBasicEmbed("Waifu Rating", name + " is a " + val, Color.Blue);
+            await Context.Channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Waifu Rating", name + " is a " + val, Color.Blue));
         }
 
-        [Command("dogJam")]
+        [Command("DogJam")]
         [Summary("Will dogJam in the chat.")]
         public async Task DogJam()
             => await Context.Channel.SendMessageAsync("https://tenor.com/view/dance-uporot-brazil-gif-13264739");
