@@ -18,6 +18,21 @@ namespace PartyBot.Modules
         [Command("RateWaifu")]
         [Summary("Type in the name of a character and they will be rated.")]
         public async Task RateWaifu([Remainder] string name)
+            => await Context.Channel.SendMessageAsync(embed: await RatingGenerator(name));
+
+        [Command("RateHusbando")]
+        [Summary("Type in the name of a character and they will be rated.")]
+        public async Task RateHusbando([Remainder] string name)
+            => await Context.Channel.SendMessageAsync(embed: await RatingGenerator(name));
+
+        
+        
+        [Command("DogJam")]
+        [Summary("Will dogJam in the chat.")]
+        public async Task DogJam()
+            => await Context.Channel.SendMessageAsync("https://tenor.com/view/dance-uporot-brazil-gif-13264739");
+
+        private async Task<Embed> RatingGenerator(string name)
         {
             var vals = new List<int>();
 
@@ -32,12 +47,7 @@ namespace PartyBot.Modules
             {
                 val = 2;
             }
-            await Context.Channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Waifu Rating", name + " is a " + val, Color.Blue));
+            return await EmbedHandler.CreateBasicEmbed("Waifu Rating", name + " is a " + val, Color.Blue);
         }
-
-        [Command("DogJam")]
-        [Summary("Will dogJam in the chat.")]
-        public async Task DogJam()
-            => await Context.Channel.SendMessageAsync("https://tenor.com/view/dance-uporot-brazil-gif-13264739");
     }
 }
