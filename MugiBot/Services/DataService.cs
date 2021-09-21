@@ -65,9 +65,9 @@ namespace PartyBot.Services
             return await DBCalculationHandler.RecommendPracticeSongs(ch, players[name], numSongs, onlyFromList);
         }
 
-        public async Task<Embed> CreatePlaylist(string name)
-        {
-            await PlaylistHandler.CreatePlaylist(name, Path.Combine(path, "playlists", name));
-        }
+        //public async Task<Embed> CreatePlaylist(string name)
+        //{
+            //await PlaylistHandler.CreatePlaylist(name, Path.Combine(path, "playlists", name));
+        //}
     }
 }

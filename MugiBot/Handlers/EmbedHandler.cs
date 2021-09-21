@@ -1,4 +1,5 @@
-﻿using System.Reflection.Metadata.Ecma335;
+﻿using System.ComponentModel;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using Discord;
 using Discord.WebSocket;
@@ -66,7 +67,7 @@ namespace PartyBot.Handlers
                 count++;
                 if (!uniqueShows.Contains(player.Show))
                     uniqueShows.Add(player.Show);
-                if (count % 10 == 0 || sb.Length + keys.Length > 1850)    
+                if (count % 10 == 0 || sb.Length + keys.Length > 1750)    
                     embeds = await AppendEmbedAndClear(embeds, sb, keys);
             }
             StringBuilder titleCard = new StringBuilder();
@@ -82,13 +83,15 @@ namespace PartyBot.Handlers
         // Need to convert all these things to use the String Builder function.
         public static async Task<Embed> PrintSongs(ISocketMessageChannel ch, List<SongTableObject> songObjects, bool printLinks = false)
         {
+            var sb = new StringBuilder();
+            var allKeys = new StringBuilder("\n For !playkey use the corresponding key: \n");
+            var embeds = new List<Embed>();
+            var uniqueShows = new List<string>();
+            int num = songObjects.Count;
             int count = 0;
-            StringBuilder sb = new StringBuilder();
-            StringBuilder allKeys = new StringBuilder("\n For !playkey use the corresponding key: \n");
-            List<Embed> embeds = new List<Embed>();
-            List<string> uniqueShows = new List<string>();
-            for (int i = 0; i < songObjects.Count; i++)
+            for (int i = 0; i < num; i++)
             {
+                count++;
                 sb.Append($"{SongTableObject.PrintSong(songObjects[i])}\n\n");
                 // If any of the links are not null and we want to print the links then append them
                 if (songObjects[i].MP3 != null && printLinks)
@@ -98,14 +101,24 @@ namespace PartyBot.Handlers
                 if (songObjects[i]._480 != null && printLinks)
                     sb.Append($"\n 480 {songObjects[i]._480} ");
                 allKeys.Append($"{songObjects[i].Key}\n");
-                count++;
+                Console.WriteLine($"{sb.Length + allKeys.Length}");
                 if (!uniqueShows.Contains(songObjects[i].Show))
                     uniqueShows.Add(songObjects[i].Show);
-                if (count % 10 == 0 || sb.Length + allKeys.Length > 1850)
+                
+                if ( (count % 10) == 0 || sb.Length + allKeys.Length > 1680)
+                {
                     embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
+                }
             }
+
+            //(i + 1) % 10 == 0 || 
             StringBuilder titleCard = new StringBuilder();
-            titleCard.Append($"Found {songObjects.Count} songs for this query.\n\n");
+            if (num > 150)
+            {
+                titleCard.Append("That is a lot of songs, I am not gonna print anything here.");
+                return await PrintEmbeds(ch, embeds, sb, allKeys, titleCard);
+            }
+            titleCard.Append($"Found {num} songs for this query.\n\n");
             titleCard.Append("Unique shows found:\n");
             foreach (string showFound in uniqueShows)
                 titleCard.Append(showFound + "\n");
@@ -126,7 +139,7 @@ namespace PartyBot.Handlers
                 allKeys.Append($"\n{songsToKeys[list[i]]}");
                 if (i == list.Count - 1)
                     return await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
-                if ((i + 1) % 10 == 0)
+                if (((i + 1) % 10) == 0)
                 {
                     var message = await ch.SendMessageAsync(embed: await CreateBasicEmbed($"Recommendations for {name}", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue));
                     sb.Clear();
@@ -151,7 +164,7 @@ namespace PartyBot.Handlers
                 allKeys.Append($"\n{list[i]}");
                 totals[0] += artistStats[list[i]][0];
                 totals[1] += artistStats[list[i]][1];
-                if (i + 1 % 10 == 0 || sb.Length + allKeys.Length > 1850)
+                if (i + 1 % 10 == 0 || (sb.Length + allKeys.Length) > 1850)
                     embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
             }
             StringBuilder titleCard = new StringBuilder();
@@ -185,7 +198,7 @@ namespace PartyBot.Handlers
 
         private static async Task<List<Embed>> AppendEmbedAndClear(List<Embed> embeds, StringBuilder sb, StringBuilder allKeys)
         {
-            var embed = await CreateBasicEmbed($"Artist Stats", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
+            var embed = await CreateBasicEmbed($"Songs", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
             embeds.Add(embed);
             sb.Clear();
             allKeys.Clear();

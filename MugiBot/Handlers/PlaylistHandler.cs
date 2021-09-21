@@ -11,20 +11,20 @@ namespace PartyBot.Handlers
 {
     public static class PlaylistHandler
     {
-        public static async CreatePlaylist(string name, string filePath)
+        public static async Task CreatePlaylist(string name, string filePath)
         {
             if (File.Exists(filePath))
                 return;
             File.Create(filePath);
         }
 
-        public static async DeletePlaylist(string name, string filePath)
+        public static async Task DeletePlaylist(string name, string filePath)
         {
             if (File.Exists(filePath))
                 File.Delete(filePath);
         }
 
-        public static async AddToPlaylist(List<string> songkeys)
+        public static async Task AddToPlaylist(List<string> songkeys)
         {
             
         }
