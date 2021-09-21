@@ -4,6 +4,9 @@ using Discord;
 using Discord.WebSocket;
 using PartyBot.Database;
 using PartyBot.Handlers;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace PartyBot.Services
@@ -12,8 +15,14 @@ namespace PartyBot.Services
     {
         public DBManager DBManager { get; set; }
         public AnilistService anilistService { get; set; }
+        public string path { get; set; }
+        private readonly char separator = Path.DirectorySeparatorChar;
         public DataService(DBManager _db)
         {
+            path = Path.GetDirectoryName(System.Reflection.
+            Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                path = separator + path;
             DBManager = _db;
         }
         public async Task<Embed> ShowStats(ISocketMessageChannel ch, string show, bool exact = false)
@@ -54,6 +63,11 @@ namespace PartyBot.Services
                 return await EmbedHandler.CreateBasicEmbed("Name Error", "Could not find any players by that name in the database.", Color.Red);
             
             return await DBCalculationHandler.RecommendPracticeSongs(ch, players[name], numSongs, onlyFromList);
+        }
+
+        public async Task<Embed> CreatePlaylist(string name)
+        {
+            await PlaylistHandler.CreatePlaylist(name, Path.Combine(path, "playlists", name));
         }
     }
 }

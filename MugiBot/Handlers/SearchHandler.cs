@@ -148,7 +148,6 @@ namespace PartyBot.Handlers
         }
 
         
-
         public static async Task<List<PlayerTableObject>> StatsSearchArtistExact(AMQDBContext _db, string artist, string type)
         {
             List<PlayerTableObject> Songs;
