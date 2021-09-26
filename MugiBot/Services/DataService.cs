@@ -65,9 +65,16 @@ namespace PartyBot.Services
             return await DBCalculationHandler.RecommendPracticeSongs(ch, players[name], numSongs, onlyFromList);
         }
 
-        //public async Task<Embed> CreatePlaylist(string name)
-        //{
-            //await PlaylistHandler.CreatePlaylist(name, Path.Combine(path, "playlists", name));
-        //}
+        public async Task<Embed> CreatePlaylist(string name)
+        {
+            if (await PlaylistHandler.CreatePlaylist(name, Path.Combine(path, "playlists", name)))
+                return await EmbedHandler.CreateBasicEmbed("Playlist", "Playlist already exists", Color.Red);
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Playlist {name} now exists", Color.Blue);
+        }
+        public async Task<Embed> AddToPlaylist(string playlistName, string key)
+        {
+            await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key);
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Song has been added to playlist", Color.Blue);
+        }
     }
 }

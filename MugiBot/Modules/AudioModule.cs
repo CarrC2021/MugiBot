@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Net.Mime;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using PartyBot.Database;
@@ -116,5 +117,10 @@ namespace PartyBot.Modules
         public async Task StartRadio()
         => await ReplyAsync(embed: await AudioService.StartRadio(RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild), Context.User as SocketGuildUser));
+
+        [Command("LoadPlaylist")]
+        [Summary("Starts the radio and will keep playing songs until you turn it off.")]
+        public async Task LoadPlaylist([Remainder] string name)
+        => await ReplyAsync(embed: await AudioService.LoadPlaylist(Context.User as SocketGuildUser, Context.Guild, name));
     }
 }

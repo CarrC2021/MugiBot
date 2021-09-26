@@ -414,5 +414,24 @@ namespace PartyBot.Services
                 }
             }
         }
+
+        public async Task<Embed> LoadPlaylist(SocketGuildUser user, IGuild guild, string name)
+        {
+            try
+            {
+                var playlist = await PlaylistHandler.LoadPlaylist(Path.Combine(path, "playlists", name));
+                playlist.RemoveAll(x => string.IsNullOrEmpty(x));
+                foreach (string key in playlist)
+                {
+                    var song = await DBSearchService.UseSongKey(key);
+                    await PlayAsync(user, guild, song.Key, song);
+                }
+                return await EmbedHandler.CreateBasicEmbed("Playlists", $"Loading {name}", Color.Blue);
+            }
+            catch (Exception ex)
+            {
+                return await EmbedHandler.CreateErrorEmbed("Playlists", ex.Message);
+            }
+        }
     }
 }

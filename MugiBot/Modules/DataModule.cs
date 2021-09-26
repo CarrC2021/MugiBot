@@ -70,5 +70,17 @@ namespace PartyBot.Modules
         {
             await DataService.anilistService.GetCoverArtAsync("Show By Rock!!", 16311);
         }
+
+        [Command("CreatePlaylist")]
+        public async Task CreatePlaylist(string name)
+        {
+            await ReplyAsync(embed: await DataService.CreatePlaylist(name));
+        }
+
+        [Command("AddToPlaylist")]
+        public async Task AddToPlaylist(string playlistName, [Remainder] string key)
+        {
+            await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName, key));
+        }
     }
 }
