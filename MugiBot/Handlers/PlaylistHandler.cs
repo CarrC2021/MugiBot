@@ -23,19 +23,28 @@ namespace PartyBot.Handlers
             if (File.Exists(filePath))
                 await Task.Run(() => File.Delete(filePath));
         }
-        public static async Task AddToPlaylist(string filepath, List<string> songkeys)
+        public static async Task<bool> AddToPlaylist(string filePath, List<string> songkeys)
         {
+            if (File.Exists(filePath))
+                return false;
             foreach (string key in songkeys)
-                await File.AppendAllTextAsync(filepath, key + "\n");
+                await File.AppendAllTextAsync(filePath, key + "\n");
+            return true;
         }
-        public static async Task AddToPlaylist(string filePath, string songkey)
+        public static async Task<bool> AddToPlaylist(string filePath, string songkey)
         {
+            if (File.Exists(filePath))
+                return false;
             await File.AppendAllTextAsync(filePath, songkey + "\n");
+            return true;
         }
-        public static async Task RemoveFromPlaylist(string filePath, string songkey)
+        public static async Task<bool> RemoveFromPlaylist(string filePath, string songkey)
         {
+            if (File.Exists(filePath))
+                return false;
             await Task.Run(() => File.WriteAllLines(filePath,
                File.ReadLines(filePath).Where(l => l != songkey).ToList()));
+            return true;
         }
         public static async Task<List<string>> LoadPlaylist(string filePath)
         {

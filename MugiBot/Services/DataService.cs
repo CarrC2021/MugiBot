@@ -5,7 +5,6 @@ using Discord.WebSocket;
 using PartyBot.Database;
 using PartyBot.Handlers;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -68,12 +67,13 @@ namespace PartyBot.Services
         public async Task<Embed> CreatePlaylist(string name)
         {
             if (await PlaylistHandler.CreatePlaylist(name, Path.Combine(path, "playlists", name)))
-                return await EmbedHandler.CreateBasicEmbed("Playlist", "Playlist already exists", Color.Red);
+                return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"Playlist {name} now exists", Color.Blue);
         }
         public async Task<Embed> AddToPlaylist(string playlistName, string key)
         {
-            await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key);
+            if (!await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key))
+                return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName} does not exist");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"Song has been added to playlist", Color.Blue);
         }
     }
