@@ -92,6 +92,8 @@ namespace PartyBot.Handlers
             for (int i = 0; i < num; i++)
             {
                 count++;
+                if (sb.Length + allKeys.Length + SongTableObject.PrintSong(songObjects[i]).Length + songObjects[i].Key.Length > 2018)
+                    embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
                 sb.Append($"{SongTableObject.PrintSong(songObjects[i])}\n\n");
                 // If any of the links are not null and we want to print the links then append them
                 if (songObjects[i].MP3 != null && printLinks)
@@ -103,12 +105,9 @@ namespace PartyBot.Handlers
                 allKeys.Append($"{songObjects[i].Key}\n");
                 Console.WriteLine($"{sb.Length + allKeys.Length}");
                 if (!uniqueShows.Contains(songObjects[i].Show))
-                    uniqueShows.Add(songObjects[i].Show);
-                
+                    uniqueShows.Add(songObjects[i].Show); 
                 if ( (count % 10) == 0 || sb.Length + allKeys.Length > 1680)
-                {
                     embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
-                }
             }
 
             //(i + 1) % 10 == 0 || 
