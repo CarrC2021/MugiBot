@@ -1,9 +1,11 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using PartyBot.Database;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PartyBot.Handlers;
 
 namespace PartyBot.Services
 {
@@ -62,30 +64,28 @@ namespace PartyBot.Services
         {
             var tempChannel = (SocketTextChannel)channel;
             var user = await reaction.Channel.GetUserAsync(reaction.UserId) as SocketGuildUser;
-            List<string> songCollection = new List<string>();
+            var songCollection = new List<string>();
             var trimmedBody = ReturnTrimmedMessage(message);
             foreach (string line in trimmedBody)
                 songCollection.Add(line);
-
             foreach (string songKey in songCollection)
                 await _audioservice.QueueCatboxFromDB(songKey, user, tempChannel.Guild);
         }
 
         // Anytime a reaction is received by the bot this function will be called.
-        public async Task ReactionReceieved(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction reaction, DBManager _db, LavaLinkAudio _audioservice)
+        public async Task ReactionReceieved(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction reaction, DataService _dataService, LavaLinkAudio _audioservice)
         {
-            if (channel.Name.Equals("bot-commands") || channel.Name.Equals("file-uploads"))
+            if (Unicodes.Contains(reaction.Emote.Name))
             {
-                if (Unicodes.Contains(reaction.Emote.Name))
-                {
-                    IUserMessage result = await cachedMessage.GetOrDownloadAsync();
-                    await OneToTenReceived(result, channel, reaction, _db, _audioservice);
-                }
-                if (reaction.Emote.Name == pepega.Name)
-                {
-                    IUserMessage result = await cachedMessage.GetOrDownloadAsync();
-                    await PepegaReceived(result, channel, reaction, _db, _audioservice);
-                }
+                IUserMessage result = await cachedMessage.GetOrDownloadAsync();
+                if(result.Author.Id == 840000261581045800)
+                    await OneToTenReceived(result, channel, reaction, _dataService.DBManager, _audioservice);
+            }
+            if (reaction.Emote.Name == pepega.Name)
+            {
+                IUserMessage result = await cachedMessage.GetOrDownloadAsync();
+                if(result.Author.Id == 840000261581045800)
+                    await PepegaReceived(result, channel, reaction, _dataService.DBManager, _audioservice);
             }
         }
 
@@ -96,22 +96,25 @@ namespace PartyBot.Services
             var tempChannel = (SocketTextChannel)channel;
             var user = await reaction.Channel.GetUserAsync(reaction.UserId) as SocketGuildUser;
             var trimmedBody = ReturnTrimmedMessage(message);
-            await tempChannel.SendMessageAsync(embed: await _audioservice.QueueCatboxFromDB(
-            trimmedBody[Unicodes.IndexOf(reaction.Emote.Name)], user, tempChannel.Guild));
+            try
+            {
+                await tempChannel.SendMessageAsync(embed: await _audioservice.QueueCatboxFromDB(
+                    trimmedBody[Unicodes.IndexOf(reaction.Emote.Name)], user, tempChannel.Guild));
+            }
+            catch (Exception ex)
+            {
+                await tempChannel.SendMessageAsync(embed: await EmbedHandler.CreateErrorEmbed("Reaction Service", $"Something went wrong here. \n {ex.Message}"));
+            }
         }
 
         // Removes all lines from the body of the message except for the lines containing the song keys
-        public string[] ReturnTrimmedMessage(IUserMessage message)
+        public List<string> ReturnTrimmedMessage(IUserMessage message)
         {
             var body = message.Embeds.FirstOrDefault().Description;
             string[] description = body.Split("\n");
-            string prefix = "Key for this song: ";
-            string[] trimmedBody = description
-                    .Where(f => f.Contains(prefix))
-                    .ToArray();
-            for (int i = 0; i < trimmedBody.Length; i++)
-                trimmedBody[i] = trimmedBody[i].Substring(prefix.Length);
-            return trimmedBody;
+            var trimmed = description.SkipWhile(x => !x.Contains("All Keys:")).ToList();
+            trimmed.Remove(trimmed[0]);
+            return trimmed;
         }
     }
 }

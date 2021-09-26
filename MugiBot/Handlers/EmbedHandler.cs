@@ -84,7 +84,7 @@ namespace PartyBot.Handlers
         public static async Task<Embed> PrintSongs(ISocketMessageChannel ch, List<SongTableObject> songObjects, bool printLinks = false)
         {
             var sb = new StringBuilder();
-            var allKeys = new StringBuilder("\n For !playkey use the corresponding key: \n");
+            var allKeys = new StringBuilder("\n All keys:\n");
             var embeds = new List<Embed>();
             var uniqueShows = new List<string>();
             int num = songObjects.Count;
@@ -97,20 +97,18 @@ namespace PartyBot.Handlers
                 sb.Append($"{SongTableObject.PrintSong(songObjects[i])}\n\n");
                 // If any of the links are not null and we want to print the links then append them
                 if (songObjects[i].MP3 != null && printLinks)
-                    sb.Append($"\n\t MP3 {songObjects[i].MP3} ");
+                    sb.Append($"MP3 {songObjects[i].MP3}\n");
                 if (songObjects[i]._720 != null && printLinks)
-                    sb.Append($"\n 720 {songObjects[i]._720} ");
+                    sb.Append($"720 {songObjects[i]._720}\n");
                 if (songObjects[i]._480 != null && printLinks)
-                    sb.Append($"\n 480 {songObjects[i]._480} ");
+                    sb.Append($"480 {songObjects[i]._480}\n");
                 allKeys.Append($"{songObjects[i].Key}\n");
-                Console.WriteLine($"{sb.Length + allKeys.Length}");
                 if (!uniqueShows.Contains(songObjects[i].Show))
                     uniqueShows.Add(songObjects[i].Show); 
-                if ( (count % 10) == 0 || sb.Length + allKeys.Length > 1680)
+                if ( (count % 10) == 0 || sb.Length + allKeys.Length > 1880)
                     embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
             }
 
-            //(i + 1) % 10 == 0 || 
             StringBuilder titleCard = new StringBuilder();
             if (num > 150)
             {
@@ -129,7 +127,7 @@ namespace PartyBot.Handlers
             Dictionary<string, float[]> songsToRecommend, string name, Dictionary<string, string> songsToKeys)
         {
             StringBuilder sb = new StringBuilder();
-            StringBuilder allKeys = new StringBuilder("All Keys:");
+            StringBuilder allKeys = new StringBuilder("\n All keys:\n");
             var list = songsToRecommend.Keys.ToList();
             for (int i = 0; i < list.Count; i++)
             {

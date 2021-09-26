@@ -114,7 +114,7 @@ namespace PartyBot.Services
 
         private async Task ReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            await _reactionService.ReactionReceieved(cachedMessage, channel, reaction, _dbManager, _audioService);
+            await _reactionService.ReactionReceieved(cachedMessage, channel, reaction, _dataService, _audioService);
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();

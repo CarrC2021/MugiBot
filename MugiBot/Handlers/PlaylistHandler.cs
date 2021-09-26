@@ -28,8 +28,14 @@ namespace PartyBot.Handlers
         {
             if (File.Exists(filePath))
             {
+                var contents = await LoadPlaylist(filePath);
                 foreach (string key in songkeys)
-                    await File.AppendAllTextAsync(filePath, key + "\n");
+                {
+                    if (!contents.Contains(key))
+                    {
+                        await File.AppendAllTextAsync(filePath, key + "\n");
+                    }
+                }
                 return true;
             }
             return false;
@@ -38,8 +44,12 @@ namespace PartyBot.Handlers
         {
             if (File.Exists(filePath))
             {
-                await File.AppendAllTextAsync(filePath, songkey + "\n");
-                return true;
+                var contents = await LoadPlaylist(filePath);
+                if (!contents.Contains(songkey))
+                {
+                    await File.AppendAllTextAsync(filePath, songkey + "\n");
+                    return true;
+                }
             }
             return false;
         }

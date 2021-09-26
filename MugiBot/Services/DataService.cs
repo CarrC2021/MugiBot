@@ -73,6 +73,8 @@ namespace PartyBot.Services
         }
         public async Task<Embed> AddToPlaylist(string playlistName, string key)
         {
+            if (DBSearchService.UseSongKey(key) == null)
+                return await EmbedHandler.CreateErrorEmbed("Playlist", $"Song key {key} is invalid");
             if (!await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key))
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName} does not exist");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"Song has been added to playlist {key}", Color.Blue);
