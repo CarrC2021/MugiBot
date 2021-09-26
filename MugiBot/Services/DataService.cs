@@ -96,7 +96,6 @@ namespace PartyBot.Services
             await PlaylistHandler.RemoveFromPlaylist(Path.Combine(path, "playlists", playlistName.ToLower()), key);
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"{key} has been removed from {playlistName}", Color.Blue);
         }
-
         public async Task<Embed> PrintPlaylist(string playlistName, ISocketMessageChannel channel)
         {
             var filePath = Path.Combine(path, "playlists", playlistName.ToLower());

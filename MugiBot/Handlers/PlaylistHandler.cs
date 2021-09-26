@@ -128,18 +128,18 @@ namespace PartyBot.Handlers
         }
         public static async Task<Embed> CreateArtistPlaylist(string artistName, string artistPlaylistDirectory)
         {
-            if (File.Exists(Path.Combine(artistPlaylistDirectory, artistName)))
-                return await EmbedHandler.CreateErrorEmbed("Playlists", $"An artist playlist with name {artistName} already exists");
+            if (File.Exists(Path.Combine(artistPlaylistDirectory, artistName.ToLower())))
+                return await EmbedHandler.CreateErrorEmbed("Playlists", $"An artist playlist with name {artistName.ToLower()} already exists");
             var songs = await DBSearchService.ReturnSongsByAuthor(artistName);
             var playlist = new Playlist("public", new Dictionary<string, string>());
-            
+
             // Now we populate the dictionary with our songs we found.
             foreach (SongTableObject song in songs)
                 playlist.Songs.Add(song.Key, SongTableObject.PrintSong(song));
 
             // Once the dictionary has been populated we serialize and write the json to a file.
-            await SerializeAndWrite(playlist, Path.Combine(artistPlaylistDirectory, artistName));
-            return await EmbedHandler.CreateBasicEmbed("Playlists", $"An artist playlist with name {artistName} now exists. "
+            await SerializeAndWrite(playlist, Path.Combine(artistPlaylistDirectory, artistName.ToLower()));
+            return await EmbedHandler.CreateBasicEmbed("Playlists", $"An artist playlist with name {artistName.ToLower()} now exists. "
             + "It will contain any song in the database by the artist you specified.", Color.Blue);
         }
 

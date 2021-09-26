@@ -2,7 +2,7 @@
 using PartyBot.Handlers;
 using PartyBot.Services;
 using System.Threading.Tasks;
-
+using System.IO;
 
 namespace PartyBot.Modules
 {
@@ -85,5 +85,10 @@ namespace PartyBot.Modules
         [Summary("Prints the content of the specified playlist.")]
         public async Task PrintPlaylist(string playlistName)
             => await ReplyAsync(embed: await DataService.PrintPlaylist(playlistName.ToLower(), Context.Channel));
+        
+        [Command("CreateArtistPlaylist")]
+        [Summary("Adds a playlist of the given name.")]
+        public async Task CreateArtistPlaylist([Remainder] string author)
+            => await ReplyAsync(embed: await PlaylistHandler.CreateArtistPlaylist(author, Path.Combine(DataService.path, "playlists", "artists", author)));
     }
 }
