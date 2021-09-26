@@ -64,11 +64,8 @@ namespace PartyBot.Services
         {
             var tempChannel = (SocketTextChannel)channel;
             var user = await reaction.Channel.GetUserAsync(reaction.UserId) as SocketGuildUser;
-            var songCollection = new List<string>();
             var trimmedBody = ReturnTrimmedMessage(message);
-            foreach (string line in trimmedBody)
-                songCollection.Add(line);
-            foreach (string songKey in songCollection)
+            foreach (string songKey in trimmedBody)
                 await _audioservice.QueueCatboxFromDB(songKey, user, tempChannel.Guild);
         }
 

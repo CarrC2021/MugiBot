@@ -29,10 +29,8 @@ namespace PartyBot.Handlers
             return embed;
         }
 
-
         public static async Task<Embed> TestingEmbedStuff()
         {
-
             var embed = await Task.Run(() => new EmbedBuilder()
                     .WithImageUrl("https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20843-bk5OtUiP8htg.png")
                     .WithThumbnailUrl("https://i.ibb.co/VW3XFxT/Emilia-megumin.jpg")
@@ -195,7 +193,7 @@ namespace PartyBot.Handlers
 
         private static async Task<List<Embed>> AppendEmbedAndClear(List<Embed> embeds, StringBuilder sb, StringBuilder allKeys)
         {
-            var embed = await CreateBasicEmbed($"Songs", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
+            var embed = await CreateBasicEmbed($"Data, Search", $"{sb.ToString()} {allKeys.ToString()}", Color.Blue);
             embeds.Add(embed);
             sb.Clear();
             allKeys.Clear();

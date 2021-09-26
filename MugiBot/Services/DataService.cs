@@ -15,6 +15,7 @@ namespace PartyBot.Services
     {
         public DBManager DBManager { get; set; }
         public AnilistService anilistService { get; set; }
+        public DBSearchService _search { get; set; }
         public string path { get; set; }
         private readonly char separator = Path.DirectorySeparatorChar;
         public DataService(DBManager _db)
