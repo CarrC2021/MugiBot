@@ -66,7 +66,7 @@ namespace PartyBot.Services
 
         public async Task<Embed> CreatePlaylist(string name)
         {
-            if (await PlaylistHandler.CreatePlaylist(name, Path.Combine(path, "playlists", name)))
+            if (!await PlaylistHandler.CreatePlaylist(name, Path.Combine(path, "playlists", name)))
                 return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"Playlist {name} now exists", Color.Blue);
         }
@@ -74,7 +74,7 @@ namespace PartyBot.Services
         {
             if (!await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key))
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName} does not exist");
-            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Song has been added to playlist", Color.Blue);
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Song has been added to playlist {key}", Color.Blue);
         }
     }
 }
