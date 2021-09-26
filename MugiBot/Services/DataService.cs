@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Text;
+using System.Linq;
 using System.Collections.Generic;
 using Discord;
 using Discord.WebSocket;
@@ -60,7 +61,7 @@ namespace PartyBot.Services
             Dictionary<string, string> players = await DBManager._rs.GetPlayersTracked();
             if (!players.Keys.Contains(name))
                 return await EmbedHandler.CreateBasicEmbed("Name Error", "Could not find any players by that name in the database.", Color.Red);
-            
+
             return await DBCalculationHandler.RecommendPracticeSongs(ch, players[name], numSongs, onlyFromList);
         }
 
@@ -83,6 +84,43 @@ namespace PartyBot.Services
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName} does not exist");
             await PlaylistHandler.ShufflePlaylist(Path.Combine(path, "playlists", playlistName));
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"{playlistName} has been shuffled", Color.Blue);
+        }
+
+        public async Task<Embed> RemoveFromPlaylist(string playlistName, string key)
+        {
+            if (!File.Exists(Path.Combine(path, "playlists", playlistName.ToLower())))
+                return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName.ToLower()} does not exist");
+            await PlaylistHandler.RemoveFromPlaylist(Path.Combine(path, "playlists", playlistName.ToLower()), key);
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"{key} has been removed from {playlistName}", Color.Blue);
+        }
+
+        public async Task<Embed> PrintPlaylist(string playlistName, ISocketMessageChannel channel)
+        {
+            var filePath = Path.Combine(path, "playlists", playlistName.ToLower());
+            if (!File.Exists(filePath))
+                return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName.ToLower()} does not exist");
+            var embeds = new List<Embed>();
+            var content = await PlaylistHandler.LoadPlaylist(filePath);
+            var sb = new StringBuilder();
+            sb.Append($"{playlistName} songs: \n\n");
+            foreach (string key in content)
+            {
+                var tableObject = await DBSearchService.UseSongKey(key);
+                if (sb.Length + SongTableObject.PrintSong(tableObject).Length > 2000)
+                {
+                    embeds.Add(await EmbedHandler.CreateBasicEmbed("Playlist", sb.ToString(), Color.Blue));
+                    sb.Clear();
+                    sb.Append($"{playlistName} songs: \n\n");
+                }
+                sb.Append(SongTableObject.PrintSong(tableObject) + "\n\n");
+            }
+            embeds.Add(await EmbedHandler.CreateBasicEmbed("Playlist", sb.ToString(), Color.Blue));
+            foreach (Embed embed in embeds)
+            {
+                await channel.SendMessageAsync(embed: embed);
+            }
+            return await EmbedHandler.CreateBasicEmbed("Playlists", $"A total of {content.Count} songs are in {playlistName}. To shuffle the order "
+                + "of the songs use the !shuffleplaylist command.", Color.Blue);
         }
     }
 }

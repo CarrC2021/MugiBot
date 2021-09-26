@@ -51,7 +51,7 @@ namespace PartyBot.Handlers
                     File.ReadLines(filePath).Where(l => l != songkey).ToList()));
                 return true;
             }
-                return false;
+            return false;
         }
         public static async Task<List<string>> LoadPlaylist(string filePath)
         {

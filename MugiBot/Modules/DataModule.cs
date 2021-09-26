@@ -45,7 +45,7 @@ namespace PartyBot.Modules
         [Summary("Input a player name and a number of songs and this will give you songs from your list to practice.")]
         public async Task PracticeMyList(string playerName, int num = 5)
             => await ReplyAsync(embed: await DataService.RecommendPracticeSongs(Context.Channel, playerName, num, true));
-            
+
         [Command("GithubTest")]
         public async Task GithubTest(string repo, int page, int perPage)
             => await ReplyAsync(embed: await DataService.DBManager.AddSongListFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
@@ -71,10 +71,19 @@ namespace PartyBot.Modules
         [Command("AddToPlaylist")]
         [Summary("Enter a playlist and song key to add a song to a playlist.")]
         public async Task AddToPlaylist(string playlistName, [Remainder] string key)
-            => await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName, key));
+            => await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName.ToLower(), key));
+        [Command("RemoveFromPlaylist")]
+        [Summary("Removes from a playlist the song you enter.")]
+        public async Task RemoveFromPlaylist(string playlistName, [Remainder] string key)
+            => await ReplyAsync(embed: await DataService.RemoveFromPlaylist(playlistName.ToLower(), key));
         [Command("ShufflePlaylist")]
         [Summary("Shuffles the specified playlist.")]
         public async Task ShufflePlaylist(string playlistName)
-            => await ReplyAsync(embed: await DataService.ShufflePlaylist(playlistName));
+            => await ReplyAsync(embed: await DataService.ShufflePlaylist(playlistName.ToLower()));
+
+        [Command("PrintPlaylist")]
+        [Summary("Prints the content of the specified playlist.")]
+        public async Task PrintPlaylist(string playlistName)
+            => await ReplyAsync(embed: await DataService.PrintPlaylist(playlistName.ToLower(), Context.Channel));
     }
 }
