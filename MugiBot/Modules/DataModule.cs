@@ -48,39 +48,33 @@ namespace PartyBot.Modules
             
         [Command("GithubTest")]
         public async Task GithubTest(string repo, int page, int perPage)
-        {
-            await ReplyAsync(embed: await DataService.DBManager.AddSongListFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
-        }
+            => await ReplyAsync(embed: await DataService.DBManager.AddSongListFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
 
 
         [Command("RemoveDeadSongs")]
         public async Task RemoveDeadSongs()
-        {
-            await ReplyAsync(embed: await DataService.DBManager.RemoveDeadSongs());
-        }
+            => await ReplyAsync(embed: await DataService.DBManager.RemoveDeadSongs());
 
         [Command("TestEmbed")]
         public async Task TestEmbed()
-        {
-            await ReplyAsync(embed: await EmbedHandler.TestingEmbedStuff());
-        }
+            => await ReplyAsync(embed: await EmbedHandler.TestingEmbedStuff());
 
         [Command("SearchAnilist")]
         public async Task TestAnilist()
-        {
-            await DataService.anilistService.GetCoverArtAsync("Show By Rock!!", 16311);
-        }
+            => await DataService.anilistService.GetCoverArtAsync("Show By Rock!!", 16311);
 
         [Command("CreatePlaylist")]
+        [Summary("Adds a playlist of the given name.")]
         public async Task CreatePlaylist(string name)
-        {
-            await ReplyAsync(embed: await DataService.CreatePlaylist(name));
-        }
+            => await ReplyAsync(embed: await DataService.CreatePlaylist(name));
 
         [Command("AddToPlaylist")]
+        [Summary("Enter a playlist and song key to add a song to a playlist.")]
         public async Task AddToPlaylist(string playlistName, [Remainder] string key)
-        {
-            await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName, key));
-        }
+            => await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName, key));
+        [Command("ShufflePlaylist")]
+        [Summary("Shuffles the specified playlist.")]
+        public async Task ShufflePlaylist(string playlistName)
+            => await ReplyAsync(embed: await DataService.ShufflePlaylist(playlistName));
     }
 }

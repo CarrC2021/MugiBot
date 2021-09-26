@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Discord;
@@ -56,6 +57,13 @@ namespace PartyBot.Handlers
         {
             var contents = await File.ReadAllLinesAsync(filePath);
             return contents.ToList();
+        }
+        public static async Task ShufflePlaylist(string filePath)
+        {
+            var list = await LoadPlaylist(filePath);
+            var rnd = new Random();
+            var randomizedList = list.OrderBy(item => rnd.Next());
+            await File.WriteAllLinesAsync(filePath, randomizedList);
         }
     }
 }
