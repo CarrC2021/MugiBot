@@ -36,6 +36,11 @@ public class DBSearchService
         return await EmbedHandler.PrintSongs(message.Channel, songList, true);
     }
 
+    public static async Task<List<SongTableObject>> ReturnSongsByAuthor(string author)
+    {
+        using var db = new AMQDBContext();
+        return await SearchHandler.SearchAuthor(db, author);
+    }
     public static async Task<Embed> ListPlayerStats(ISocketMessageChannel channel, string playerName, string showName, PlayersRulesService rulesService, string type = "any", string exactMatch = "no")
     {
         var players = await rulesService.GetPlayersTracked();
