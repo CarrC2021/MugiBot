@@ -15,6 +15,11 @@ namespace PartyBot.Modules
         public async Task CatJam()
             => await Context.Channel.SendMessageAsync("https://tenor.com/view/cat-jam-gif-18110512");
 
+        [Command("FrogJam")]
+        [Summary("Will frogJam in the chat.")]
+        public async Task FrogJam()
+            => await Context.Channel.SendMessageAsync("https://tenor.com/view/frog-loop-frog-loop-viynl-frog-viynl-gif-18152140");
+
         [Command("RateWaifu")]
         [Summary("Type in the name of a character and they will be rated.")]
         public async Task RateWaifu([Remainder] string name)
