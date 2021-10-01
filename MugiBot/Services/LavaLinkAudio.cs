@@ -415,11 +415,20 @@ namespace PartyBot.Services
             }
         }
 
-        public async Task<Embed> LoadPlaylist(SocketGuildUser user, IGuild guild, string name)
+        public async Task<Embed> LoadPlaylist(SocketGuildUser user, IGuild guild, string name, string type = "default")
         {
             try
             {
-                var playlist = await PlaylistHandler.LoadPlaylist(Path.Combine(path, "playlists", name));
+                var fileName = PlaylistHandler.SearchPlaylistDirectories(Path.Combine(path, "playlists"), name);
+                Console.WriteLine(fileName);
+                var playlistPath = "";
+                if (type.Equals("default"))
+                    playlistPath = Path.Combine(path, "playlists", name);
+                else
+                    playlistPath = Path.Combine(path, "playlists", type, name);
+                if (!File.Exists(playlistPath))
+                    return await EmbedHandler.CreateErrorEmbed("Playlists", $"Could not find playlist with the name {name}");
+                var playlist = await PlaylistHandler.LoadPlaylist(playlistPath);
                 playlist.RemoveAll(x => string.IsNullOrEmpty(x));
                 foreach (string key in playlist)
                 {

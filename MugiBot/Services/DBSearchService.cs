@@ -159,13 +159,21 @@ public class DBSearchService
             .ToListAsync();
     }
 
-    public static async Task<List<SongTableObject>> ReturnAllSongObjectsByShowByType(string show, string type)
+    public static async Task<List<SongTableObject>> ReturnAllSongObjectsByShowByType(string show, string type, bool exact)
     {
         using var db = new AMQDBContext();
+        if (type.Equals("any"))
+            return await ReturnAllSongObjects(show);
+        if (exact)
+            return await db.SongTableObject
+                .AsNoTracking()
+                .Where(f => f.Show.ToLower().Equals(show.ToLower()))
+                .Where(f => f.Type.ToLower().Contains(type.ToLower()))
+                .ToListAsync();
         return await db.SongTableObject
             .AsNoTracking()
-            .Where(f => f.Show.ToLower().Equals(show.ToLower()))
-            .Where(f => f.Type.ToLower().Equals(type.ToLower()))
+            .Where(f => f.Show.ToLower().Contains(show.ToLower()))
+            .Where(f => f.Type.ToLower().Contains(type.ToLower()))
             .ToListAsync();
     }
 

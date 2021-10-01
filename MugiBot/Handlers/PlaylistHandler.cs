@@ -84,23 +84,31 @@ namespace PartyBot.Handlers
         }
         public static async Task<List<string>> LoadPlaylist(string filePath)
         {
-            Playlist contents;
-            contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(filePath));
-            return contents.Songs.Keys.ToList();
+            Playlist playlist;
+            var settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
+
+            var content = await File.ReadAllTextAsync(filePath);
+            playlist = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content, settings));
+            return playlist.Songs.Keys.ToList();
         }
         public static async Task<Dictionary<string, string>> ReturnPlaylistDictionary(string filePath)
         {
-            Playlist contents;
-            contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(filePath));
-            return contents.Songs;
+            var content = await File.ReadAllTextAsync(filePath);
+            Playlist playlist = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content));
+            return playlist.Songs;
         }
         public static async Task ShufflePlaylist(string filePath)
         {
-            Playlist contents;
-            contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(filePath));
+            Playlist playlist;
+            var content = await File.ReadAllTextAsync(filePath);
+            playlist = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content));
             var rnd = new Random();
-            contents.Songs.OrderBy(item => rnd.Next()).ToDictionary(item => item.Key, item => item.Value);
-            await SerializeAndWrite(contents, filePath);
+            playlist.Songs.OrderBy(item => rnd.Next()).ToDictionary(item => item.Key, item => item.Value);
+            await SerializeAndWrite(playlist, filePath);
         }
         public static async Task SerializeAndWrite(Playlist content, string filePath)
         {
@@ -125,22 +133,68 @@ namespace PartyBot.Handlers
                 var songObject = await DBSearchService.UseSongKey(line);
                 newContents.Songs.Add(line, SongTableObject.PrintSong(songObject));
             }
+            await SerializeAndWrite(newContents, fileName);
         }
-        public static async Task<Embed> CreateArtistPlaylist(string artistName, string artistPlaylistDirectory)
-        {
-            if (File.Exists(Path.Combine(artistPlaylistDirectory, artistName.ToLower())))
-                return await EmbedHandler.CreateErrorEmbed("Playlists", $"An artist playlist with name {artistName.ToLower()} already exists");
-            var songs = await DBSearchService.ReturnSongsByAuthor(artistName);
-            var playlist = new Playlist("public", new Dictionary<string, string>());
 
+        public static string SearchPlaylistDirectories(string path, string query)
+        {
+            var list = new List<string>();
+            if (File.Exists(Path.Combine(path, "artists", query)))
+                list.Append(Path.Combine(path, "artists", query));
+                
+            if (File.Exists(Path.Combine(path, "shows", query)))
+                list.Append(Path.Combine(path, "shows", query));
+            
+            if (File.Exists(Path.Combine(path, query)))
+                list.Append(Path.Combine(path, query));
+
+            return "Figure out what to do with this later";
+        }
+
+        public static async Task<Embed> CreateArtistPlaylist(string artistName, string artistPlaylistDirectory, bool exact = false)
+        {
+            return await AutomaticPlaylistCreation(artistName, artistPlaylistDirectory, "artist", "any", true);
+        }
+
+        public static async Task<Embed> CreateShowPlaylist(string show, string showPlaylistDirectory, string songType = "any", bool exact = false)
+        {
+            return await AutomaticPlaylistCreation(show, showPlaylistDirectory, "show", songType, exact);
+        }
+
+        public static async Task<Embed> AutomaticPlaylistCreation(string query, string playlistDirectory, string searchType, string songType = "any", bool exact = false)
+        {
+            if (File.Exists(Path.Combine(playlistDirectory, query.ToLower())))
+                return await EmbedHandler.CreateErrorEmbed("Playlists", $"A playlist with name {query.ToLower()} already exists");
+            if (File.Exists(Path.Combine(playlistDirectory, songType, query.ToLower())))
+                return await EmbedHandler.CreateErrorEmbed("Playlists", $"A playlist with name {query.ToLower()} already exists");
+            var songs = new List<SongTableObject>();
+            Console.WriteLine(songType);
+            if (searchType.Equals("artist"))
+                songs = await DBSearchService.ReturnSongsByAuthor(query);
+            if (searchType.Equals("show"))
+                songs = await DBSearchService.ReturnAllSongObjectsByShowByType(query, songType, exact);
+            if (songs.Count == 0)
+                return await EmbedHandler.CreateBasicEmbed("Playlists", $"A playlist with name {query.ToLower()} not created. "
+            + "The query you specified returned 0 songs. Blame Dayt not me :wink:.", Color.Red);
+            var playlist = new Playlist("public", new Dictionary<string, string>(), true, false);
+            playlist.AutomaticallyGenerated = true;
             // Now we populate the dictionary with our songs we found.
             foreach (SongTableObject song in songs)
                 playlist.Songs.Add(song.Key, SongTableObject.PrintSong(song));
 
             // Once the dictionary has been populated we serialize and write the json to a file.
-            await SerializeAndWrite(playlist, Path.Combine(artistPlaylistDirectory, artistName.ToLower()));
-            return await EmbedHandler.CreateBasicEmbed("Playlists", $"An artist playlist with name {artistName.ToLower()} now exists. "
-            + "It will contain any song in the database by the artist you specified.", Color.Blue);
+            if (!songType.Equals("any"))
+            {
+                songType += "s";
+                await SerializeAndWrite(playlist, Path.Combine(playlistDirectory, $"{query.ToLower()} {songType.ToLower()}"));
+            }
+            else
+            {
+                await SerializeAndWrite(playlist, Path.Combine(playlistDirectory, query.ToLower()));
+                songType = "";
+            }
+            return await EmbedHandler.CreateBasicEmbed("Playlists", $"A playlist with name {query.ToLower()} {songType.ToLower()} now exists. "
+            + "It will contain any song in the database by the query you specified.", Color.Blue);
         }
 
         // This function will return all of the names of the files in the specified playlist directory.

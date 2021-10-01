@@ -99,10 +99,22 @@ namespace PartyBot.Services
         public async Task<Embed> PrintPlaylist(string playlistName, ISocketMessageChannel channel)
         {
             var filePath = Path.Combine(path, "playlists", playlistName.ToLower());
-            if (!File.Exists(filePath))
+            var filePath2 = Path.Combine(path, "playlists", "artists", playlistName.ToLower());
+            var filePath3 = Path.Combine(path, "playlists", "shows", playlistName.ToLower());
+
+            string toUse;
+            if (File.Exists(filePath3))
+                toUse = filePath3;
+            else if (File.Exists(filePath2))
+                toUse = filePath2;
+            else if (File.Exists(filePath))
+                toUse = filePath;
+            else
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName.ToLower()} does not exist");
             var embeds = new List<Embed>();
-            var content = await PlaylistHandler.LoadPlaylist(filePath);
+
+            var content = await PlaylistHandler.LoadPlaylist(toUse);
+
             var sb = new StringBuilder();
             sb.Append($"{playlistName} songs: \n\n");
             foreach (string key in content)
