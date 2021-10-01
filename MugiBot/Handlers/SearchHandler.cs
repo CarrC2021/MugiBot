@@ -13,15 +13,8 @@ namespace PartyBot.Handlers
         {
             SongTableObject song = await _db.SongTableObject.FindAsync(key);
             if (song != null)
-            {
                 return song;
-            }
-            // This will catch any weird cases where the casing has been changed in the game.
-            List<SongTableObject> result = await _db.SongTableObject
-                .AsNoTracking()
-                .Where(x => x.Key.ToLower().Equals(key.ToLower()))
-                .ToListAsync();
-            return result[0];
+            return null;
         }
 
         public static async Task<List<PlayerTableObject>> AllObjectsForPlayer(AMQDBContext _db, string name, bool onlyFromList = true)

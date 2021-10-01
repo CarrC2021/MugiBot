@@ -131,7 +131,8 @@ namespace PartyBot.Handlers
             foreach (string line in filtered)
             {
                 var songObject = await DBSearchService.UseSongKey(line);
-                newContents.Songs.Add(line, SongTableObject.PrintSong(songObject));
+                if (songObject != null && !newContents.Songs.ContainsKey(songObject.Key))
+                    newContents.Songs.Add(line, SongTableObject.PrintSong(songObject));
             }
             await SerializeAndWrite(newContents, fileName);
         }
