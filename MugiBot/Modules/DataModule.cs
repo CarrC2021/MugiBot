@@ -65,7 +65,7 @@ namespace PartyBot.Modules
 
         [Command("CreatePlaylist")]
         [Summary("Adds a playlist of the given name.")]
-        public async Task CreatePlaylist(string name)
+        public async Task CreatePlaylist([Remainder] string name)
             => await ReplyAsync(embed: await DataService.CreatePlaylist(name));
 
         [Command("AddToPlaylist")]
@@ -83,9 +83,9 @@ namespace PartyBot.Modules
 
         [Command("PrintPlaylist")]
         [Summary("Prints the content of the specified playlist.")]
-        public async Task PrintPlaylist(string playlistName)
+        public async Task PrintPlaylist([Remainder] string playlistName)
             => await ReplyAsync(embed: await DataService.PrintPlaylist(playlistName.ToLower(), Context.Channel));
-        
+
         [Command("CreateArtistPlaylist")]
         [Summary("Adds a playlist of the given name.")]
         public async Task CreateArtistPlaylist([Remainder] string artist)
@@ -104,7 +104,7 @@ namespace PartyBot.Modules
         [Command("CreateShowEDPlaylist")]
         [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
         public async Task CreateShowEDPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"),"Ending"));
+            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "Ending"));
 
         [Command("CreateShowINSPlaylist")]
         [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
@@ -115,11 +115,11 @@ namespace PartyBot.Modules
         [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
         public async Task CreateShowOPPlaylist([Remainder] string show)
             => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "Opening"));
-        
+
         [Command("CreateShowExactPlaylist")]
         [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
         public async Task CreateShowExactPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "any" , true));
+            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "any", true));
 
         [Command("CreateShowEDExactPlaylist")]
         [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
