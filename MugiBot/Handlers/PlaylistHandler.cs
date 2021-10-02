@@ -159,7 +159,7 @@ namespace PartyBot.Handlers
 
         public static async Task<Embed> CreateArtistPlaylist(string artistName, string artistPlaylistDirectory, bool exact = false)
         {
-            return await AutomaticPlaylistCreation(artistName, artistPlaylistDirectory, "artist", "any", true);
+            return await AutomaticPlaylistCreation(artistName, artistPlaylistDirectory, "artist", "any", exact);
         }
 
         public static async Task<Embed> CreateShowPlaylist(string show, string showPlaylistDirectory, string songType = "any", bool exact = false)
@@ -176,7 +176,7 @@ namespace PartyBot.Handlers
             var songs = new List<SongTableObject>();
             Console.WriteLine(songType);
             if (searchType.Equals("artist"))
-                songs = await DBSearchService.ReturnSongsByAuthor(query);
+                songs = await DBSearchService.ReturnSongsByAuthor(query, exact);
             if (searchType.Equals("show"))
                 songs = await DBSearchService.ReturnAllSongObjectsByShowByType(query, songType, exact);
             if (songs.Count == 0)

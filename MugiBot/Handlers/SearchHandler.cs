@@ -117,13 +117,15 @@ namespace PartyBot.Handlers
             return await ContainsArtistStatsSearch(_db, playerName, artist, type);
         }
 
-        public static async Task<List<SongTableObject>> SearchAuthor(AMQDBContext _db, string author)
+        public static async Task<List<SongTableObject>> SearchAuthor(AMQDBContext _db, string author, bool exact)
         {
             List<SongTableObject> Songs;
             Songs = await _db.SongTableObject
                 .AsNoTracking()
                 .Where(x => x.Artist.ToLower().Contains(author.ToLower()))
                 .ToListAsync();
+            if (exact)
+                Songs.Where(x =>  x.Artist.ToLower().Equals(author.ToLower()));
 
             return Songs;
         }
