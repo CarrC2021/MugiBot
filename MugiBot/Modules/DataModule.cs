@@ -73,13 +73,9 @@ namespace PartyBot.Modules
         public async Task AddToPlaylist(string playlistName, [Remainder] string key)
             => await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName.ToLower(), key));
         [Command("RemoveFromPlaylist")]
-        [Summary("Removes from a playlist the song you enter.")]
+        [Summary("Removes the song you enter from the playlist.")]
         public async Task RemoveFromPlaylist(string playlistName, [Remainder] string key)
             => await ReplyAsync(embed: await DataService.RemoveFromPlaylist(playlistName.ToLower(), key));
-        [Command("ShufflePlaylist")]
-        [Summary("Shuffles the specified playlist.")]
-        public async Task ShufflePlaylist([Remainder] string playlistName)
-            => await ReplyAsync(embed: await DataService.ShufflePlaylist(playlistName.ToLower()));
 
         [Command("PrintPlaylist")]
         [Summary("Prints the content of the specified playlist.")]
