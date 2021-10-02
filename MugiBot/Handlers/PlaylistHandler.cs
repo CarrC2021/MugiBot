@@ -101,15 +101,6 @@ namespace PartyBot.Handlers
             Playlist playlist = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content));
             return playlist.Songs;
         }
-        public static async Task ShufflePlaylist(string filePath)
-        {
-            Playlist playlist;
-            var content = await File.ReadAllTextAsync(filePath);
-            playlist = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content));
-            var rnd = new Random();
-            playlist.Songs.OrderBy(item => rnd.Next()).ToDictionary(item => item.Key, item => item.Value);
-            await SerializeAndWrite(playlist, filePath);
-        }
         public static async Task SerializeAndWrite(Playlist content, string filePath)
         {
             var jsonObject = JsonConvert.SerializeObject(content);
@@ -141,15 +132,17 @@ namespace PartyBot.Handlers
         {
             var list = new List<string>();
             if (File.Exists(Path.Combine(path, "artists", query)))
-                list.Append(Path.Combine(path, "artists", query));
+                list.Add(Path.Combine(path, "artists", query));
                 
             if (File.Exists(Path.Combine(path, "shows", query)))
-                list.Append(Path.Combine(path, "shows", query));
+                list.Add(Path.Combine(path, "shows", query));
             
             if (File.Exists(Path.Combine(path, query)))
-                list.Append(Path.Combine(path, query));
+                list.Add(Path.Combine(path, query));
 
-            return "Figure out what to do with this later";
+            if (list.Count == 0)
+                return null;
+            return list.FirstOrDefault();
         }
 
         public static async Task<Embed> CreateArtistPlaylist(string artistName, string artistPlaylistDirectory, bool exact = false)

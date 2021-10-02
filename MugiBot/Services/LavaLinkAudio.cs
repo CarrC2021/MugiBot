@@ -168,6 +168,11 @@ namespace PartyBot.Services
                 /* Create a string builder we can use to format how we want our list to be displayed. */
                 var descriptionBuilder = new StringBuilder();
 
+                var radio = RadioHandler.FindRadio(radios, guild);
+                StringBuilder sb = new StringBuilder();
+                if (radio != null)
+                    sb = await radio.PrintQueue();
+
                 /* Get The Player and make sure it isn't null. */
                 var player = _lavaNode.GetPlayer(guild);
                 if (player == null)
@@ -178,7 +183,7 @@ namespace PartyBot.Services
                 /*If the queue count is less than 1 and the current track IS NOT null then we wont have a list to reply with.
                     In this situation we simply return an embed that displays the current track instead. */
                 if (player.Queue.Count < 1 && player.Track != null)
-                    return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", "Nothing Else Is Queued.", Color.Blue);
+                    return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", $"Next in Queue \n {sb.ToString()}", Color.Blue);
                 /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
                  *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
                     This trackNum variable is used to display the number in which the song is in place. (Start at 2 because we're including the current song.*/
@@ -188,10 +193,6 @@ namespace PartyBot.Services
                     descriptionBuilder.Append($"{trackNum}: {track.Title}\n");
                     trackNum++;
                 }
-                var radio = RadioHandler.FindRadio(radios, guild);
-                StringBuilder sb = new StringBuilder();
-                if (radio != null)
-                    sb = await radio.PrintQueue();
 
                 return await EmbedHandler.CreateBasicEmbed("Music Playlist", $"Now Playing: {player.Track.Title} \n{descriptionBuilder}\n + {sb.ToString()}", Color.Blue);
             }
@@ -221,7 +222,12 @@ namespace PartyBot.Services
                 {
                     var song = await radio.NextSong();
                     if (song != null)
-                        return await PlayAsync(user, guild, song.Key, song);
+                    {
+                        await CheckDeleteTempMusicFile(currentTrack.Url);
+                        await PlayAsync(user, guild, song.Key, song);
+                        await player.SkipAsync();
+                        return await EmbedHandler.CreateBasicEmbed("Music Skip", $"I have successfully skipped {currentTrack.Title}\n Now playing {player.Track.Title} by {player.Track.Author}", Color.Blue);
+                    }
                     //If the radio is off then just return StopAsync
                     if (!radio.RadioMode)
                         return await StopAsync(guild);
@@ -346,7 +352,7 @@ namespace PartyBot.Services
                 );
             string toPrint = "Now Playing:";
             if (guildRadio != null && args.Player.Queue.Count < 3)
-            {
+            {                    
                 await RadioQueue(guildRadio);
                 if (!guildRadio.CurrPlayers.Equals("any"))
                     toPrint = $"You are Listening to {guildRadio.CurrPlayers} Radio. Now Playing:";
@@ -396,6 +402,9 @@ namespace PartyBot.Services
         {
             try
             {
+                var outVal = await radio.NextSong();
+                if (outVal != null)
+                    await CatboxHandler.QueueRadioSong(outVal, radio.Guild, _lavaNode, path);
                 await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);
             }
             catch (Exception ex)
@@ -422,8 +431,16 @@ namespace PartyBot.Services
             }
         }
 
-        public async Task<Embed> LoadPlaylist(SocketGuildUser user, SocketGuild guild, ISocketMessageChannel channel, string name, string type = "default")
+        public async Task<Embed> LoadPlaylist(Radio radio, SocketGuildUser user, ISocketMessageChannel channel, string name, string type = "default")
         {
+            //Check If User Is Connected To Voice Cahnnel.
+            if (user.VoiceChannel == null)
+                return await EmbedHandler.CreateErrorEmbed("Music, Join/Play", "You Must First Join a Voice Channel.");
+
+            //Check the guild has a player available.
+            if (!_lavaNode.HasPlayer(radio.Guild))
+                return await EmbedHandler.CreateErrorEmbed("Music, Play", "I'm not connected to a voice channel.");
+
             try
             {
                 var fileName = PlaylistHandler.SearchPlaylistDirectories(Path.Combine(path, "playlists"), name);
@@ -437,6 +454,15 @@ namespace PartyBot.Services
                 
                 var playlist = await PlaylistHandler.LoadPlaylist(playlistPath);
 
+                Random rnd = new Random();
+                for (int i = 0; i < playlist.Count; i++)
+                {
+                    int k = rnd.Next(0, i);
+                    var key = playlist[k];
+                    playlist[k] = playlist[i];
+                    playlist[i] = key;
+                }
+
                 //Queue the first song immediately
                 var song = new SongTableObject();
                 for (int i = 0; i < 3; i++)
@@ -444,12 +470,11 @@ namespace PartyBot.Services
                     if (playlist.Count == 0)
                         return await EmbedHandler.CreateBasicEmbed("Playlists", $"Loaded {name}", Color.Blue);
                     song = await DBSearchService.UseSongKey(playlist.FirstOrDefault());
-                    await PlayAsync(user, guild, song.Key, song);
+                    await PlayAsync(user, radio.Guild, song.Key, song);
                     playlist.Remove(song.Key);
                 }
 
                 //Now we will place the rest of the songs in a queue
-                var radio = RadioHandler.FindOrCreateRadio(radios, channel, guild);
                 var songs = new List<SongTableObject>();
                 foreach (string key in playlist)
                     songs.Add(await DBSearchService.UseSongKey(key));

@@ -21,6 +21,10 @@ namespace PartyBot.Handlers
              All the Tasks here are also static which means we can call them from anywhere in our program. */
         public static async Task<Embed> CreateBasicEmbed(string title, string description, Color color)
         {
+            if (description.Length > 2048)
+            {
+                return await CreateErrorEmbed("Description too long", "Toxic ping the creator of this app");
+            }
             var embed = await Task.Run(() => (new EmbedBuilder()
                 .WithTitle(title)
                 .WithDescription(description)
