@@ -405,13 +405,15 @@ namespace PartyBot.Services
                 var outVal = await radio.NextSong();
                 if (outVal != null)
                     await CatboxHandler.QueueRadioSong(outVal, radio.Guild, _lavaNode, path);
-                await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);
+                else
+                    await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);
             }
             catch (Exception ex)
             {
                 await radio.Channel.SendMessageAsync(embed: await 
                     EmbedHandler.CreateErrorEmbed("Radio", "Something went wrong trying to queue a song from the radio."));
                 Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
             }
         }
 
