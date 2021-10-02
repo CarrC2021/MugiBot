@@ -58,7 +58,13 @@ namespace PartyBot.Handlers
         {
             if (File.Exists(filePath))
             {
-                Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(filePath));
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
+                var content = await File.ReadAllTextAsync(filePath);
+                Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content, settings));
                 if (!contents.Songs.ContainsKey(songkey))
                 {
                     var songObject = await DBSearchService.UseSongKey(songkey);
@@ -73,7 +79,13 @@ namespace PartyBot.Handlers
         {
             if (File.Exists(filePath))
             {
-                Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(filePath));
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
+                var content = await File.ReadAllTextAsync(filePath);
+                Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content, settings));
                 if (contents.Songs.ContainsKey(songkey))
                     contents.Songs.Remove(songkey);
 

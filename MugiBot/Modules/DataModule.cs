@@ -140,5 +140,10 @@ namespace PartyBot.Modules
         [Summary("Converts playlists to the new format.")]
         public async Task UpdateAPlaylistFormat()
             => await ReplyAsync(embed: await PlaylistHandler.UpdatePlaylists(Path.Combine(DataService.path, "playlists")));
+
+        [Command("PlaylistToJson")]
+        [Summary("Converts playlists to the new format.")]
+        public async Task UpdatePlaylistFormat([Remainder] string name)
+            => await PlaylistHandler.UpdatePlaylist(Path.Combine(DataService.path, "playlists", name));
     }
 }
