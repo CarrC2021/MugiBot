@@ -21,7 +21,7 @@ namespace PartyBot.Services
         public DataService(DBManager _db)
         {
             path = Path.GetDirectoryName(System.Reflection.
-            Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
+                Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 path = separator + path;
             DBManager = _db;

@@ -21,6 +21,7 @@ public class Radio
     public Dictionary<string, int> listStatus = new Dictionary<string, int>();
     public Dictionary<int, string> listStatusReverse = new Dictionary<int, string>();
     private List<SongTableObject> SongSelection = new List<SongTableObject>();
+    private Queue<SongTableObject> Queue = new Queue<SongTableObject>();
     public Radio(IMessageChannel c, SocketGuild g)
     {
         Guild = g;
@@ -122,6 +123,43 @@ public class Radio
             toPrint.Append($"{s}\n");
 
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint.ToString(), Color.Blue);
+    }
+
+    public async Task PopulateQueue(List<SongTableObject> songs)
+    {
+        foreach (SongTableObject song in songs)
+            await Task.Run(() => Queue.Enqueue(song));
+    }
+
+    public async Task DeQueue()
+    {
+        await Task.Run(() => Queue.TryDequeue(out var result));
+    }
+
+    public async Task DeQueueAll()
+    {
+        while (Queue.Peek() != null)
+            await DeQueue();
+    }
+
+    public async Task<StringBuilder> PrintQueue()
+    {
+        var sb = new StringBuilder();
+        var array = await Task.Run(() => Queue.ToArray());
+        foreach (SongTableObject song in array)
+            sb.Append($"{SongTableObject.PrintSong(song)}\n");
+        return sb;
+    }
+
+    public async Task<SongTableObject> NextSong()
+    {
+        Queue.TryPeek(out var result);
+        if (result != null)
+        {
+            await DeQueue();
+            return result;
+        }
+        return null;
     }
 
     public async Task UpdatePotentialSongs(DBManager _db)

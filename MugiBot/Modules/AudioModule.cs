@@ -43,7 +43,7 @@ namespace PartyBot.Modules
         [Command("List")]
         [Summary("Prints the queue.")]
         public async Task List()
-            => await ReplyAsync(embed: await AudioService.ListAsync(Context.Guild));
+            => await ReplyAsync(embed: await AudioService.ListAsync(Context.Guild, Context.Channel));
 
         [Command("Skip")]
         [Summary("Skips the current song if there is another song in the queue.")]
@@ -121,16 +121,16 @@ namespace PartyBot.Modules
         [Command("LoadPlaylist")]
         [Summary("Starts the radio and will keep playing songs until you turn it off.")]
         public async Task LoadPlaylist([Remainder] string name)
-        => await ReplyAsync(embed: await AudioService.LoadPlaylist(Context.User as SocketGuildUser, Context.Guild, name));
+        => await ReplyAsync(embed: await AudioService.LoadPlaylist(Context.User as SocketGuildUser, Context.Guild, Context.Channel, name));
 
         [Command("LAP")]
         [Summary("Starts the radio and will keep playing songs until you turn it off.")]
         public async Task LoadArtistPlaylist([Remainder] string name)
-        => await ReplyAsync(embed: await AudioService.LoadPlaylist(Context.User as SocketGuildUser, Context.Guild, name, "artists"));
+        => await ReplyAsync(embed: await AudioService.LoadPlaylist(Context.User as SocketGuildUser, Context.Guild, Context.Channel, name, "artists"));
 
         [Command("LSP")]
         [Summary("Loads a show playlist with the given name.")]
         public async Task LoadShowPlaylist([Remainder] string name)
-        => await ReplyAsync(embed: await AudioService.LoadPlaylist(Context.User as SocketGuildUser, Context.Guild, name, "shows"));
+        => await ReplyAsync(embed: await AudioService.LoadPlaylist(Context.User as SocketGuildUser, Context.Guild, Context.Channel, name, "shows"));
     }
 }
