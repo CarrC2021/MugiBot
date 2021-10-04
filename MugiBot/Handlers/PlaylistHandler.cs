@@ -19,7 +19,6 @@ namespace PartyBot.Handlers
         {
             if (File.Exists(filePath))
                 return false;
-            await Task.Run(() => File.Create(filePath));
             await SerializeAndWrite(new Playlist("public", new Dictionary<string, string>()), filePath);
             return true;
         }
@@ -27,7 +26,6 @@ namespace PartyBot.Handlers
         {
             if (File.Exists(filePath))
                 return false;
-            await Task.Run(() => File.Create(filePath));
             await SerializeAndWrite(new Playlist(playlistCreator, new Dictionary<string, string>()), filePath);
             return true;
         }
