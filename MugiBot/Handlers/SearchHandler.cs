@@ -9,9 +9,10 @@ namespace PartyBot.Handlers
 
     public class SearchHandler
     {
-        public static async Task<SongTableObject> UseSongKey(AMQDBContext _db, string key)
+        public static async Task<SongTableObject> UseSongKey(string key)
         {
-            SongTableObject song = await _db.SongTableObject.FindAsync(key);
+            using var db = new AMQDBContext();
+            SongTableObject song = await db.SongTableObject.FindAsync(key);
             if (song != null)
                 return song;
             return null;
@@ -212,11 +213,12 @@ namespace PartyBot.Handlers
             return Shows.Union(Romajis, new SongTableObjectComparer()).ToList();
         }
 
-        public static async Task<List<SongTableObject>> ShowSearch(AMQDBContext _db, string name, string type, bool exactMatch)
+        public static async Task<List<SongTableObject>> ShowSearch(string name, string type, bool exactMatch)
         {
+            using var db = new AMQDBContext();
             if (exactMatch)
-                return await ExactShowSearch(_db, name, type);
-            return await ContainsShowSearch(_db, name, type);
+                return await ExactShowSearch(db, name, type);
+            return await ContainsShowSearch(db, name, type);
         }
     }
 }
