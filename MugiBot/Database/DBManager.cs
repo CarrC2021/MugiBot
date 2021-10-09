@@ -40,6 +40,7 @@ namespace PartyBot.Database
                 mainpath = separator + mainpath;
             JsonFiles = Path.Combine(mainpath, "LocalJson");
             ArchivedFiles = Path.Combine(mainpath, "archivedJsons");
+            DatabaseAdminIds = new List<ulong>();
         }
 
         /// <summary>

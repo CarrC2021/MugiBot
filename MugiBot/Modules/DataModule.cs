@@ -28,7 +28,7 @@ namespace PartyBot.Modules
 
         [Command("UpdateSongDB")]
         [Summary("This command will update the song database using all files the bot has downloaded and player stats too if the file name does not include co-op, coop, or teams.")]
-        public async Task UpdateSongDatabase(string expandLibraryFile)
+        public async Task UpdateSongDatabase([Remainder] string expandLibraryFile)
             => await ReplyAsync(embed: await DataService.DBManager.UpdateSongDatabase(Context.User, expandLibraryFile));
 
         [Command("CalcTotal")]
