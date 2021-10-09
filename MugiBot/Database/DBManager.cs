@@ -198,6 +198,7 @@ namespace PartyBot.Database
             await _db.SaveChangesAsync();
             await UpdateSongIDs();
             await _db.SaveChangesAsync();
+            await Task.Run(() => File.Delete(Path.Combine(mainpath, expandLibraryFile)));
             return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
         }
 
@@ -207,6 +208,7 @@ namespace PartyBot.Database
             foreach (Song song in question.Songs)
             {
                 string Type = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
+                // Need to work on incorporating the artist ID.
                 var result = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(question.AnnId, Type, song.Name, song.Artist));
                 if (result == null)
                 {
@@ -220,9 +222,13 @@ namespace PartyBot.Database
                         await LoggingService.LogAsync(ex.Source, LogSeverity.Error, ex.Message);
                     }
                 }
+                // Update the links just in case a link has been changed.
                 else
                 {
                     result.AnnSongID = song.AnnSongId;
+                    result._720 = song.Examples._720;
+                    result.MP3 = song.Examples.Mp3;
+                    result.Show = song.Name;
                 }
             }
         }
