@@ -18,9 +18,9 @@ namespace PartyBot.Database
         public readonly PlayersRulesService _rs;
         private readonly char separator = Path.DirectorySeparatorChar;
         private readonly string mainpath;
-
         public readonly string JsonFiles;
         public readonly string ArchivedFiles;
+        public List<ulong> DatabaseAdminIds { get; set; }
 
         private readonly Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
                 {1, "Opening"},
@@ -189,8 +189,10 @@ namespace PartyBot.Database
             => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
 
         // This function is used to update the song database using a json that is created by exporting from the expand library.
-        public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
+        public async Task<Embed> UpdateSongDatabase(IUser user, string expandLibraryFile)
         {
+            if(!DatabaseAdminIds.Contains(user.Id))
+                return await EmbedHandler.CreateErrorEmbed("Data, Songs", $"You do not have the privileges necessary to use this method.");
             AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
             foreach (Question question in data.Questions)
                 await AddSongsFromQuestion(question);
@@ -228,7 +230,7 @@ namespace PartyBot.Database
                     result.AnnSongID = song.AnnSongId;
                     result._720 = song.Examples._720;
                     result.MP3 = song.Examples.Mp3;
-                    result.Show = song.Name;
+                    result.Show = question.Name;
                 }
             }
         }

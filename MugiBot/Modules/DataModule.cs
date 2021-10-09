@@ -29,7 +29,7 @@ namespace PartyBot.Modules
         [Command("UpdateSongDB")]
         [Summary("This command will update the song database using all files the bot has downloaded and player stats too if the file name does not include co-op, coop, or teams.")]
         public async Task UpdateSongDatabase(string expandLibraryFile)
-            => await ReplyAsync(embed: await DataService.DBManager.UpdateSongDatabase(expandLibraryFile));
+            => await ReplyAsync(embed: await DataService.DBManager.UpdateSongDatabase(Context.User, expandLibraryFile));
 
         [Command("CalcTotal")]
         [Summary("This will calculate and list all players' total success rate. There is an optional argument to calculate successrate by rule. Use !listrules to see what they are.")]

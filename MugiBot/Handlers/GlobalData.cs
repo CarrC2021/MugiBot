@@ -42,6 +42,7 @@ namespace PartyBot.Handlers
             DefaultPrefix = "!",
             GameStatus = "CHANGE ME IN CONFIG",
             BlacklistedChannels = new List<ulong>(),
+            DatabaseAdmins = new List<ulong>(),
             LocalEndPoint = "Not Assigned"
         };
     }
