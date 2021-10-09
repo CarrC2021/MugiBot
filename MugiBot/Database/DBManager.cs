@@ -1,4 +1,6 @@
 ﻿using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using PartyBot.DataStructs;
 using PartyBot.Handlers;
 using PartyBot.Services;
@@ -190,7 +192,7 @@ namespace PartyBot.Database
             => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
 
         // This function is used to update the song database using a json that is created by exporting from the expand library.
-        public async Task<Embed> UpdateSongDatabase(IUser user, string expandLibraryFile)
+        public async Task<Embed> UpdateSongDatabase(SocketUser user, string expandLibraryFile)
         {
             if(!DatabaseAdminIds.Contains(user.Id))
                 return await EmbedHandler.CreateErrorEmbed("Data, Songs", $"You do not have the privileges necessary to use this method.");
