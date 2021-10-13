@@ -72,19 +72,31 @@ namespace PartyBot.Services
                 return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"Playlist {name} now exists", Color.Blue);
         }
+
+        public async Task<Embed> CreatePrivatePlaylist(string name, ulong ID)
+        {
+            var creatorName = ID.ToString();
+            if (!await PlaylistHandler.CreatePrivatePlaylist(name, Path.Combine(path, "playlists", name.ToLower()), creatorName))
+                return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"A private playlist with the name {name} now exists", Color.Blue);
+        }
+
         public async Task<Embed> AddToPlaylist(string playlistName, string key)
         {
             if (DBSearchService.UseSongKey(key) == null)
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"Song key {key} is invalid");
-            if (!await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key))
-                return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName} does not exist");
+            var tuple = await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key);
+            if (!tuple.Item1)
+                return await EmbedHandler.CreateErrorEmbed("Playlist", $"{tuple.Item2}");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"Song has been added to playlist {key}", Color.Blue);
         }
         public async Task<Embed> RemoveFromPlaylist(string playlistName, string key)
         {
             if (!File.Exists(Path.Combine(path, "playlists", playlistName.ToLower())))
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName.ToLower()} does not exist");
-            await PlaylistHandler.RemoveFromPlaylist(Path.Combine(path, "playlists", playlistName.ToLower()), key);
+            var tuple = await PlaylistHandler.RemoveFromPlaylist(Path.Combine(path, "playlists", playlistName.ToLower()), key);
+            if (!tuple.Item1)
+                return await EmbedHandler.CreateErrorEmbed("Playlist", $"{tuple.Item2}");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"{key} has been removed from {playlistName}", Color.Blue);
         }
         public async Task<Embed> PrintPlaylist(string playlistName, ISocketMessageChannel channel)

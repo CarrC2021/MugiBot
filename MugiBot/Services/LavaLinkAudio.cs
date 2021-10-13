@@ -169,9 +169,9 @@ namespace PartyBot.Services
                 var descriptionBuilder = new StringBuilder();
 
                 var radio = RadioHandler.FindRadio(radios, guild);
-                StringBuilder sb = new StringBuilder();
+                var radioQueue = new List<string>();
                 if (radio != null)
-                    sb = await radio.PrintQueue();
+                    radioQueue = await radio.PrintQueue();
 
                 /* Get The Player and make sure it isn't null. */
                 var player = _lavaNode.GetPlayer(guild);
@@ -183,7 +183,7 @@ namespace PartyBot.Services
                 /*If the queue count is less than 1 and the current track IS NOT null then we wont have a list to reply with.
                     In this situation we simply return an embed that displays the current track instead. */
                 if (player.Queue.Count < 1 && player.Track != null)
-                    return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", $"Next in Queue \n {sb.ToString()}", Color.Blue);
+                    return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", $"Not sure what to put here", Color.Blue);
                 /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
                  *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
                     This trackNum variable is used to display the number in which the song is in place. (Start at 2 because we're including the current song.*/
@@ -193,8 +193,13 @@ namespace PartyBot.Services
                     descriptionBuilder.Append($"{trackNum}: {track.Title}\n");
                     trackNum++;
                 }
+                foreach (string song in radioQueue)
+                {
+                    descriptionBuilder.Append($"{trackNum}: {radioQueue}\n");
+                    trackNum++;
+                }
 
-                return await EmbedHandler.CreateBasicEmbed("Music Playlist", $"Now Playing: {player.Track.Title} \n{descriptionBuilder}\n + {sb.ToString()}", Color.Blue);
+                return await EmbedHandler.CreateBasicEmbed("Music Playlist", $"Now Playing: {player.Track.Title} \n{descriptionBuilder}\n", Color.Blue);
             }
             catch (Exception ex)
             {
@@ -245,6 +250,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
+                await LoggingService.LogInformationAsync(ex.Source, ex.Message + "\n" + ex.StackTrace);
                 return await EmbedHandler.CreateErrorEmbed("Music, Skip", ex.Message);
             }
 
@@ -393,7 +399,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message, ex.StackTrace);
+                await LoggingService.LogInformationAsync(ex.Message, ex.StackTrace);
             }
             return await EmbedHandler.CreateErrorEmbed("Radio", "Seems like I could not find any songs that meet the search criteria.");
         }
@@ -402,18 +408,20 @@ namespace PartyBot.Services
         {
             try
             {
+                // First try to see if there is anything queued up.
                 var outVal = await radio.NextSong();
                 if (outVal != null)
                     await CatboxHandler.QueueRadioSong(outVal, radio.Guild, _lavaNode, path);
-                else
+                // If there is nothing then try to queue from the random radio selection.
+                outVal = radio.GetRandomSong();
+                if (outVal != null)
                     await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);
             }
             catch (Exception ex)
             {
                 await radio.Channel.SendMessageAsync(embed: await 
                     EmbedHandler.CreateErrorEmbed("Radio", "Something went wrong trying to queue a song from the radio."));
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
+                await LoggingService.LogInformationAsync(ex.Source, ex.Message + "\n" + ex.StackTrace);
             }
         }
 
@@ -435,11 +443,11 @@ namespace PartyBot.Services
 
         public async Task<Embed> LoadPlaylist(Radio radio, SocketGuildUser user, ISocketMessageChannel channel, string name, string type = "default")
         {
-            //Check If User Is Connected To Voice Cahnnel.
+            // Check If User Is Connected To Voice Cahnnel.
             if (user.VoiceChannel == null)
                 return await EmbedHandler.CreateErrorEmbed("Music, Join/Play", "You Must First Join a Voice Channel.");
 
-            //Check the guild has a player available.
+            // Check the guild has a player available.
             if (!_lavaNode.HasPlayer(radio.Guild))
                 return await EmbedHandler.CreateErrorEmbed("Music, Play", "I'm not connected to a voice channel.");
 
@@ -465,7 +473,7 @@ namespace PartyBot.Services
                     playlist[i] = key;
                 }
 
-                //Queue the first song immediately
+                // Queue the first song immediately
                 var song = new SongTableObject();
                 for (int i = 0; i < 3; i++)
                 {
@@ -476,7 +484,7 @@ namespace PartyBot.Services
                     playlist.Remove(song.Key);
                 }
 
-                //Now we will place the rest of the songs in a queue
+                // Now we will place the rest of the songs in a queue
                 var songs = new List<SongTableObject>();
                 foreach (string key in playlist)
                     songs.Add(await DBSearchService.UseSongKey(key));
@@ -485,6 +493,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
+                await LoggingService.LogInformationAsync("Playlists", ex.Source + "\n" + ex.Message + "\n" + ex.StackTrace);
                 return await EmbedHandler.CreateErrorEmbed("Playlists", ex.Message);
             }
         }

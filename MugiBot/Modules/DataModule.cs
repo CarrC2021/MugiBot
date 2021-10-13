@@ -55,6 +55,12 @@ namespace PartyBot.Modules
         public async Task RemoveDeadSongs()
             => await ReplyAsync(embed: await DataService.DBManager.RemoveDeadSongs());
 
+        [Command("UpdateSongLink")]
+        [Summary("To use this command first provide a link, then paste the songkey after to identify which song to update." +
+        " In order to use this command you need Database admin priviliges.")]
+        public async Task UpdateSongLink(string newLink, [Remainder] string songkey)
+            => await ReplyAsync(embed: await DataService.DBManager.UpdateSongLink(songkey, newLink, Context.User.Id));
+
         [Command("TestEmbed")]
         public async Task TestEmbed()
             => await ReplyAsync(embed: await EmbedHandler.TestingEmbedStuff());
@@ -67,6 +73,12 @@ namespace PartyBot.Modules
         [Summary("Adds a playlist of the given name.")]
         public async Task CreatePlaylist([Remainder] string name)
             => await ReplyAsync(embed: await DataService.CreatePlaylist(name));
+
+         [Command("CreatePrivatePlaylist")]
+        [Summary("Creates a private playlist of the given name. This means that only the owner"
+        + " of the list can make any changes.")]
+        public async Task CreatePrivatePlaylist([Remainder] string name)
+            => await ReplyAsync(embed: await DataService.CreatePrivatePlaylist(name, Context.User.Id));
 
         [Command("AddToPlaylist")]
         [Summary("Enter a playlist and song key to add a song to a playlist.")]

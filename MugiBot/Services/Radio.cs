@@ -142,13 +142,15 @@ public class Radio
             await DeQueue();
     }
 
-    public async Task<StringBuilder> PrintQueue()
+    public async Task<List<string>> PrintQueue()
     {
         var sb = new StringBuilder();
         var array = await Task.Run(() => Queue.ToArray());
+        var stringArray = new List<string>();
         foreach (SongTableObject song in array)
-            sb.Append($"{SongTableObject.PrintSong(song)}\n");
-        return sb;
+            stringArray.Add(SongTableObject.PrintSong(song));
+
+        return stringArray;
     }
 
     public async Task<SongTableObject> NextSong()
@@ -197,6 +199,8 @@ public class Radio
 
     public SongTableObject GetRandomSong()
     {
+        if (SongSelection.Count == 0)
+            return null;
         Random rnd = new Random();
         int r = rnd.Next(SongSelection.Count);
         return SongSelection[r];
