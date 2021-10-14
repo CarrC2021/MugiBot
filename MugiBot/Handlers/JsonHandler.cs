@@ -15,6 +15,7 @@ namespace PartyBot.Handlers
     {
         public static async Task DownloadJson(SocketMessage message, string JsonFolder)
         {
+            char separator = Path.DirectorySeparatorChar;
             string fileName = "";
             try
             {
@@ -25,8 +26,13 @@ namespace PartyBot.Handlers
                     {
                         //Create a WebClient and download the attached file
                         using var client = new WebClient();
-                        await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
-                            Path.Combine(JsonFolder, fileName)));
+
+                        if (fileName.ToLower().Contains("expand library") || fileName.ToLower().Contains("expandlibrary"))
+                            await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
+                                Path.Combine(JsonFolder.Replace($"{separator}LocalJson", ""), fileName)));
+                        else
+                            await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
+                                Path.Combine(JsonFolder, fileName)));
                         client.Dispose();
                     }
                 }

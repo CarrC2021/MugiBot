@@ -1,4 +1,6 @@
 ﻿using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using PartyBot.DataStructs;
 using PartyBot.Handlers;
 using PartyBot.Services;
@@ -18,9 +20,9 @@ namespace PartyBot.Database
         public readonly PlayersRulesService _rs;
         private readonly char separator = Path.DirectorySeparatorChar;
         private readonly string mainpath;
-
         public readonly string JsonFiles;
         public readonly string ArchivedFiles;
+        public List<ulong> DatabaseAdminIds { get; set; }
 
         private readonly Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
                 {1, "Opening"},
@@ -40,6 +42,7 @@ namespace PartyBot.Database
                 mainpath = separator + mainpath;
             JsonFiles = Path.Combine(mainpath, "LocalJson");
             ArchivedFiles = Path.Combine(mainpath, "archivedJsons");
+            DatabaseAdminIds = new List<ulong>();
         }
 
         /// <summary>
@@ -189,8 +192,10 @@ namespace PartyBot.Database
             => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
 
         // This function is used to update the song database using a json that is created by exporting from the expand library.
-        public async Task<Embed> UpdateSongDatabase(string expandLibraryFile)
+        public async Task<Embed> UpdateSongDatabase(SocketUser user, string expandLibraryFile)
         {
+            if(!DatabaseAdminIds.Contains(user.Id))
+                return await EmbedHandler.CreateErrorEmbed("Data, Songs", $"You do not have the privileges necessary to use this method.");
             AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
             foreach (Question question in data.Questions)
                 await AddSongsFromQuestion(question);
@@ -198,6 +203,7 @@ namespace PartyBot.Database
             await _db.SaveChangesAsync();
             await UpdateSongIDs();
             await _db.SaveChangesAsync();
+            await Task.Run(() => File.Delete(Path.Combine(mainpath, expandLibraryFile)));
             return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
         }
 
@@ -207,6 +213,7 @@ namespace PartyBot.Database
             foreach (Song song in question.Songs)
             {
                 string Type = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
+                // Need to work on incorporating the artist ID.
                 var result = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(question.AnnId, Type, song.Name, song.Artist));
                 if (result == null)
                 {
@@ -220,9 +227,13 @@ namespace PartyBot.Database
                         await LoggingService.LogAsync(ex.Source, LogSeverity.Error, ex.Message);
                     }
                 }
+                // Update the links just in case a link has been changed.
                 else
                 {
                     result.AnnSongID = song.AnnSongId;
+                    result._720 = song.Examples._720;
+                    result.MP3 = song.Examples.Mp3;
+                    result.Show = question.Name;
                 }
             }
         }
@@ -240,6 +251,19 @@ namespace PartyBot.Database
                     song.AnnSongID = -1;
                 }
             }
+        }
+
+        public async Task<Embed> UpdateSongLink(string songKey, string newLink, ulong messengerID)
+        {
+            if (!DatabaseAdminIds.Contains(messengerID))
+                return await EmbedHandler.CreateErrorEmbed("Database", "You do not have permission to update links.");
+            if (newLink.ToLower().Contains("catbox") || newLink.ToLower().EndsWith(".mp3"))
+                return await EmbedHandler.CreateErrorEmbed("Database", "This link does not look correct.");
+            var tableObject = await DBSearchService.UseSongKey(songKey);
+            if (tableObject != null)
+                tableObject.MP3 = newLink;
+            return await EmbedHandler.CreateBasicEmbed("Database", $"The link for {songKey} has been updated to {newLink}." +
+            " Contact mods if this looks incorrect. ", Color.Blue);
         }
 
         public async Task<Embed> RemoveDeadSongs()

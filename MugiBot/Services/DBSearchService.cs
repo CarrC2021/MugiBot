@@ -21,25 +21,25 @@ public class DBSearchService
     public static async Task<Embed> SearchForShow(SocketMessage message, string name, string type = "any", bool exactmatch = false, string links = "no")
     {
         using var db = new AMQDBContext();
-        var songList = await SearchHandler.ShowSearch(db, name, type, exactmatch);
+        var songList = await SearchHandler.ShowSearch(name, type, exactmatch);
         if (links.Equals("no"))
             return await EmbedHandler.PrintSongs(message.Channel, songList);
         return await EmbedHandler.PrintSongs(message.Channel, songList, true);
     }
 
-    public static async Task<Embed> SearchByAuthor(SocketMessage message, string author, string printLinks = "no")
+    public static async Task<Embed> SearchByAuthor(SocketMessage message, string author, string printLinks = "no", bool exact = false)
     {
         using var db = new AMQDBContext();
-        var songList = await SearchHandler.SearchAuthor(db, author);
+        var songList = await SearchHandler.SearchAuthor(db, author, exact);
         if (printLinks.Equals("no"))
             return await EmbedHandler.PrintSongs(message.Channel, songList);
         return await EmbedHandler.PrintSongs(message.Channel, songList, true);
     }
 
-    public static async Task<List<SongTableObject>> ReturnSongsByAuthor(string author)
+    public static async Task<List<SongTableObject>> ReturnSongsByAuthor(string author, bool exact)
     {
         using var db = new AMQDBContext();
-        return await SearchHandler.SearchAuthor(db, author);
+        return await SearchHandler.SearchAuthor(db, author, exact);
     }
     public static async Task<Embed> ListPlayerStats(ISocketMessageChannel channel, string playerName, string showName, PlayersRulesService rulesService, string type = "any", string exactMatch = "no")
     {
@@ -68,8 +68,7 @@ public class DBSearchService
 
     public static async Task<SongTableObject> UseSongKey(string key)
     {
-        using var db = new AMQDBContext();
-        return await SearchHandler.UseSongKey(db, key);
+        return await SearchHandler.UseSongKey(key);
     }
 
     public static async Task<List<PlayerTableObject>> ReturnAllPlayerObjects()
@@ -157,37 +156,6 @@ public class DBSearchService
             .AsNoTracking()
             .Where(f => f.Type.ToLower().Contains(type.ToLower()))
             .ToListAsync();
-    }
-
-    public static async Task<List<SongTableObject>> ReturnAllSongObjectsByShowByType(string show, string type, bool exact)
-    {
-        using var db = new AMQDBContext();
-        if (type.Equals("any"))
-            return await ReturnAllSongObjects(show);
-        if (exact)
-            return await db.SongTableObject
-                .AsNoTracking()
-                .Where(f => f.Show.ToLower().Equals(show.ToLower()))
-                .Where(f => f.Type.ToLower().Contains(type.ToLower()))
-                .ToListAsync();
-        return await db.SongTableObject
-            .AsNoTracking()
-            .Where(f => f.Show.ToLower().Contains(show.ToLower()))
-            .Where(f => f.Type.ToLower().Contains(type.ToLower()))
-            .ToListAsync();
-    }
-
-    public static async Task<SongTableObject> ReturnSongFromQuery(int annID, string artist, string type, string songName)
-    {
-        using var db = new AMQDBContext();
-        var query = await db.SongTableObject
-            .AsNoTracking()
-            .Where(f => f.AnnID == annID)
-            .Where(f => f.Type.ToLower().Equals(type.ToLower()))
-            .Where(f => f.Artist.ToLower().Equals(artist.ToLower()))
-            .Where(j => j.SongName.ToLower().Equals(songName.ToLower()))
-            .ToListAsync();
-        return query.FirstOrDefault();
     }
 
 }

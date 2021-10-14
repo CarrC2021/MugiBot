@@ -55,6 +55,8 @@ namespace PartyBot.Services
             await _client.LoginAsync(TokenType.Bot, GlobalData.Config.DiscordToken);
             await _client.StartAsync();
 
+            _dbManager.DatabaseAdminIds = GlobalData.Config.DatabaseAdmins;
+            _dataService.DBManager.DatabaseAdminIds = GlobalData.Config.DatabaseAdmins;
             await _commandHandler.InitializeAsync();
             await Task.Delay(-1);
         }

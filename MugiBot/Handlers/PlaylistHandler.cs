@@ -19,22 +19,42 @@ namespace PartyBot.Handlers
         {
             if (File.Exists(filePath))
                 return false;
-            await Task.Run(() => File.Create(filePath));
-            await Task.Run(() => JsonConvert.SerializeObject(new Playlist("public", new Dictionary<string, string>())));
+            await SerializeAndWrite(new Playlist("public", new Dictionary<string, string>()), filePath);
             return true;
         }
         public static async Task<bool> CreatePrivatePlaylist(string name, string filePath, string playlistCreator)
         {
             if (File.Exists(filePath))
                 return false;
-            await Task.Run(() => File.Create(filePath));
-            await Task.Run(() => JsonConvert.SerializeObject(new Playlist(playlistCreator, new Dictionary<string, string>())));
+            await SerializeAndWrite(new Playlist(playlistCreator, new Dictionary<string, string>()), filePath);
             return true;
         }
-        public static async Task DeletePlaylist(string name, string filePath)
+        // Given a file name this function will deserialize a json file asynchronously and return it as a Playlist object
+        public static async Task<Playlist> DeserializePlaylistAsync(string filePath)
         {
-            if (File.Exists(filePath))
+            var settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
+            var content = await File.ReadAllTextAsync(filePath);
+            Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content, settings));
+            return contents;
+        }
+        public static async Task<Embed> DeletePlaylist(string name, string filePath, string author = "public")
+        {
+            if (!File.Exists(filePath))
+                return await EmbedHandler.CreateBasicEmbed("Playlists", $"There is no playlist with the name {name}", Color.Blue);
+            var playlist = await DeserializePlaylistAsync(filePath);
+            if (playlist.Private && playlist.Author.Equals(author))
+            {
                 await Task.Run(() => File.Delete(filePath));
+                return await EmbedHandler.CreateBasicEmbed("Playlists", $"Deleted the playlist {name}", Color.Blue);
+            }
+            if (playlist.Private || playlist.AutomaticallyGenerated)
+                return await EmbedHandler.CreateErrorEmbed("Playlists", $"You do not have the permission to delete the playlist {name}");
+            await Task.Run(() => File.Delete(filePath));
+            return await EmbedHandler.CreateBasicEmbed("Playlists", $"Deleted the playlist {name}", Color.Blue);
         }
         public static async Task<bool> AddMultipleToPlaylist(string filePath, List<string> songkeys)
         {
@@ -54,57 +74,42 @@ namespace PartyBot.Handlers
             }
             return false;
         }
-        public static async Task<bool> AddToPlaylist(string filePath, string songkey)
+        public static async Task<Tuple<bool, string>> AddToPlaylist(string filePath, string songkey, string author = "public")
         {
             if (File.Exists(filePath))
             {
-                var settings = new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    MissingMemberHandling = MissingMemberHandling.Ignore
-                };
-                var content = await File.ReadAllTextAsync(filePath);
-                Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content, settings));
+                var contents = await DeserializePlaylistAsync(filePath);
+                if (contents.Private && !contents.Author.Equals(author))
+                    return new Tuple<bool, string>(false, "You do not have permission to add to this playlist.");
                 if (!contents.Songs.ContainsKey(songkey))
                 {
                     var songObject = await DBSearchService.UseSongKey(songkey);
                     contents.Songs.Add(songkey, SongTableObject.PrintSong(songObject));
                 }
                 await SerializeAndWrite(contents, filePath);
-                return true;
+                return new Tuple<bool, string>(true, "");
             }
-            return false;
+            return new Tuple<bool, string>(false, "This playlist does not exist");
         }
-        public static async Task<bool> RemoveFromPlaylist(string filePath, string songkey)
+        public static async Task<Tuple<bool, string>> RemoveFromPlaylist(string filePath, string songkey, string author = "public")
         {
             if (File.Exists(filePath))
             {
-                var settings = new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    MissingMemberHandling = MissingMemberHandling.Ignore
-                };
-                var content = await File.ReadAllTextAsync(filePath);
-                Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content, settings));
+                var contents = await DeserializePlaylistAsync(filePath);
+                if (contents.Private && !contents.Author.Equals(author))
+                    return new Tuple<bool, string>(true, "You do not have permission to add to this playlist.");
                 if (contents.Songs.ContainsKey(songkey))
                     contents.Songs.Remove(songkey);
 
                 await SerializeAndWrite(contents, filePath);
-                return true;
+                return new Tuple<bool, string>(true, "");
             }
-            return false;
+            return new Tuple<bool, string>(false, "");
         }
+
         public static async Task<List<string>> LoadPlaylist(string filePath)
         {
-            Playlist playlist;
-            var settings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                MissingMemberHandling = MissingMemberHandling.Ignore
-            };
-
-            var content = await File.ReadAllTextAsync(filePath);
-            playlist = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(content, settings));
+            var playlist = await DeserializePlaylistAsync(filePath);
             return playlist.Songs.Keys.ToList();
         }
         public static async Task<Dictionary<string, string>> ReturnPlaylistDictionary(string filePath)
@@ -145,10 +150,10 @@ namespace PartyBot.Handlers
             var list = new List<string>();
             if (File.Exists(Path.Combine(path, "artists", query)))
                 list.Add(Path.Combine(path, "artists", query));
-                
+
             if (File.Exists(Path.Combine(path, "shows", query)))
                 list.Add(Path.Combine(path, "shows", query));
-            
+
             if (File.Exists(Path.Combine(path, query)))
                 list.Add(Path.Combine(path, query));
 
@@ -159,7 +164,7 @@ namespace PartyBot.Handlers
 
         public static async Task<Embed> CreateArtistPlaylist(string artistName, string artistPlaylistDirectory, bool exact = false)
         {
-            return await AutomaticPlaylistCreation(artistName, artistPlaylistDirectory, "artist", "any", true);
+            return await AutomaticPlaylistCreation(artistName, artistPlaylistDirectory, "artist", "any", exact);
         }
 
         public static async Task<Embed> CreateShowPlaylist(string show, string showPlaylistDirectory, string songType = "any", bool exact = false)
@@ -167,23 +172,29 @@ namespace PartyBot.Handlers
             return await AutomaticPlaylistCreation(show, showPlaylistDirectory, "show", songType, exact);
         }
 
+        // Yes this function badly needs documentation
         public static async Task<Embed> AutomaticPlaylistCreation(string query, string playlistDirectory, string searchType, string songType = "any", bool exact = false)
         {
+            // I should be using the working SearchDirectories function now.
             if (File.Exists(Path.Combine(playlistDirectory, query.ToLower())))
                 return await EmbedHandler.CreateErrorEmbed("Playlists", $"A playlist with name {query.ToLower()} already exists");
             if (File.Exists(Path.Combine(playlistDirectory, songType, query.ToLower())))
                 return await EmbedHandler.CreateErrorEmbed("Playlists", $"A playlist with name {query.ToLower()} already exists");
             var songs = new List<SongTableObject>();
             Console.WriteLine(songType);
+            // Use the correct search command.
             if (searchType.Equals("artist"))
-                songs = await DBSearchService.ReturnSongsByAuthor(query);
+                songs = await DBSearchService.ReturnSongsByAuthor(query, exact);
             if (searchType.Equals("show"))
-                songs = await DBSearchService.ReturnAllSongObjectsByShowByType(query, songType, exact);
+                songs = await SearchHandler.ShowSearch(query, songType, exact);
+            // If nothing was found for this query then don't create a playlist.
             if (songs.Count == 0)
                 return await EmbedHandler.CreateBasicEmbed("Playlists", $"A playlist with name {query.ToLower()} not created. "
             + "The query you specified returned 0 songs. Blame Dayt not me :wink:.", Color.Red);
             var playlist = new Playlist("public", new Dictionary<string, string>(), true, false);
+            // Just added this for debugging and tracking purposes
             playlist.AutomaticallyGenerated = true;
+
             // Now we populate the dictionary with our songs we found.
             foreach (SongTableObject song in songs)
                 playlist.Songs.Add(song.Key, SongTableObject.PrintSong(song));

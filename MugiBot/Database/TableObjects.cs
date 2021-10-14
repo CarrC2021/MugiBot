@@ -120,6 +120,11 @@ namespace PartyBot.Database
             return $"{tableObject.Show} {tableObject.Type} {tableObject.SongName} by {tableObject.Artist}";
         }
 
+        public string PrintSong()
+        {
+            return $"{Show} {Type} {SongName} by {Artist}";
+        }
+
         public static string PrintSong(PlayerTableObject tableObject)
         {
             return $"{tableObject.Show} {tableObject.Type} {tableObject.SongName} by {tableObject.Artist}";
