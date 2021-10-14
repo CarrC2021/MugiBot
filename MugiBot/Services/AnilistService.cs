@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Mime;
 using Discord;
@@ -14,12 +15,19 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Net;
 using PartyBot.Queries;
+using GraphQL;
+using GraphQL.Client.Http;
+using GraphQL.Client.Abstractions;
+using GraphQL.Client.Serializer.SystemTextJson;
+using PartyBot.DataStructs;
+using PartyBot.Handlers;
 
 namespace PartyBot.Services
 {
     public class AnilistService
     {
         private Anilist4Net.Client _anilistClient;
+        private GraphQLHttpClient _graphQLClient { get; set; }
         private readonly char separator = Path.DirectorySeparatorChar;
         private readonly string path;
         private readonly Dictionary<string, string> FolderToExtension;
@@ -28,7 +36,7 @@ namespace PartyBot.Services
             NullValueHandling = NullValueHandling.Ignore,
             MissingMemberHandling = MissingMemberHandling.Ignore
         };
-        private HttpClient _client = new HttpClient();
+        
         public AnilistService()
         {
             path = Path.GetDirectoryName(System.Reflection.
@@ -44,6 +52,12 @@ namespace PartyBot.Services
                 {"Statistics", ".json"},
                 {"MediaFiles", ".json"}
             };
+            var options = new GraphQLHttpClientOptions
+			{
+				EndPoint = new Uri("https://graphql.anilist.co"),
+                
+			};
+            _graphQLClient = new GraphQLHttpClient(options, new SystemTextJsonSerializer(), new HttpClient());
         }
         public async Task<string> GetCoverArtAsync(string show, int annId)
         {
@@ -51,28 +65,18 @@ namespace PartyBot.Services
             Console.WriteLine(response.Title.ToString());
             return response.CoverImageLarge;
         }
-        public async Task GetUserAsync(string userName)
-        {
-            var user = await _anilistClient.GetUserByName(userName);
-            string query = AniListQueryCreator.MediaListQuery(user.Name);
-            var request = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                Headers = {
-                    {"Content-Type", "application/json"},
-                    {"Accept", "application/json"}
-                },
-                RequestUri = new Uri("https://graphql.anilist.co"),
-                Content = new StringContent(query)
-            };
-            using var client = new HttpClient();
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var body = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(body);
-            await DownloadFromURL(user.SiteUrl + "/animelist", "AniLists", user.Name);
 
+        public async Task<Embed> GetUserListAsync(string username)
+        {
+            var query = "query ($username: String){"+ $"{AnilistQuery.MediaListQuery()}" +"}";
+			var request = new GraphQLRequest {Query = query, Variables = new {username}};
+            Console.Write(request);
+			var response = await _graphQLClient.SendQueryAsync<dynamic>(request).ConfigureAwait(false);
+            var UserList = response.Data.ToString();
+            await WriteJsonResponseToFile(UserList, "AniLists", username);
+            return await EmbedHandler.CreateBasicEmbed("Anilist", $"Downloaded a file containing the contents of {username}'s anilist", Color.Green);
         }
+
         public async Task DownloadMediaAsync(string Show, string folder, int annId)
         {
             Media media = await GetMediaAsync(Show);
@@ -99,9 +103,14 @@ namespace PartyBot.Services
             responseMessage.EnsureSuccessStatusCode();
             var body = await responseMessage.Content.ReadAsStringAsync();
             Console.WriteLine(body);
-            string localpath = Path.Combine(path, $"{folder}", $"{fileName}.{FolderToExtension[folder]}");
             using var wc = new WebClient();
             string jsonResponse = await wc.DownloadStringTaskAsync(new Uri(urlToDownload));
+            await WriteJsonResponseToFile(jsonResponse, folder, fileName);
+        }
+
+        public async Task WriteJsonResponseToFile(string jsonResponse, string folder, string fileName)
+        {
+            string localpath = Path.Combine(path, $"{folder}", $"{fileName}{FolderToExtension[folder]}");
             await File.WriteAllTextAsync(localpath, jsonResponse);
         }
     }

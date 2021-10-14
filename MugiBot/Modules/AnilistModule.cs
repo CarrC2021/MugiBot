@@ -13,7 +13,7 @@ namespace PartyBot.Modules
         private AnilistService _anilistService = new AnilistService();
         [Command("ALUser")]
         [Summary("Gets the Anilist User associated with this username.")]
-        public async Task JoinAndPlay([Remainder] string userName)
-            => await _anilistService.GetUserAsync(userName);
+        public async Task GetUserListAsync([Remainder] string userName)
+            => await ReplyAsync(embed: await _anilistService.GetUserListAsync(userName));
     }
 }
