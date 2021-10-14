@@ -129,7 +129,7 @@ namespace PartyBot.Services
             //If after all the checks we did, something still goes wrong. Tell the user about it so they can report it back to us.
             catch (Exception ex)
             {
-                return await EmbedHandler.CreateErrorEmbed("Music, Play", ex.Message);
+                return await EmbedHandler.CreateErrorEmbed("Music, Play", $"{ex.Message} \n {query}");
             }
 
         }
@@ -199,7 +199,7 @@ namespace PartyBot.Services
                     trackNum++;
                 }
 
-                return await EmbedHandler.CreateBasicEmbed("Music Playlist", $"Now Playing: {player.Track.Title} \n{descriptionBuilder}\n", Color.Blue);
+                return await EmbedHandler.CreateBasicEmbed("Music, List", $"Now Playing: {player.Track.Title} \n{descriptionBuilder}\n", Color.Blue);
             }
             catch (Exception ex)
             {
