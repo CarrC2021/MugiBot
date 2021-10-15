@@ -53,11 +53,22 @@ namespace PartyBot.DataStructs
         [JsonProperty("genres")]
         public List<string> Genres { get; } = new List<string>();
 
+        [JsonProperty("tags")]
+        public List<Tag> Tags { get; set; }
+
         [JsonProperty("mediaListEntry")]
         public object MediaListEntry { get; set; }
 
         [JsonProperty("siteUrl")]
         public string SiteUrl { get; set; }
+    }
+
+    public class Tag
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        [JsonProperty("description")]
+        public string Description { get; set; }
     }
 
     public class Entry

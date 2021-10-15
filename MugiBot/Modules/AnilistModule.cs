@@ -10,10 +10,10 @@ namespace PartyBot.Modules
 {
     public class AnilistModule : ModuleBase<SocketCommandContext>
     {
-        private AnilistService _anilistService = new AnilistService();
+        public AnilistService AnilistService = new AnilistService(GlobalData.Config.RootFolderPath);
         [Command("ALUser")]
         [Summary("Gets the Anilist User associated with this username.")]
         public async Task GetUserListAsync([Remainder] string userName)
-            => await ReplyAsync(embed: await _anilistService.GetUserListAsync(userName));
+            => await ReplyAsync(embed: await AnilistService.GetUserListAsync(userName));
     }
 }

@@ -15,7 +15,7 @@ namespace PartyBot.Services
     public sealed class PlayersRulesService
     {
         private readonly char separator = Path.DirectorySeparatorChar;
-        public string mainpath;
+        public string mainpath { get; set; }
         private string rulesPath;
         private string playersPath;
         private string usernamesPath;

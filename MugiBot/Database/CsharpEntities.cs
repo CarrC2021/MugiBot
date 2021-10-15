@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PartyBot.DataStructs;
+using PartyBot.Handlers;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -16,19 +17,7 @@ namespace PartyBot.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string mainpath = Path.GetDirectoryName(System.Reflection.
-            Assembly.GetExecutingAssembly().GetName().CodeBase);
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                mainpath = mainpath.Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
-                mainpath = separator + mainpath;
-            }
-            else
-            {
-                mainpath = mainpath.Replace($"{separator}bin{separator}debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
-            }
-            Console.WriteLine(mainpath);
+            string mainpath = GlobalData.Config.RootFolderPath;
             var connectionStringBuilder = new SqliteConnectionStringBuilder
             {
                 DataSource =

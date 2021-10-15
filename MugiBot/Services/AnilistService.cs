@@ -29,7 +29,7 @@ namespace PartyBot.Services
         private Anilist4Net.Client _anilistClient;
         private GraphQLHttpClient _graphQLClient { get; set; }
         private readonly char separator = Path.DirectorySeparatorChar;
-        public string path;
+        public string path { get; set; }
         private readonly Dictionary<string, string> FolderToExtension;
         private JsonSerializerSettings settings = new JsonSerializerSettings
         {
@@ -51,7 +51,23 @@ namespace PartyBot.Services
             var options = new GraphQLHttpClientOptions
 			{
 				EndPoint = new Uri("https://graphql.anilist.co"),
-                
+			};
+            _graphQLClient = new GraphQLHttpClient(options, new SystemTextJsonSerializer(), new HttpClient());
+        }
+        public AnilistService(string rootPath)
+        {
+            _anilistClient = new Client(new HttpClient());
+            path = rootPath;
+            FolderToExtension = new Dictionary<string, string>
+            {
+                {"CoverImages", ".png"},
+                {"AniLists", ".json"},
+                {"Statistics", ".json"},
+                {"MediaFiles", ".json"}
+            };
+            var options = new GraphQLHttpClientOptions
+			{
+				EndPoint = new Uri("https://graphql.anilist.co"),
 			};
             _graphQLClient = new GraphQLHttpClient(options, new SystemTextJsonSerializer(), new HttpClient());
         }
@@ -61,7 +77,6 @@ namespace PartyBot.Services
             Console.WriteLine(response.Title.ToString());
             return response.CoverImageLarge;
         }
-
         public async Task<Embed> GetUserListAsync(string username)
         {
             var query = "query ($username: String){"+ $"{AnilistQuery.MediaListQuery()}" +"}";

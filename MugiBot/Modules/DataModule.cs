@@ -74,7 +74,7 @@ namespace PartyBot.Modules
         public async Task CreatePlaylist([Remainder] string name)
             => await ReplyAsync(embed: await DataService.CreatePlaylist(name));
 
-         [Command("CreatePrivatePlaylist")]
+        [Command("CreatePrivatePlaylist")]
         [Summary("Creates a private playlist of the given name. This means that only the owner"
         + " of the list can make any changes.")]
         public async Task CreatePrivatePlaylist([Remainder] string name)
