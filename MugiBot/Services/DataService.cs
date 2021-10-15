@@ -39,6 +39,7 @@ namespace PartyBot.Services
         public async Task MessageReceived(SocketMessage message)
         {
             await JsonHandler.DownloadJson(message, DBManager.JsonFiles);
+            await PlaylistHandler.DownloadPlaylistFile(message, Path.Combine(path, "PlaylistDownloads"));
         }
 
         public async Task<Embed> CalcTotalCorrect(PlayersRulesService _service, string rule = "")
@@ -69,33 +70,10 @@ namespace PartyBot.Services
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"Playlist {name} now exists", Color.Blue);
         }
 
-        public async Task<Embed> CreatePlaylistFromFile(string filePath, ulong ID)
-        {
-            if (!File.Exists(filePath))
-                return await EmbedHandler.CreateErrorEmbed("Playlist", "Could not find a file with that name");
-            var lines = await File.ReadAllLinesAsync(filePath);
-            var dict = new Dictionary<string, string>();
-            foreach (string line in lines)
-            {
-                var song = await DBSearchService.UseSongKey(line);
-                if (song == null)
-                {
-                    File.Delete(filePath);
-                    return await EmbedHandler.CreateErrorEmbed("Playlist", $"Invalid song key: {line}, fix this line and reupload.");
-                }
-                dict.TryAdd(song.Key, song.PrintSong());
-            }
-            string name = filePath.Remove(filePath.LastIndexOf(separator));
-            var creatorName = ID.ToString();
-            if (!await PlaylistHandler.CreatePrivatePlaylist(name, Path.Combine(path, "playlists", name.ToLower()), creatorName))
-                return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
-            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Created a playlist with the name {name}", Color.Blue);
-        }
-
         public async Task<Embed> CreatePrivatePlaylist(string name, ulong ID)
         {
             var creatorName = ID.ToString();
-            if (!await PlaylistHandler.CreatePrivatePlaylist(name, Path.Combine(path, "playlists", name.ToLower()), creatorName))
+            if (!await PlaylistHandler.CreatePrivatePlaylist(Path.Combine(path, "playlists", name.ToLower()), creatorName))
                 return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"A private playlist with the name {name} now exists", Color.Blue);
         }

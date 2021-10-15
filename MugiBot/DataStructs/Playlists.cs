@@ -40,11 +40,11 @@ namespace PartyBot.DataStructs
             Viewable = true;
             AutomaticallyGenerated = false;
         }
-        public Playlist(string a, Dictionary<string, string> dict, bool view)
+        public Playlist(string a, Dictionary<string, string> dict, bool p)
         {
             Author = a;
             Songs = dict;
-            Viewable = view;
+            Private = p;
         }
         public Playlist(string a, Dictionary<string, string> dict, bool view, bool p)
         {

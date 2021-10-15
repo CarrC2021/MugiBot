@@ -34,6 +34,7 @@ namespace PartyBot.Handlers
                             await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
                                 Path.Combine(JsonFolder, fileName)));
                         client.Dispose();
+                        await message.Channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("File Downloads", $"Downloaded a file named {fileName}", Color.Blue));
                     }
                 }
             }

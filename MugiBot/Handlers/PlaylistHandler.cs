@@ -10,23 +10,77 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using PartyBot.Database;
 using System.Text;
+using System.Net;
 
 namespace PartyBot.Handlers
 {
     public static class PlaylistHandler
     {
-        public static async Task<bool> CreatePlaylist(string name, string filePath)
+        public static async Task<bool> CreatePlaylist(string name, string filePath, Dictionary<string, string> dict = null)
         {
             if (File.Exists(filePath))
                 return false;
-            await SerializeAndWrite(new Playlist("public", new Dictionary<string, string>()), filePath);
+            if (dict == null)
+                dict = new Dictionary<string, string>();
+            await SerializeAndWrite(new Playlist("public", dict), filePath);
             return true;
         }
-        public static async Task<bool> CreatePrivatePlaylist(string name, string filePath, string playlistCreator)
+        public static async Task DownloadPlaylistFile(SocketMessage message, string filePath)
+        {
+            string fileName = "";
+            try
+            {
+                for (int i = 0; i < message.Attachments.Count; i++)
+                {
+                    fileName = message.Attachments.ElementAt(i).Filename;
+                    if (fileName.EndsWith("txt"))
+                    {
+                        //Create a WebClient and download the attached file
+                        using var client = new WebClient();
+                        var bytes = await client.DownloadDataTaskAsync(new Uri(message.Attachments.ElementAt(i).Url));
+                        await File.WriteAllBytesAsync(Path.Combine(filePath, fileName), bytes);
+                        client.Dispose();
+                        await message.Channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("File Downloads", $"Downloaded a file named {fileName}", Color.Blue));
+                        await message.Channel.SendMessageAsync(embed: await PlaylistHandler.CreatePlaylistFromFile(filePath, fileName, message.Author.Id));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message, ex.Source);
+            }
+            Console.WriteLine("Downloads: Does this look like the file you wanted to download? " + fileName);
+        }
+        public static async Task<Embed> CreatePlaylistFromFile(string path, string fileName, ulong ID)
+        {
+            var filePath = Path.Combine(path, fileName);
+            if (!File.Exists(filePath))
+                return await EmbedHandler.CreateErrorEmbed("Playlist", "Could not find a file with that name");
+            var lines = await File.ReadAllLinesAsync(filePath);
+            var dict = new Dictionary<string, string>();
+            foreach (string line in lines)
+            {
+                var song = await DBSearchService.UseSongKey(line);
+                if (song == null)
+                {
+                    File.Delete(filePath);
+                    return await EmbedHandler.CreateErrorEmbed("Playlist", $"Invalid song key: {line}, fix this line and reupload.");
+                }
+                dict.TryAdd(song.Key, song.PrintSong());
+            }
+            string name = filePath.Substring(filePath.LastIndexOf(Path.DirectorySeparatorChar)).Replace($"{Path.DirectorySeparatorChar}", "");
+            var creatorName = ID.ToString();
+            if (!await PlaylistHandler.CreatePrivatePlaylist(Path.Combine(path.Replace($"PlaylistDownloads", ""), "playlists", name.ToLower()), creatorName, dict))
+                return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Created a playlist with the name {name}", Color.Blue);
+        }
+        public static async Task<bool> CreatePrivatePlaylist(string filePath, string playlistCreator, Dictionary<string, string> dict = null)
         {
             if (File.Exists(filePath))
                 return false;
-            await SerializeAndWrite(new Playlist(playlistCreator, new Dictionary<string, string>()), filePath);
+            if (dict == null)
+                dict = new Dictionary<string, string>();
+            await SerializeAndWrite(new Playlist(playlistCreator, dict, true), filePath);
             return true;
         }
         // Given a file name this function will deserialize a json file asynchronously and return it as a Playlist object
@@ -58,21 +112,21 @@ namespace PartyBot.Handlers
         }
         public static async Task<bool> AddMultipleToPlaylist(string filePath, List<string> songkeys)
         {
-            if (File.Exists(filePath))
+            if (!File.Exists(filePath))
+                return false;
+
+            Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(filePath));
+            foreach (string key in songkeys)
             {
-                Playlist contents = await Task.Run(() => JsonConvert.DeserializeObject<Playlist>(filePath));
-                foreach (string key in songkeys)
+                if (!contents.Songs.ContainsKey(key))
                 {
-                    if (!contents.Songs.ContainsKey(key))
-                    {
-                        var songObject = await DBSearchService.UseSongKey(key);
-                        contents.Songs.Add(key, SongTableObject.PrintSong(songObject));
-                    }
+                    var songObject = await DBSearchService.UseSongKey(key);
+                    contents.Songs.Add(key, SongTableObject.PrintSong(songObject));
                 }
-                await SerializeAndWrite(contents, filePath);
-                return true;
             }
-            return false;
+            await SerializeAndWrite(contents, filePath);
+            return true;
+
         }
         public static async Task<Tuple<bool, string>> AddToPlaylist(string filePath, string songkey, string author = "public")
         {
