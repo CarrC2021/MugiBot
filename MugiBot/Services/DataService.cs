@@ -20,10 +20,6 @@ namespace PartyBot.Services
         private readonly char separator = Path.DirectorySeparatorChar;
         public DataService(DBManager _db)
         {
-            path = Path.GetDirectoryName(System.Reflection.
-                Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                path = separator + path;
             DBManager = _db;
         }
         public async Task<Embed> ShowStats(ISocketMessageChannel ch, string show, bool exact = false)

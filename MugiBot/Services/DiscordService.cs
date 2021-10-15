@@ -57,10 +57,25 @@ namespace PartyBot.Services
 
             _dbManager.DatabaseAdminIds = GlobalData.Config.DatabaseAdmins;
             _dataService.DBManager.DatabaseAdminIds = GlobalData.Config.DatabaseAdmins;
+            await Task.Run(() => SetMainPathValues());
+            await SetSubPaths();
             await _commandHandler.InitializeAsync();
             await Task.Delay(-1);
         }
 
+        private void SetMainPathValues()
+        {
+            _dataService.path = GlobalData.Config.RootFolderPath;
+            _dbManager.mainpath = GlobalData.Config.RootFolderPath;
+            _playersRulesService.mainpath = GlobalData.Config.RootFolderPath;
+            _audioService.path = GlobalData.Config.RootFolderPath;
+            _anilistService.path = GlobalData.Config.RootFolderPath;
+        }
+        private async Task SetSubPaths()
+        {
+            await Task.Run (() => _dbManager.SetSubPaths());
+            await Task.Run (() => _playersRulesService.SetSubPaths());
+        }
         /* Hook Any Client Events Up Here. */
         private void SubscribeLavaLinkEvents()
         {

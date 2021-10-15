@@ -15,24 +15,20 @@ namespace PartyBot.Services
     public sealed class PlayersRulesService
     {
         private readonly char separator = Path.DirectorySeparatorChar;
-        private readonly string mainpath;
-        private readonly string rulesPath;
-        private readonly string playersPath;
-        private readonly string usernamesPath;
+        public string mainpath;
+        private string rulesPath;
+        private string playersPath;
+        private string usernamesPath;
         private JsonSerializerSettings settings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore,
             MissingMemberHandling = MissingMemberHandling.Ignore
         };
 
-        public PlayersRulesService()
+        public PlayersRulesService() {}
+
+        public void SetSubPaths()
         {
-            //Making sure that all of the pathing will work regardless of platform
-            mainpath = Path.GetDirectoryName(System.Reflection.
-            Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}" +
-            $"bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                mainpath = separator + mainpath;
             rulesPath = Path.Combine(mainpath, "Database", "rules.txt");
             playersPath = Path.Combine(mainpath, "Database", "players.json");
             usernamesPath = Path.Combine(mainpath, "Database", "usernames.json");

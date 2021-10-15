@@ -29,7 +29,7 @@ namespace PartyBot.Services
         private Anilist4Net.Client _anilistClient;
         private GraphQLHttpClient _graphQLClient { get; set; }
         private readonly char separator = Path.DirectorySeparatorChar;
-        private readonly string path;
+        public string path;
         private readonly Dictionary<string, string> FolderToExtension;
         private JsonSerializerSettings settings = new JsonSerializerSettings
         {
@@ -39,10 +39,6 @@ namespace PartyBot.Services
         
         public AnilistService()
         {
-            path = Path.GetDirectoryName(System.Reflection.
-            Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                path = separator + path;
             _anilistClient = new Client(new HttpClient());
 
             FolderToExtension = new Dictionary<string, string>

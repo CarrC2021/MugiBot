@@ -5,6 +5,7 @@ namespace PartyBot.DataStructs
 {
     public class BotConfig
     {
+        
         public string DiscordToken { get; set; }
         public string DefaultPrefix { get; set; }
         public string GameStatus { get; set; }
@@ -13,5 +14,8 @@ namespace PartyBot.DataStructs
         
         [JsonProperty("DatabaseAdmins")]
         public List<ulong> DatabaseAdmins { get; set; }
+
+        [JsonProperty("RootFolderPath")]
+        public string RootFolderPath { get; set; }
     }
 }

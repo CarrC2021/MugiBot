@@ -2,8 +2,10 @@
 using Newtonsoft.Json;
 using PartyBot.DataStructs;
 using PartyBot.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,6 +37,24 @@ namespace PartyBot.Handlers
             Config = JsonConvert.DeserializeObject<BotConfig>(json);
         }
 
+        private static string RootFolderPath()
+        {
+            char separator = Path.DirectorySeparatorChar;
+            string mainpath = Path.GetDirectoryName(System.Reflection.
+            Assembly.GetExecutingAssembly().GetName().CodeBase);
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                mainpath = mainpath.Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
+                mainpath = separator + mainpath;
+            }
+            else
+            {
+                mainpath = mainpath.Replace($"{separator}bin{separator}debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
+            }
+            Console.WriteLine(mainpath);
+            return mainpath;
+        }
         //If no config is found, this structure is generated as an empty config. 
         private static BotConfig GenerateNewConfig() => new BotConfig
         {
@@ -43,7 +63,8 @@ namespace PartyBot.Handlers
             GameStatus = "CHANGE ME IN CONFIG",
             BlacklistedChannels = new List<ulong>(),
             DatabaseAdmins = new List<ulong>(),
-            LocalEndPoint = "Not Assigned"
+            LocalEndPoint = "Not Assigned",
+            RootFolderPath = RootFolderPath()
         };
     }
 }

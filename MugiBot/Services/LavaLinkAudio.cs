@@ -20,19 +20,13 @@ namespace PartyBot.Services
     {
         private readonly LavaNode _lavaNode;
         private readonly char separator = Path.DirectorySeparatorChar;
-        private readonly string path;
+        public string path;
         private readonly DBManager _db;
         public List<Radio> radios;
 
         public LavaLinkAudio(LavaNode lavaNode, DBManager _dbmanager)
         {
             _lavaNode = lavaNode;
-            path = Path.GetDirectoryName(System.Reflection.
-            Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                path = separator + path;
-            }
             _db = _dbmanager;
             radios = new List<Radio>();
         }

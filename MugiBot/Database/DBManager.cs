@@ -19,9 +19,9 @@ namespace PartyBot.Database
         private readonly AMQDBContext _db;
         public readonly PlayersRulesService _rs;
         private readonly char separator = Path.DirectorySeparatorChar;
-        private readonly string mainpath;
-        public readonly string JsonFiles;
-        public readonly string ArchivedFiles;
+        public string mainpath { get; set; }
+        public string JsonFiles { get; set; }
+        public string ArchivedFiles { get; set; }
         public List<ulong> DatabaseAdminIds { get; set; }
 
         private readonly Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
@@ -34,15 +34,13 @@ namespace PartyBot.Database
         {
             _db = database;
             _rs = rulesService;
-            // For now this is how the bot figures out its pathing. This is just pointing it to
-            // the correct directories regardless of platform or run method.
-            mainpath = Path.GetDirectoryName(System.Reflection.
-            Assembly.GetExecutingAssembly().GetName().CodeBase).Replace($"{separator}bin{separator}Debug{separator}netcoreapp3.1", "").Replace($"file:{separator}", "");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                mainpath = separator + mainpath;
+            DatabaseAdminIds = new List<ulong>();
+        }
+
+        public void SetSubPaths()
+        {
             JsonFiles = Path.Combine(mainpath, "LocalJson");
             ArchivedFiles = Path.Combine(mainpath, "archivedJsons");
-            DatabaseAdminIds = new List<ulong>();
         }
 
         /// <summary>
