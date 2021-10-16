@@ -68,11 +68,11 @@ namespace PartyBot.Handlers
                 }
                 dict.TryAdd(song.Key, song.PrintSong());
             }
-            string name = filePath.Substring(filePath.LastIndexOf(Path.DirectorySeparatorChar)).Replace($"{Path.DirectorySeparatorChar}", "");
             var creatorName = ID.ToString();
-            if (!await PlaylistHandler.CreatePrivatePlaylist(Path.Combine(path.Replace($"PlaylistDownloads", ""), "playlists", name.ToLower()), creatorName, dict))
+            if (!await PlaylistHandler.CreatePrivatePlaylist(Path.Combine(path.Replace($"PlaylistDownloads", ""), "playlists", fileName.ToLower()), creatorName, dict))
                 return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
-            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Created a playlist with the name {name}", Color.Blue);
+            await Task.Run(() => File.Delete(filePath));
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Created a playlist with the name {fileName}", Color.Blue);
         }
         public static async Task<bool> CreatePrivatePlaylist(string filePath, string playlistCreator, Dictionary<string, string> dict = null)
         {
