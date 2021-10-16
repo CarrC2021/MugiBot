@@ -85,7 +85,7 @@ namespace PartyBot.Services
             var tuple = await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key);
             if (!tuple.Item1)
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"{tuple.Item2}");
-            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Song has been added to playlist {key}", Color.Blue);
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"The song {key} has been added to the playlist {playlistName}", Color.Blue);
         }
         public async Task<Embed> RemoveFromPlaylist(string playlistName, string key)
         {

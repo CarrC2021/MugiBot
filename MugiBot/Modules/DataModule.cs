@@ -84,6 +84,7 @@ namespace PartyBot.Modules
         [Summary("Enter a playlist and song key to add a song to a playlist.")]
         public async Task AddToPlaylist(string playlistName, [Remainder] string key)
             => await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName.ToLower(), key));
+            
         [Command("RemoveFromPlaylist")]
         [Summary("Removes the song you enter from the playlist.")]
         public async Task RemoveFromPlaylist(string playlistName, [Remainder] string key)

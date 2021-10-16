@@ -18,14 +18,12 @@ namespace PartyBot.Database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             string mainpath = GlobalData.Config.RootFolderPath;
-            Console.WriteLine(mainpath);
             var connectionStringBuilder = new SqliteConnectionStringBuilder
             {
                 DataSource =
                 Path.Combine(mainpath, "Database", "MugiBotDatbase.db")
             };
             var connectionString = connectionStringBuilder.ToString();
-            Console.WriteLine(connectionString);
             var connection = new SqliteConnection(connectionString);
             optionsBuilder.UseSqlite(connection);
         }
