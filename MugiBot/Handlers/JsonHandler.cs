@@ -24,9 +24,10 @@ namespace PartyBot.Handlers
                     fileName = message.Attachments.ElementAt(i).Filename;
                     if (fileName.EndsWith("json"))
                     {
-                        //Create a WebClient and download the attached file
+                        // Create a WebClient and download the attached file
                         using var client = new WebClient();
 
+                        // If this file is an expand library export we want to download it to somewhere else.
                         if (fileName.ToLower().Contains("expand library") || fileName.ToLower().Contains("expandlibrary"))
                             await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
                                 Path.Combine(JsonFolder.Replace($"{separator}LocalJson", ""), fileName)));

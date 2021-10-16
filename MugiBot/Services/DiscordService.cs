@@ -66,16 +66,16 @@ namespace PartyBot.Services
         private void SetMainPathValues()
         {
             _dataService.path = GlobalData.Config.RootFolderPath;
-            _dbManager.mainpath = GlobalData.Config.RootFolderPath;
             _playersRulesService.mainpath = GlobalData.Config.RootFolderPath;
             _audioService.path = GlobalData.Config.RootFolderPath;
             _anilistService.path = GlobalData.Config.RootFolderPath;
             _dataService.anilistService.path = GlobalData.Config.RootFolderPath;
+            _dataService.DBManager.mainpath = GlobalData.Config.RootFolderPath;
         }
         private async Task SetSubPaths()
         {
             await Task.Run (() => _playersRulesService.SetSubPaths());
-            await Task.Run (() => _dbManager.SetSubPaths());
+            await Task.Run (() => _dataService.DBManager.SetSubPaths());
         }
         /* Hook Any Client Events Up Here. */
         private void SubscribeLavaLinkEvents()
