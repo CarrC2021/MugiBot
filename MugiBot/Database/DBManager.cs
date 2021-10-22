@@ -22,6 +22,7 @@ namespace PartyBot.Database
         public string JsonFiles { get; set; }
         public string ArchivedFiles { get; set; }
         public List<ulong> DatabaseAdminIds { get; set; }
+        public readonly AnimeRelationManager animeRelationManager;
 
         private readonly Dictionary<int, string> TypeConversion = new Dictionary<int, string>(){
                 {1, "Opening"},
@@ -33,6 +34,7 @@ namespace PartyBot.Database
         {
             _rs = rulesService;
             DatabaseAdminIds = new List<ulong>();
+            animeRelationManager = new AnimeRelationManager();
         }
 
         public void SetSubPaths()
@@ -128,6 +130,7 @@ namespace PartyBot.Database
                 if (query == null)
                 {
                     SongTableObject temp = SongTableObject.SongDataToSongTableObject(song);
+                    await animeRelationManager.UpdateRelationalMap(song);
                     await _db.AddAsync(temp);
                 }
                 // If it is not null then update the titles of the show.
@@ -136,6 +139,7 @@ namespace PartyBot.Database
                     query.Show = song.anime.english;
                     query.Romaji = song.anime.romaji;
                 }
+
                 if (songsOnly)
                     continue;
                 // Update the player stats when songsOnly is false.
@@ -143,7 +147,6 @@ namespace PartyBot.Database
             }
             await _db.SaveChangesAsync();
         }
-
         private async Task UpdatePlayerStats(SongData song, Dictionary<string, string> playerDict)
         {
             Dictionary<string, int> listStatusDict = new Dictionary<string, int>();
@@ -221,7 +224,7 @@ namespace PartyBot.Database
             foreach (Song song in question.Songs)
             {
                 string Type = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
-                // Need to work on incorporating the artist ID.
+                // Need to work on incorporating the artist ID for this not to be a nightmare.
                 var result = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(question.AnnId, Type, song.Name, song.Artist));
                 if (result == null)
                 {
@@ -243,6 +246,7 @@ namespace PartyBot.Database
                     result.MP3 = song.Examples.Mp3;
                     result.Show = question.Name;
                 }
+                await animeRelationManager.UpdateRelationalMap(question.AnnId);
             }
         }
 

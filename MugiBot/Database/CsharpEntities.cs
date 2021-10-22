@@ -14,6 +14,7 @@ namespace PartyBot.Database
         public virtual DbSet<SongTableObject> SongTableObject { get; set; }
         public virtual DbSet<PlayerTableObject> PlayerStats { get; set; }
         public virtual DbSet<DiscordUser> DiscordUsers { get; set; }
+        public virtual DbSet<AnimeRelationalMap> AnimeRelationalMaps { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
