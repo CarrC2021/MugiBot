@@ -11,8 +11,9 @@ namespace PartyBot.Handlers
     {
 
         // Merges player objects into a new PlayerTableObject with a new player name.
-        public static async Task<Embed> MergePlayers(AMQDBContext _db, string nameToFind, string nameToMergeTo)
+        public static async Task<Embed> MergePlayers(string nameToFind, string nameToMergeTo)
         {
+            using var _db = new AMQDBContext();
             var Query = await _db.PlayerStats
                 .AsNoTracking()
                 .Where(k => k.PlayerName.Equals(nameToFind))

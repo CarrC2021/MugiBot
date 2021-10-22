@@ -101,7 +101,7 @@ namespace PartyBot.Services
                 {
                     track = await FindTrackAsync(query);
                     if (track == null)
-                        return await EmbedHandler.CreateErrorEmbed("Music", $"I wasn't able to find anything for {query}.");   
+                        return await EmbedHandler.CreateErrorEmbed("Music", $"I wasn't able to find anything for {query}.");
                 }
                 else
                 {
@@ -176,7 +176,7 @@ namespace PartyBot.Services
                     return await EmbedHandler.CreateErrorEmbed("Music, List", "Player doesn't seem to be playing anything right now.");
                 /*If the queue count is less than 1 and the current track IS NOT null then we wont have a list to reply with.
                     In this situation we simply return an embed that displays the current track instead. */
-                if (player.Queue.Count < 1 && player.Track != null)
+                if (player.Queue.Count < 1 && radioQueue.Count() < 1 && player.Track != null)
                     return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", $"Not sure what to put here", Color.Blue);
                 /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
                  *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
@@ -184,12 +184,16 @@ namespace PartyBot.Services
                 var trackNum = 2;
                 foreach (LavaTrack track in player.Queue)
                 {
+                    if (trackNum == 30)
+                        break;
                     descriptionBuilder.Append($"{trackNum}: {track.Title}\n");
                     trackNum++;
                 }
                 foreach (string song in radioQueue)
                 {
-                    descriptionBuilder.Append($"{trackNum}: {radioQueue}\n");
+                    if (trackNum == 30)
+                        break;
+                    descriptionBuilder.Append($"{trackNum}: {song}\n");
                     trackNum++;
                 }
 
@@ -266,12 +270,7 @@ namespace PartyBot.Services
                 if (player.PlayerState is PlayerState.Playing)
                     await player.StopAsync();
 
-                foreach (LavaTrack track in player.Queue)
-                {
-                    await CheckDeleteTempMusicFile(track.Url);
-                    player.Queue.Remove(track);
-                    await RadioHandler.FindRadio(radios, guild).DeQueueAll();
-                }
+                await ClearQueue(player, guild);
 
                 await LoggingService.LogInformationAsync("Music", $"Bot has stopped playback.");
                 return await EmbedHandler.CreateBasicEmbed("Music Stop", "I Have stopped playback & the playlist has been cleared.", Color.Blue);
@@ -280,6 +279,17 @@ namespace PartyBot.Services
             {
                 return await EmbedHandler.CreateErrorEmbed("Music, Stop", ex.Message);
             }
+        }
+
+        // Clears the entire queue for the LavaPlayer and the server
+        public async Task ClearQueue(LavaPlayer player, SocketGuild guild)
+        {
+            foreach (LavaTrack track in player.Queue)
+            {
+                await CheckDeleteTempMusicFile(track.Url);
+                player.Queue.Remove(track);
+            }
+            await RadioHandler.FindRadio(radios, guild).DeQueueAll();
         }
 
         /*This is ran when a user uses the command Volume 
@@ -352,7 +362,7 @@ namespace PartyBot.Services
                 );
             string toPrint = "Now Playing:";
             if (guildRadio != null && args.Player.Queue.Count < 3)
-            {                    
+            {
                 await RadioQueue(guildRadio);
                 if (!guildRadio.CurrPlayers.Equals("any"))
                     toPrint = $"You are Listening to {guildRadio.CurrPlayers} Radio. Now Playing:";
@@ -376,7 +386,7 @@ namespace PartyBot.Services
 
         public async Task<Embed> QueueCatboxFromDB(string key, SocketGuildUser user, IGuild guild)
         {
-            SongTableObject song = await DBSearchService.UseSongKey(key);
+            var song = await DBSearchService.UseSongKey(key);
             return await PlayAsync(user, guild, song.MP3, song);
         }
 
@@ -413,7 +423,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                await radio.Channel.SendMessageAsync(embed: await 
+                await radio.Channel.SendMessageAsync(embed: await
                     EmbedHandler.CreateErrorEmbed("Radio", "Something went wrong trying to queue a song from the radio."));
                 await LoggingService.LogInformationAsync(ex.Source, ex.Message + "\n" + ex.StackTrace);
             }
@@ -426,7 +436,7 @@ namespace PartyBot.Services
                 try
                 {
                     FileSystemInfo fileInfo = new FileInfo(filePath);
-                    fileInfo.Delete();
+                    await Task.Run(() => fileInfo.Delete());
                 }
                 catch (Exception ex)
                 {
@@ -455,7 +465,7 @@ namespace PartyBot.Services
                     playlistPath = Path.Combine(path, "playlists", type, name);
                 if (!File.Exists(playlistPath))
                     return await EmbedHandler.CreateErrorEmbed("Playlists", $"Could not find playlist with the name {name}");
-                
+
                 var playlist = await PlaylistHandler.LoadPlaylist(playlistPath);
 
                 Random rnd = new Random();

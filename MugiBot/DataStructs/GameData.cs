@@ -37,6 +37,8 @@ namespace PartyBot.DataStructs
         //Anime News Network ID of the show from which the song played
         [JsonProperty("annId")]
         public int annId { get; set; }
+        [JsonProperty("siteIds")]
+        public SiteIDs SiteIDs { get; set; }
         //the number that comes after type, ex OP 2 or ED 3
         [JsonProperty("songNumber")]
         public int songNumber { get; set; }
@@ -76,6 +78,17 @@ namespace PartyBot.DataStructs
         public string romaji { get; set; }
     }
 
+    public class SiteIDs
+    {
+        [JsonProperty("annId")]
+        public int annId { get; set; }
+        [JsonProperty("malId")]
+        public int malId { get; set; }
+        [JsonProperty("kitsuId")]
+        public int kitsuId { get; set; }
+        [JsonProperty("aniListId")]
+        public int aniListId { get; set; }
+    }
     public class Urls
     {
         [JsonProperty("catbox")]

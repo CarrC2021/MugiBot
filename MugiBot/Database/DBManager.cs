@@ -16,7 +16,6 @@ namespace PartyBot.Database
 {
     public class DBManager
     {
-        private readonly AMQDBContext _db;
         public readonly PlayersRulesService _rs;
         private readonly char separator = Path.DirectorySeparatorChar;
         public string mainpath { get; set; }
@@ -32,7 +31,6 @@ namespace PartyBot.Database
 
         public DBManager(AMQDBContext database, PlayersRulesService rulesService)
         {
-            _db = database;
             _rs = rulesService;
             DatabaseAdminIds = new List<ulong>();
         }
@@ -54,6 +52,7 @@ namespace PartyBot.Database
         public async Task<Embed> AddAllToDatabase()
         {
             FileInfo[] names = await JsonHandler.GetAllJsonInFolder(JsonFiles);
+            using var _db = new AMQDBContext();
             foreach (FileInfo s in names)
             {
                 bool songsOnly = false;
@@ -83,6 +82,7 @@ namespace PartyBot.Database
         public async Task<Embed> AddSongListFilesToDataBase(List<string> jsonFiles)
         {
             List<SongListData> data = await JsonHandler.ConvertSongJsons(jsonFiles);
+            using var _db = new AMQDBContext();
             foreach (SongListData song in data)
             {
                 // If the song links are null or the annId is 0 then there is no point in adding it so just
@@ -111,6 +111,7 @@ namespace PartyBot.Database
             List<SongData> data = await JsonHandler.ConvertJsonToSongData(new FileInfo(filepath));
             // Get the rules we want to check and get the players we are tracking.
             var playerDict = await _rs.GetPlayersTracked();
+            using var _db = new AMQDBContext();
             foreach (SongData song in data)
             {
                 // This indicates that a new game has begun. Since there is a chance that the
@@ -129,6 +130,12 @@ namespace PartyBot.Database
                     SongTableObject temp = SongTableObject.SongDataToSongTableObject(song);
                     await _db.AddAsync(temp);
                 }
+                // If it is not null then update the titles of the show.
+                else
+                {
+                    query.Show = song.anime.english;
+                    query.Romaji = song.anime.romaji;
+                }
                 if (songsOnly)
                     continue;
                 // Update the player stats when songsOnly is false.
@@ -142,6 +149,7 @@ namespace PartyBot.Database
             Dictionary<string, int> listStatusDict = new Dictionary<string, int>();
             var RulesMetList = await _rs.RulesMetBySongData(song, playerDict);
             RulesMetList.Add("");
+            using var _db = new AMQDBContext();
             // If the game is not a ranked game then we want to update everyone's list status.
             if (!song.gameMode.Equals("Ranked"))
             {
@@ -187,11 +195,12 @@ namespace PartyBot.Database
         }
 
         public async Task<Embed> MergeTest(string mergeFrom, string mergeInto)
-            => await DBMergeHandler.MergePlayers(_db, mergeFrom, mergeInto);
+            => await DBMergeHandler.MergePlayers(mergeFrom, mergeInto);
 
         // This function is used to update the song database using a json that is created by exporting from the expand library.
         public async Task<Embed> UpdateSongDatabase(SocketUser user, string expandLibraryFile)
         {
+            using var _db = new AMQDBContext();
             if(!DatabaseAdminIds.Contains(user.Id))
                 return await EmbedHandler.CreateErrorEmbed("Data, Songs", $"You do not have the privileges necessary to use this method.");
             AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
@@ -208,6 +217,7 @@ namespace PartyBot.Database
         // This function updates the database using the file you receive when exporting all songs from expand library.
         private async Task AddSongsFromQuestion(Question question)
         {
+            using var _db = new AMQDBContext();
             foreach (Song song in question.Songs)
             {
                 string Type = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
@@ -238,6 +248,7 @@ namespace PartyBot.Database
 
         private async Task UpdateSongIDs()
         {
+            using var _db = new AMQDBContext();
             var songs = await _db.SongTableObject
                 .AsTracking()
                 .ToListAsync();
@@ -266,6 +277,7 @@ namespace PartyBot.Database
 
         public async Task<Embed> RemoveDeadSongs()
         {
+            using var _db = new AMQDBContext();
             var toRemove = await _db.SongTableObject
                     .AsTracking()
                     .Where(f => f.AnnID == 0)
