@@ -131,7 +131,7 @@ namespace PartyBot.Database
         }
     }
 
-    //This class represents a player's stats on a given song when the "condition" or rule is met.
+    // This class represents a player's stats on a given song when the "condition" or rule is met.
     // For example the rule Ranked means this object represents a given players' stats on the specific song in ranked
     public class PlayerTableObject
     {

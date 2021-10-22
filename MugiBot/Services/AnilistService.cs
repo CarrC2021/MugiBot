@@ -2,25 +2,20 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Mime;
 using Discord;
-using PartyBot.Database;
-using PartyBot.Services;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Victoria;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Anilist4Net;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Net;
 using PartyBot.Queries;
 using GraphQL;
 using GraphQL.Client.Http;
-using GraphQL.Client.Abstractions;
 using GraphQL.Client.Serializer.SystemTextJson;
-using PartyBot.DataStructs;
 using PartyBot.Handlers;
+using PartyBot.Database;
 
 namespace PartyBot.Services
 {
@@ -36,7 +31,7 @@ namespace PartyBot.Services
             NullValueHandling = NullValueHandling.Ignore,
             MissingMemberHandling = MissingMemberHandling.Ignore
         };
-        
+
         public AnilistService()
         {
             _anilistClient = new Client(new HttpClient());
@@ -49,11 +44,12 @@ namespace PartyBot.Services
                 {"MediaFiles", ".json"}
             };
             var options = new GraphQLHttpClientOptions
-			{
-				EndPoint = new Uri("https://graphql.anilist.co"),
-			};
+            {
+                EndPoint = new Uri("https://graphql.anilist.co"),
+            };
             _graphQLClient = new GraphQLHttpClient(options, new SystemTextJsonSerializer(), new HttpClient());
         }
+
         public AnilistService(string rootPath)
         {
             _anilistClient = new Client(new HttpClient());
@@ -66,9 +62,9 @@ namespace PartyBot.Services
                 {"MediaFiles", ".json"}
             };
             var options = new GraphQLHttpClientOptions
-			{
-				EndPoint = new Uri("https://graphql.anilist.co"),
-			};
+            {
+                EndPoint = new Uri("https://graphql.anilist.co"),
+            };
             _graphQLClient = new GraphQLHttpClient(options, new SystemTextJsonSerializer(), new HttpClient());
         }
         public async Task<string> GetCoverArtAsync(string show, int annId)
@@ -79,10 +75,10 @@ namespace PartyBot.Services
         }
         public async Task<Embed> GetUserListAsync(string username)
         {
-            var query = "query ($username: String){"+ $"{AnilistQuery.MediaListQuery()}" +"}";
-			var request = new GraphQLRequest {Query = query, Variables = new {username}};
+            var query = "query ($username: String){" + $"{AnilistQuery.MediaListQuery()}" + "}";
+            var request = new GraphQLRequest { Query = query, Variables = new { username } };
             Console.Write(request);
-			var response = await _graphQLClient.SendQueryAsync<dynamic>(request).ConfigureAwait(false);
+            var response = await _graphQLClient.SendQueryAsync<dynamic>(request).ConfigureAwait(false);
             var UserList = response.Data.ToString();
             await WriteJsonResponseToFile(UserList, "AniLists", username);
             return await EmbedHandler.CreateBasicEmbed("Anilist", $"Downloaded a file containing the contents of {username}'s anilist", Color.Green);

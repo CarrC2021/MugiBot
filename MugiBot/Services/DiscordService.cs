@@ -74,8 +74,8 @@ namespace PartyBot.Services
         }
         private async Task SetSubPaths()
         {
-            await Task.Run (() => _playersRulesService.SetSubPaths());
-            await Task.Run (() => _dataService.DBManager.SetSubPaths());
+            await Task.Run(() => _playersRulesService.SetSubPaths());
+            await Task.Run(() => _dataService.DBManager.SetSubPaths());
         }
         /* Hook Any Client Events Up Here. */
         private void SubscribeLavaLinkEvents()
