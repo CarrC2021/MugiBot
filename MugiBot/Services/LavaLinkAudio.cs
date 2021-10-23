@@ -177,7 +177,7 @@ namespace PartyBot.Services
                 /*If the queue count is less than 1 and the current track IS NOT null then we wont have a list to reply with.
                     In this situation we simply return an embed that displays the current track instead. */
                 if (player.Queue.Count < 1 && radioQueue.Count() < 1 && player.Track != null)
-                    return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", $"Not sure what to put here", Color.Blue);
+                    return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", $"Nothing else queued", Color.Blue);
                 /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
                  *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
                     This trackNum variable is used to display the number in which the song is in place. (Start at 2 because we're including the current song.*/
@@ -197,7 +197,7 @@ namespace PartyBot.Services
                     trackNum++;
                 }
 
-                return await EmbedHandler.CreateBasicEmbed("Music, List", $"Now Playing: {player.Track.Title} \n{descriptionBuilder}\n", Color.Blue);
+                return await EmbedHandler.CreateBasicEmbed("Music, List", $"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n", Color.Blue);
             }
             catch (Exception ex)
             {
@@ -361,7 +361,7 @@ namespace PartyBot.Services
                     args.Player.TextChannel.Guild as SocketGuild
                 );
             string toPrint = "Now Playing:";
-            if (guildRadio != null && args.Player.Queue.Count < 3)
+            if (guildRadio != null && guildRadio.RadioMode == true && args.Player.Queue.Count < 3)
             {
                 await RadioQueue(guildRadio);
                 if (!guildRadio.CurrPlayers.Equals("any"))
