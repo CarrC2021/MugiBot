@@ -27,6 +27,12 @@ namespace PartyBot.Database
         {
             AnnID = annID;
         }
+        public AnimeRelationalMap(int annID, string engName, string romaji)
+        {
+            AnnID = annID;
+            EngName = engName;
+            Romaji = romaji;
+        }
         public AnimeRelationalMap(int annID, string engName, string romaji, int anilistID, int kitsuID, int mID)
         {
             AnnID = annID;

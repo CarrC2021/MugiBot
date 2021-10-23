@@ -154,5 +154,10 @@ namespace PartyBot.Modules
         [Summary("Converts playlists to the new format.")]
         public async Task UpdatePlaylistFormat([Remainder] string name)
             => await PlaylistHandler.UpdatePlaylist(Path.Combine(DataService.path, "playlists", name));
+
+        [Command("urm")]
+        [Summary("Converts playlists to the new format.")]
+        public async Task UpdateRelationalMap()
+            => await DataService.DBManager.animeRelationManager.UpdateRelationalMapUsingSongTable();
     }
 }
