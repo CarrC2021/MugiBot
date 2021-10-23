@@ -114,6 +114,7 @@ namespace PartyBot.Database
             // Get the rules we want to check and get the players we are tracking.
             var playerDict = await _rs.GetPlayersTracked();
             using var _db = new AMQDBContext();
+            await animeRelationManager.UpdateRelationalMapAsync(data);
             foreach (SongData song in data)
             {
                 // This indicates that a new game has begun. Since there is a chance that the
@@ -130,7 +131,6 @@ namespace PartyBot.Database
                 if (query == null)
                 {
                     SongTableObject temp = SongTableObject.SongDataToSongTableObject(song);
-                    await animeRelationManager.UpdateRelationalMap(song);
                     await _db.AddAsync(temp);
                 }
                 // If it is not null then update the titles of the show.
@@ -139,7 +139,7 @@ namespace PartyBot.Database
                     query.Show = song.anime.english;
                     query.Romaji = song.anime.romaji;
                 }
-
+                // If not updating player statistics then continue through
                 if (songsOnly)
                     continue;
                 // Update the player stats when songsOnly is false.

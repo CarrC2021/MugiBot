@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using PartyBot.Services;
 using System;
+using System.Collections.Generic;
 
 namespace PartyBot.Database
 {
@@ -48,13 +49,33 @@ namespace PartyBot.Database
         /// Takes an annID as input and adds a new AnimeRelationalMap to the database if that key is not present.
         /// <summary>
         /// <param name="annID">.</param>
-        public async Task UpdateRelationalMap(SongData song)
+        public async Task UpdateRelationalMapAsync(List<SongData> songs)
         {
             using var db = new AMQDBContext();
+            foreach (SongData song in songs)
+                await UpdateRelationalData(db, song);
+        }
+
+        /// <summary>
+        /// Takes an annID as input and adds a new AnimeRelationalMap to the database if that key is not present.
+        /// <summary>
+        /// <param name="annID">.</param>
+        public async Task UpdateRelationalData(AMQDBContext db, SongData song)
+        {
             var mapResult = await db.AnimeRelationalMaps.FindAsync(song.annId);
             try
             {
-                if (mapResult == null)
+                await AddToTable(db, mapResult, song);
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogCriticalAsync(ex.Source, ex.Message);
+            }
+        }
+
+        public async Task AddToTable(AMQDBContext db, AnimeRelationalMap mapResult, SongData song)
+        {
+            if (mapResult == null)
             {
                 await db.AnimeRelationalMaps.AddAsync(new AnimeRelationalMap(song.annId, song.anime.english, song.anime.romaji, song.SiteIDs.aniListId,
                 song.SiteIDs.kitsuId, song.SiteIDs.malId));
@@ -67,12 +88,7 @@ namespace PartyBot.Database
                 mapResult.KitsuID = song.SiteIDs.kitsuId;
                 mapResult.AnilistID = song.SiteIDs.aniListId;
             }
-                await db.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                await LoggingService.LogCriticalAsync(ex.Source, ex.Message);
-            }
+            await db.SaveChangesAsync();
         }
     }
 }
