@@ -361,7 +361,7 @@ namespace PartyBot.Services
                     args.Player.TextChannel.Guild as SocketGuild
                 );
             string toPrint = "Now Playing:";
-            if (guildRadio != null && guildRadio.RadioMode == true && args.Player.Queue.Count < 3)
+            if (guildRadio != null && args.Player.Queue.Count < 3)
             {
                 await RadioQueue(guildRadio);
                 if (!guildRadio.CurrPlayers.Equals("any"))
@@ -417,9 +417,9 @@ namespace PartyBot.Services
                 if (outVal != null)
                     await CatboxHandler.QueueRadioSong(outVal, radio.Guild, _lavaNode, path);
                 // If there is nothing then try to queue from the random radio selection.
-                outVal = radio.GetRandomSong();
-                if (outVal != null)
+                if (radio.RadioMode)
                     await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);
+                
             }
             catch (Exception ex)
             {
