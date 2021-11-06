@@ -75,6 +75,7 @@ namespace PartyBot.DataStructs
     {
         [JsonProperty("media")]
         public AnimeMedia Media { get; set; }
+        public string Status { get; set; }
     }
 
     public class List

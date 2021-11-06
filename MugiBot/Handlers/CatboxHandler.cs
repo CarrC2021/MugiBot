@@ -36,6 +36,7 @@ namespace PartyBot.Handlers
         public static async Task<LavaTrack> DownloadAndMakeTrack(SongTableObject song, string musicPath, LavaNode _lavaNode)
         {
             string MP3Link = await DownloadMP3(song.MP3, musicPath);
+            Console.WriteLine(MP3Link);
             var search = await _lavaNode.SearchAsync(MP3Link);
             LavaTrack track = search.Tracks.FirstOrDefault();
             Console.WriteLine(track.Url);

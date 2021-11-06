@@ -14,6 +14,7 @@ namespace PartyBot.Modules
         /* Get our AudioService from DI */
         public LavaLinkAudio AudioService { get; set; }
         public DBManager DBManager { get; set; }
+        public AnilistService AnilistService { get; set; }
 
         /* All the below commands are ran via Lambda Expressions to keep this file as neat and closed off as possible. 
               We pass the AudioService Task into the section that would normally require an Embed as that's what all the
@@ -79,17 +80,17 @@ namespace PartyBot.Modules
         [Summary("Changes the player name in the Radio to the given argument.")]
         public async Task ChangePlayerName([Remainder] string playerName = "any")
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).ChangePlayer(playerName, DBManager));
+                AudioService.radios, Context.Channel, Context.Guild).ChangePlayer(playerName, DBManager, AnilistService));
         [Command("RCT")]
         [Summary("Changes the type of song played by the Radio to the given argument.")]
         public async Task ChangePlayerName(int type)
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).SetType(type, DBManager));
+                AudioService.radios, Context.Channel, Context.Guild).SetType(type, DBManager, AnilistService));
         [Command("RCT")]
         [Summary("Changes the type of song played by the Radio to the given argument.")]
         public async Task ChangePlayerNameString([Remainder] string type)
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).SetType(type, DBManager));
+                AudioService.radios, Context.Channel, Context.Guild).SetType(type, DBManager, AnilistService));
         [Command("RLT")]
         [Summary("Lists out the types the Radio can use.")]
         public async Task ListTypes()
@@ -105,13 +106,13 @@ namespace PartyBot.Modules
             "will play songs that meet those conditions in the database. By default this is set Watching or completed")]
         public async Task AddRadioListStatus([Remainder] string input)
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).AddListStatus(input.Split(), DBManager));
+                AudioService.radios, Context.Channel, Context.Guild).AddListStatus(input.Split(), DBManager, AnilistService));
         [Command("RDL")]
         [Summary("This will remove from the radio a condition to play the songs from the specified list status. For example, !rdl Watching Completed Dropped Paused " +
             "will remove songs that meet those conditions in the database. By default this is set to Watching or completed")]
         public async Task RemoveRadioListStatus([Remainder] string input)
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).RemoveListStatus(input.Split(), DBManager));
+                AudioService.radios, Context.Channel, Context.Guild).RemoveListStatus(input.Split(), DBManager, AnilistService));
         [Command("StartRadio")]
         [Summary("Starts the radio and will keep playing songs until you turn it off.")]
         public async Task StartRadio()

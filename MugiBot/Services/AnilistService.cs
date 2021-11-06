@@ -15,7 +15,9 @@ using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using PartyBot.Handlers;
+using PartyBot.DataStructs;
 using PartyBot.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace PartyBot.Services
 {
@@ -26,6 +28,7 @@ namespace PartyBot.Services
         private readonly char separator = Path.DirectorySeparatorChar;
         public string path { get; set; }
         private readonly Dictionary<string, string> FolderToExtension;
+        private readonly Dictionary<string, int> ListStatusConversion;
         private JsonSerializerSettings settings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Ignore,
@@ -42,6 +45,15 @@ namespace PartyBot.Services
                 {"AniLists", ".json"},
                 {"Statistics", ".json"},
                 {"MediaFiles", ".json"}
+            };
+            ListStatusConversion = new Dictionary<string, int>
+            {
+                { "current", 1 },
+                { "completed", 2 },
+                { "paused", 3 },
+                { "dropped", 4 },
+                { "planning", 5 },
+                { "repeating", 2}
             };
             var options = new GraphQLHttpClientOptions
             {
@@ -117,8 +129,45 @@ namespace PartyBot.Services
 
         public async Task WriteJsonResponseToFile(string jsonResponse, string folder, string fileName)
         {
-            string localpath = Path.Combine(path, $"{folder}", $"{fileName}{FolderToExtension[folder]}");
+            string localpath = Path.Combine(GlobalData.Config.RootFolderPath, $"{folder}", $"{fileName}{FolderToExtension[folder]}");
             await File.WriteAllTextAsync(localpath, jsonResponse);
+        }
+
+        public async Task<UserAnilist> ReturnUserAnilistAsync(string name)
+        {
+            await GetUserListAsync(name);
+            return await Task.Run( async() => JsonConvert.DeserializeObject<UserAnilist>
+                (await File.ReadAllTextAsync(Path.Combine(GlobalData.Config.RootFolderPath, "Anilists", $"{name}.json")), settings));
+        }
+
+        public async Task<List<SongTableObject>> ReturnSongsFromLists(List<UserAnilist> anilists, List<int> validListNums)
+        {
+            var entries = new List<Entry>();
+            var SongsToReturn = new List<SongTableObject>();
+            foreach (UserAnilist anilist in anilists)
+                for (int i =0; i < 6; i++)
+                {
+                    entries.AddRange(anilist.MediaListCollection.Lists[i].Entries);   
+                }
+            // Get rid of the shows which are not the correct type, (planning, watching, completed, etc.)
+            entries = entries.Where(x => validListNums.Contains(ListStatusConversion[x.Status.ToLower()])).ToList();
+            using var db = new AMQDBContext();
+            foreach (Entry entry in entries)
+            {
+                var media = await db.AnimeRelationalMaps
+                                .AsNoTracking()
+                                .Where(x => x.AnilistID.Equals(entry.Media.Id))
+                                .ToListAsync();
+                if (media.FirstOrDefault() != null)
+                {
+                    var tempList = await db.SongTableObject
+                        .AsNoTracking()
+                        .Where(y => y.AnnID == media.FirstOrDefault().AnnID)
+                        .ToListAsync();
+                    SongsToReturn.AddRange(tempList);
+                }
+            }
+            return SongsToReturn;
         }
     }
 }

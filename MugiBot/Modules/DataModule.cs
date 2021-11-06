@@ -159,5 +159,9 @@ namespace PartyBot.Modules
         [Summary("Converts playlists to the new format.")]
         public async Task UpdateRelationalMap()
             => await DataService.DBManager.animeRelationManager.UpdateRelationalMapUsingSongTable();
+
+        [Command("getauth")]
+        public async Task GetAuth()
+            => await DataService.DBManager.animeRelationManager.GetAuthAsync();
     }
 }

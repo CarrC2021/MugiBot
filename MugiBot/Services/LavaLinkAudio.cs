@@ -484,7 +484,7 @@ namespace PartyBot.Services
                     if (playlist.Count == 0)
                         return await EmbedHandler.CreateBasicEmbed("Playlists", $"Loaded {name}", Color.Blue);
                     song = await DBSearchService.UseSongKey(playlist.FirstOrDefault());
-                    await PlayAsync(user, radio.Guild, song.Key, song);
+                    await radio.Channel.SendMessageAsync(embed: await PlayAsync(user, radio.Guild, song.Key, song));
                     playlist.Remove(song.Key);
                 }
 

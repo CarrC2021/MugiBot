@@ -9,6 +9,7 @@ namespace PartyBot.Queries
             "MediaListCollection(userName: $username, type: ANIME){\n"
                 +"lists{\n"
                     +"entries{\n"
+                        +"status\n"
                         +"media{\n"
                         +"id\n"
                         +"idMal\n"

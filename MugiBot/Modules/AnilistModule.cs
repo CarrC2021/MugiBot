@@ -14,5 +14,7 @@ namespace PartyBot.Modules
         + "and paste the exact user name. Use the command like this !setal ARealDingus.")]
         public async Task SetUserListAsync([Remainder] string anilistName)
             => await ReplyAsync(embed: await DiscordUserHandler.SetUserListNameAsync(Context.User.Id, "anilist", anilistName));
+
+        
     }
 }
