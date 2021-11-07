@@ -175,6 +175,7 @@ public class Radio
         List<SongTableObject> final = new List<SongTableObject>();
         if (_as != null)
             final.AddRange(await SongsFromAnimeListsAsync(_as));
+        final = final.Where(x => types.Contains(x.Type)).ToList();
         //loop through each desired type
         foreach (string type in types)
         {
@@ -193,9 +194,7 @@ public class Radio
                     var playersTracked = await _db._rs.GetPlayersTracked();
                     var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
                     foreach (PlayerTableObject pto in Query)
-                    {
                         potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(pto)));
-                    }
                     final.AddRange(potentialSongs);
                 }
             }

@@ -136,8 +136,9 @@ namespace PartyBot.Services
         public async Task<UserAnilist> ReturnUserAnilistAsync(string name)
         {
             await GetUserListAsync(name);
-            return await Task.Run( async() => JsonConvert.DeserializeObject<UserAnilist>
-                (await File.ReadAllTextAsync(Path.Combine(GlobalData.Config.RootFolderPath, "Anilists", $"{name}.json")), settings));
+            string fileLocation = Path.Combine(GlobalData.Config.RootFolderPath, "AniLists", $"{name}{FolderToExtension["AniLists"]}");
+            var userlist = JsonConvert.DeserializeObject<UserAnilist>(await File.ReadAllTextAsync(fileLocation), settings);
+            return userlist;
         }
 
         public async Task<List<SongTableObject>> ReturnSongsFromLists(List<UserAnilist> anilists, List<int> validListNums)
