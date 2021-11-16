@@ -129,10 +129,22 @@ public class Radio
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint.ToString(), Color.Blue);
     }
 
-    public async Task PopulateQueue(List<SongTableObject> songs)
+    public async Task<Embed> PopulateQueue(List<SongTableObject> songs)
     {
+        if (songs.Count == 0)
+            return await EmbedHandler.CreateErrorEmbed("Radio", "No songs were found in this list.");
+
+        Random rnd = new Random();
+        for (int i = 0; i < songs.Count; i++)
+        {
+            int k = rnd.Next(0, i);
+            var key = songs[k];
+            songs[k] = songs[i];
+            songs[i] = key;
+        }
         foreach (SongTableObject song in songs)
             await Task.Run(() => Queue.Enqueue(song));
+        return await EmbedHandler.CreateBasicEmbed("Radio", "The radio queue has been populated with songs use the !startradio command to begin listening.", Color.Blue);
     }
 
     public async Task DeQueue()
@@ -220,7 +232,7 @@ public class Radio
             users.AddRange(list);
         }
         foreach (DiscordUser user in users)
-            userAnilists.Add(await _as.ReturnUserAnilistAsync(user.AnilistName));
+            userAnilists.Add(await _as.ReadUserAnilistAsync(user.AnilistName));
         return await _as.ReturnSongsFromLists(userAnilists, ListNums);
     }
 
