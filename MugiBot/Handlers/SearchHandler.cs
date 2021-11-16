@@ -81,7 +81,7 @@ namespace PartyBot.Handlers
         {
             if (exactMatch.ToLower().Equals("exact") || exactMatch.ToLower().Equals("exactmatch"))
                 return await ExactPlayerStatsSearch(_db, playerName, showName, type);
-            
+
             return await ContainsPlayerStatsSearch(_db, playerName, showName, type);
         }
 
@@ -114,7 +114,7 @@ namespace PartyBot.Handlers
         {
             if (exactMatch.ToLower().Equals("exact") || exactMatch.ToLower().Equals("exactmatch"))
                 return await ExactArtistStatsSearch(_db, playerName, artist, type);
-            
+
             return await ContainsArtistStatsSearch(_db, playerName, artist, type);
         }
 
@@ -126,7 +126,7 @@ namespace PartyBot.Handlers
                 .Where(x => x.Artist.ToLower().Contains(author.ToLower()))
                 .ToListAsync();
             if (exact)
-                Songs.Where(x =>  x.Artist.ToLower().Equals(author.ToLower()));
+                Songs = Songs.Where(x => x.Artist.ToLower().Equals(author.ToLower())).ToList();
 
             return Songs;
         }
@@ -193,7 +193,7 @@ namespace PartyBot.Handlers
         /// <param name="name"/>. Additionally, if the parameter <param name="type"/> is not equal to "any"
         /// then it will restrict the search to shows whose type contains this argument.
         /// <summary>
-        public static async Task<List<SongTableObject>> ContainsShowSearch(AMQDBContext _db, string name, string type) 
+        public static async Task<List<SongTableObject>> ContainsShowSearch(AMQDBContext _db, string name, string type)
         {
             List<SongTableObject> Shows = await _db.SongTableObject
                         .AsNoTracking()

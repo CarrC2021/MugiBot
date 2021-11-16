@@ -138,6 +138,7 @@ namespace PartyBot.Database
                 {
                     query.Show = song.anime.english;
                     query.Romaji = song.anime.romaji;
+                    query.MP3 = song.urls.catbox._0;
                 }
                 // If not updating player statistics then continue through
                 if (songsOnly)

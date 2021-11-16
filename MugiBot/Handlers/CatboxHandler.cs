@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using PartyBot.Database;
 using PartyBot.Services;
 using System;
@@ -30,7 +31,7 @@ namespace PartyBot.Handlers
             using var wc = new WebClient();
             Uri tempurl = new Uri(query);
             var audio = await wc.DownloadDataTaskAsync(tempurl);
-            File.WriteAllBytes(localpath, audio);
+            await File.WriteAllBytesAsync(localpath, audio);
             return localpath;
         }
         public static async Task<LavaTrack> DownloadAndMakeTrack(SongTableObject song, string musicPath, LavaNode _lavaNode)
@@ -52,8 +53,13 @@ namespace PartyBot.Handlers
                 Show + " " + Type + " " + songName, author, track.Url, track.Position, track.Duration.Ticks, track.CanSeek, track.IsStream);
             return toReturn;
         }
-        public static async Task QueueRadioSong(SongTableObject sto, IGuild guild, LavaNode _lavaNode, string musicPath)
+        public static async Task<String> QueueRadioSong(SongTableObject sto, SocketGuild guild, LavaNode _lavaNode, string musicPath)
         {
+            if (sto == null)
+            {
+                await LoggingService.LogInformationAsync("QueueRadioSong", "Somehow a null songtableobject was passed.");
+                return "Please ping the creator of this app to show this error message. A null SongTableObject was passed to QueueRadioSong.";
+            }
             try
             {
                 var track = await DownloadAndMakeTrack(sto, musicPath, _lavaNode);
@@ -64,6 +70,7 @@ namespace PartyBot.Handlers
             {
                 await LoggingService.LogInformationAsync("Queue Catbox Song", ex.Message);
             }
+            return "success";
         }
     }
 }
