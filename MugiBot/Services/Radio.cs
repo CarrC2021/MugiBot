@@ -154,8 +154,7 @@ public class Radio
 
     public async Task DeQueueAll()
     {
-        while (Queue.Peek() != null)
-            await DeQueue();
+        await Task.Run(() => Queue = new Queue<SongTableObject>());
     }
 
     public async Task<List<string>> PrintQueue()
