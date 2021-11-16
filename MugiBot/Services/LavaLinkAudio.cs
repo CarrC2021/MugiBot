@@ -184,14 +184,14 @@ namespace PartyBot.Services
                 var trackNum = 2;
                 foreach (LavaTrack track in player.Queue)
                 {
-                    if (trackNum == 30)
+                    if (($"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {track.Title}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {track.Title}\n");
                     trackNum++;
                 }
                 foreach (string song in radioQueue)
                 {
-                    if (trackNum == 30)
+                    if (($"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {song}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {song}\n");
                     trackNum++;
@@ -395,11 +395,12 @@ namespace PartyBot.Services
             try
             {
                 radio.RadioMode = true;
+                var nextSong = await radio.NextSong();
+                if (nextSong != null)
+                    return await PlayAsync(user, radio.Guild, nextSong.MP3, nextSong);
                 var song = radio.GetRandomSong();
                 if (Uri.IsWellFormedUriString(song.MP3, UriKind.Absolute))
-                {
                     return await PlayAsync(user, radio.Guild, song.MP3, song);
-                }
             }
             catch (Exception ex)
             {

@@ -133,32 +133,30 @@ namespace PartyBot.Services
             await File.WriteAllTextAsync(localpath, jsonResponse);
         }
 
-        public async Task<UserAnilist> ReturnUserAnilistAsync(string name)
+        public async Task<UserAnilist> ReadUserAnilistAsync(string name)
         {
             await GetUserListAsync(name);
             string fileLocation = Path.Combine(GlobalData.Config.RootFolderPath, "AniLists", $"{name}{FolderToExtension["AniLists"]}");
             var userlist = JsonConvert.DeserializeObject<UserAnilist>(await File.ReadAllTextAsync(fileLocation), settings);
             return userlist;
         }
-
-        public async Task<List<SongTableObject>> ReturnSongsFromLists(List<UserAnilist> anilists, List<int> validListNums)
+        public async Task<List<SongTableObject>> ReturnSongsFromList(UserAnilist anilist, List<int> validListNums)
         {
             var entries = new List<Entry>();
             var SongsToReturn = new List<SongTableObject>();
-            foreach (UserAnilist anilist in anilists)
-                for (int i =0; i < 6; i++)
-                {
-                    entries.AddRange(anilist.MediaListCollection.Lists[i].Entries);   
-                }
+            for (int i = 0; i < 6; i++)
+            {
+                entries.AddRange(anilist.MediaListCollection.Lists[i].Entries);
+            }
             // Get rid of the shows which are not the correct type, (planning, watching, completed, etc.)
             entries = entries.Where(x => validListNums.Contains(ListStatusConversion[x.Status.ToLower()])).ToList();
             using var db = new AMQDBContext();
             foreach (Entry entry in entries)
             {
                 var media = await db.AnimeRelationalMaps
-                                .AsNoTracking()
-                                .Where(x => x.AnilistID.Equals(entry.Media.Id))
-                                .ToListAsync();
+                            .AsNoTracking()
+                            .Where(x => x.AnilistID.Equals(entry.Media.Id))
+                            .ToListAsync();
                 if (media.FirstOrDefault() != null)
                 {
                     var tempList = await db.SongTableObject
@@ -168,6 +166,15 @@ namespace PartyBot.Services
                     SongsToReturn.AddRange(tempList);
                 }
             }
+            return SongsToReturn;
+        }
+
+        public async Task<List<SongTableObject>> ReturnSongsFromLists(List<UserAnilist> anilists, List<int> validListNums)
+        {
+            var entries = new List<Entry>();
+            var SongsToReturn = new List<SongTableObject>();
+            foreach (UserAnilist anilist in anilists)
+                SongsToReturn.AddRange(await ReturnSongsFromList(anilist, validListNums));
             return SongsToReturn;
         }
     }

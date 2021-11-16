@@ -95,56 +95,6 @@ namespace PartyBot.Modules
         public async Task PrintPlaylist([Remainder] string playlistName)
             => await ReplyAsync(embed: await DataService.PrintPlaylist(playlistName.ToLower(), Context.Channel));
 
-        [Command("CreateArtistPlaylist")]
-        [Summary("Adds a playlist of the given name.")]
-        public async Task CreateArtistPlaylist([Remainder] string artist)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateArtistPlaylist(artist, Path.Combine(DataService.path, "playlists", "artists")));
-
-        [Command("CreateArtistExactPlaylist")]
-        [Summary("Adds a playlist of the given name.")]
-        public async Task CreateArtistExactPlaylist([Remainder] string artist)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateArtistPlaylist(artist, Path.Combine(DataService.path, "playlists", "artists"), true));
-
-        [Command("CreateShowPlaylist")]
-        [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
-        public async Task CreateShowPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows")));
-
-        [Command("CreateShowEDPlaylist")]
-        [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
-        public async Task CreateShowEDPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "Ending"));
-
-        [Command("CreateShowINSPlaylist")]
-        [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
-        public async Task CreateShowINSPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "Insert"));
-
-        [Command("CreateShowOPPlaylist")]
-        [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
-        public async Task CreateShowOPPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "Opening"));
-
-        [Command("CreateShowExactPlaylist")]
-        [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
-        public async Task CreateShowExactPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "any", true));
-
-        [Command("CreateShowEDExactPlaylist")]
-        [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
-        public async Task CreateShowEDExactPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "Ending", true));
-
-        [Command("CreateShowINSExactPlaylist")]
-        [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
-        public async Task CreateShowINSExactPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "Insert", true));
-
-        [Command("CreateShowOPExactPlaylist")]
-        [Summary("Adds a playlist of the given name automatically populated with songs from that show.")]
-        public async Task CreateShowOPExactPlaylist([Remainder] string show)
-            => await ReplyAsync(embed: await PlaylistHandler.CreateShowPlaylist(show, Path.Combine(DataService.path, "playlists", "shows"), "Opening", true));
-
         [Command("PlaylistsToJson")]
         [Summary("Converts playlists to the new format.")]
         public async Task UpdateAPlaylistFormat()

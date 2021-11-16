@@ -216,24 +216,9 @@ namespace PartyBot.Handlers
             return list.FirstOrDefault();
         }
 
-        public static async Task<Embed> CreateArtistPlaylist(string artistName, string artistPlaylistDirectory, bool exact = false)
+        // This function should be moved into DBSearchService or into searchhandler
+        public static async Task<List<SongTableObject>> LoadSongsForQuery(string query, string searchType, string songType = "any", bool exact = false)
         {
-            return await AutomaticPlaylistCreation(artistName, artistPlaylistDirectory, "artist", "any", exact);
-        }
-
-        public static async Task<Embed> CreateShowPlaylist(string show, string showPlaylistDirectory, string songType = "any", bool exact = false)
-        {
-            return await AutomaticPlaylistCreation(show, showPlaylistDirectory, "show", songType, exact);
-        }
-
-        // Yes this function badly needs documentation
-        public static async Task<Embed> AutomaticPlaylistCreation(string query, string playlistDirectory, string searchType, string songType = "any", bool exact = false)
-        {
-            // I should be using the working SearchDirectories function now.
-            if (File.Exists(Path.Combine(playlistDirectory, query.ToLower())))
-                return await EmbedHandler.CreateErrorEmbed("Playlists", $"A playlist with name {query.ToLower()} already exists");
-            if (File.Exists(Path.Combine(playlistDirectory, songType, query.ToLower())))
-                return await EmbedHandler.CreateErrorEmbed("Playlists", $"A playlist with name {query.ToLower()} already exists");
             var songs = new List<SongTableObject>();
             Console.WriteLine(songType);
             // Use the correct search command.
@@ -241,31 +226,7 @@ namespace PartyBot.Handlers
                 songs = await DBSearchService.ReturnSongsByAuthor(query, exact);
             if (searchType.Equals("show"))
                 songs = await SearchHandler.ShowSearch(query, songType, exact);
-            // If nothing was found for this query then don't create a playlist.
-            if (songs.Count == 0)
-                return await EmbedHandler.CreateBasicEmbed("Playlists", $"A playlist with name {query.ToLower()} not created. "
-            + "The query you specified returned 0 songs. Blame Dayt not me :wink:.", Color.Red);
-            var playlist = new Playlist("public", new Dictionary<string, string>(), true, false);
-            // Just added this for debugging and tracking purposes
-            playlist.AutomaticallyGenerated = true;
-
-            // Now we populate the dictionary with our songs we found.
-            foreach (SongTableObject song in songs)
-                playlist.Songs.Add(song.Key, SongTableObject.PrintSong(song));
-
-            // Once the dictionary has been populated we serialize and write the json to a file.
-            if (!songType.Equals("any"))
-            {
-                songType += "s";
-                await SerializeAndWrite(playlist, Path.Combine(playlistDirectory, $"{query.ToLower()} {songType.ToLower()}"));
-            }
-            else
-            {
-                await SerializeAndWrite(playlist, Path.Combine(playlistDirectory, query.ToLower()));
-                songType = "";
-            }
-            return await EmbedHandler.CreateBasicEmbed("Playlists", $"A playlist with name {query.ToLower()} {songType.ToLower()} now exists. "
-            + "It will contain any song in the database by the query you specified.", Color.Blue);
+            return songs;
         }
 
         // This function will return all of the names of the files in the specified playlist directory.

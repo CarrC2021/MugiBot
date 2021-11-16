@@ -23,7 +23,7 @@ namespace PartyBot.Handlers
         {
             if (description.Length > 2048)
             {
-                return await CreateErrorEmbed("Description too long", "Toxic ping the creator of this app");
+                return await CreateErrorEmbed("Description too long", "Is this still happening :worryconcon:");
             }
             var embed = await Task.Run(() => (new EmbedBuilder()
                 .WithTitle(title)
