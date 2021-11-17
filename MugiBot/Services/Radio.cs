@@ -152,9 +152,9 @@ public class Radio
         await Task.Run(() => Queue.TryDequeue(out var result));
     }
 
-    public async Task DeQueueAll()
+    public void DeQueueAll()
     {
-        await Task.Run(() => Queue = new Queue<SongTableObject>());
+        Queue.Clear();
     }
 
     public async Task<List<string>> PrintQueue()
@@ -231,7 +231,7 @@ public class Radio
             users.AddRange(list);
         }
         foreach (DiscordUser user in users)
-            userAnilists.Add(await _as.ReadUserAnilistAsync(user.AnilistName));
+            userAnilists.Add(await _as.ReturnUserAnilistAsync(user.AnilistName));
         return await _as.ReturnSongsFromLists(userAnilists, ListNums);
     }
 

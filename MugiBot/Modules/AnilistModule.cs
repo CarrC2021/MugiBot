@@ -15,6 +15,9 @@ namespace PartyBot.Modules
         public async Task SetUserListAsync([Remainder] string anilistName)
             => await ReplyAsync(embed: await DiscordUserHandler.SetUserListNameAsync(Context.User.Id, "anilist", anilistName));
 
-        
+        [Command("UpdateAL")]
+        [Summary("Updates the file containing the user's anilist.")]
+        public async Task UpdateUserListAsync([Remainder] string anilistName)
+            => await ReplyAsync(embed: await AnilistService.GetUserListAsync(Context.User.Id));
     }
 }

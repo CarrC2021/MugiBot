@@ -85,8 +85,11 @@ namespace PartyBot.Services
             Console.WriteLine(response.Title.ToString());
             return response.CoverImageLarge;
         }
-        public async Task<Embed> GetUserListAsync(string username)
+        public async Task<Embed> GetUserListAsync(ulong userID)
         {
+            using var db = new AMQDBContext();
+            var user = await db.DiscordUsers.FindAsync(userID);
+            var username = user.AnilistName;
             var query = "query ($username: String){" + $"{AnilistQuery.MediaListQuery()}" + "}";
             var request = new GraphQLRequest { Query = query, Variables = new { username } };
             Console.Write(request);
@@ -133,9 +136,8 @@ namespace PartyBot.Services
             await File.WriteAllTextAsync(localpath, jsonResponse);
         }
 
-        public async Task<UserAnilist> ReadUserAnilistAsync(string name)
+        public async Task<UserAnilist> ReturnUserAnilistAsync(string name)
         {
-            await GetUserListAsync(name);
             string fileLocation = Path.Combine(GlobalData.Config.RootFolderPath, "AniLists", $"{name}{FolderToExtension["AniLists"]}");
             var userlist = JsonConvert.DeserializeObject<UserAnilist>(await File.ReadAllTextAsync(fileLocation), settings);
             return userlist;

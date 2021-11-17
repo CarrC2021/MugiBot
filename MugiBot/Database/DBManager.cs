@@ -271,12 +271,12 @@ namespace PartyBot.Database
         {
             if (!DatabaseAdminIds.Contains(messengerID))
                 return await EmbedHandler.CreateErrorEmbed("Database", "You do not have permission to update links.");
-            if (newLink.ToLower().Contains("catbox") || newLink.ToLower().EndsWith(".mp3"))
+            if (!newLink.ToLower().Contains("catbox") || !newLink.ToLower().EndsWith(".mp3"))
                 return await EmbedHandler.CreateErrorEmbed("Database", "This link does not look correct.");
             var tableObject = await DBSearchService.UseSongKey(songKey);
             if (tableObject != null)
                 tableObject.MP3 = newLink;
-            return await EmbedHandler.CreateBasicEmbed("Database", $"The link for {songKey} has been updated to {newLink}." +
+            return await EmbedHandler.CreateBasicEmbed("Database", $"The link for {tableObject.PrintSong()} has been updated to {newLink}." +
             " Contact mods if this looks incorrect. ", Color.Blue);
         }
 

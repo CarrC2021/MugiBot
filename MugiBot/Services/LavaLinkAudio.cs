@@ -289,7 +289,7 @@ namespace PartyBot.Services
                 await CheckDeleteTempMusicFile(track.Url);
                 player.Queue.Remove(track);
             }
-            await RadioHandler.FindRadio(radios, guild).DeQueueAll();
+            await Task.Run(() => RadioHandler.FindRadio(radios, guild).DeQueueAll());
         }
 
         /*This is ran when a user uses the command Volume 
