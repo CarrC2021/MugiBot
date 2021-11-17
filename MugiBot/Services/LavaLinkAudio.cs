@@ -140,6 +140,10 @@ namespace PartyBot.Services
                 //if The Player is playing, Stop it.
                 if (player.PlayerState is PlayerState.Playing)
                     await player.StopAsync();
+                
+                var radio = RadioHandler.FindRadio(radios, (SocketGuild)guild);
+                if (radio != null)
+                    radio.DeQueueAll();
 
                 //Leave the voice channel.
                 await _lavaNode.LeaveAsync(player.VoiceChannel);

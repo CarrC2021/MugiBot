@@ -17,6 +17,19 @@ namespace PartyBot.DataStructs
         + "\nTo pause the playback use !pause, to resume the playback use !resume. \nTo get the bot to stop playing and clear the queue, use"
         + "!stop. \nTo get the bot to leave the voice channel use !leave.";
 
+        public readonly string RadioHelpString = 
+        "In order to use the radio you should first join a voice channel with !join. \n"
+        + "If you want the bot to start playing songs from your list you can use !rcp {your user name}."
+        + "Note you can also set the bot to use multiple people's list. An example is the following !rcp dingster bluegiraffetongue."
+        + "You can then set the radio to play only the type of songs you are interested in hearing, see the output of !rlt for more information."
+        + "If you want to set the radio to only play a certain type on your list use the command !rdl to remove different list types."
+        + "One example is !rdl Watching Paused. After executing that command the radio will be set to play only shows that are completed, dropped, or planning."
+        + "To add certain list types back use the command !ral. One example is !ral watching, that will make sure the radio will play shows it thinks you are watching."
+        + "Use the command !printradio to print out all the current settings for the radio."
+        + "Some important things to note are that I am currently working on anilist/mal/kitsu support, I know it is not fully working properly."
+        + "Please help to improve the experience by using the songlistui script hosted on joseph98's github page to upload data to the bot."
+        + "As more data comes in there will be a better radio experience. Lastly, update your anilist with !updateal to get all the new changes to your anilist.";
+
         public readonly string DatabaseTrackingHelpString = 
         "If you want to track a player's stats in the database use the command !addplayer."
         + " Here is an example of how to use it, !addplayer dingster A_Real_Dingus."
@@ -31,10 +44,11 @@ namespace PartyBot.DataStructs
         public readonly string MainHelpString = 
         "If you want help with a specific command use !help {yourcommand} to get information about the command."
         + " Otherwise, look below and react with the relevant emote to get info on that part of the bot."
-        + $"\n For help with basic audio commands react with the {"1️⃣"} or use !audiohelp."
-        + $"\n For help with database tracking react with the {"2️⃣"} or use !trackinghelp."
-        + $"\n For help with searching the database react with the {"3️⃣"} or use !searchhelp."
-        + $"\n To see a list of all commands use react with {"4️⃣"} !commandshelp.";
+        + $"\n For help with basic audio commands use !audiohelp."
+        + $"\n For help with database tracking use !trackinghelp."
+        + $"\n For help with searching the database use !searchhelp."
+        + "\n For help with the radio use !radiohelp."
+        + $"\n To see a list of all commands use !commandshelp.";
 
         public readonly string DBSearchHelpString = 
         "First, use a command like !searchdb or !searchop and type out the name of a show or some substring of a show. For example, " +

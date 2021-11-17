@@ -199,7 +199,6 @@ namespace PartyBot.Handlers
             await SerializeAndWrite(newContents, fileName);
         }
 
-        
         public static string SearchPlaylistDirectories(string path, string query)
         {
             var list = new List<string>();

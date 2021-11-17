@@ -123,9 +123,12 @@ public class Radio
     public async Task<Embed> ListTypes()
     {
         StringBuilder toPrint = new StringBuilder();
+        var num = 1;
         foreach (string s in SongTypes)
-            toPrint.Append($"{s}\n");
-
+        {
+            toPrint.Append($"Set the radio to play {s} with !rct {num}.\n");
+            num++;
+        }
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint.ToString(), Color.Blue);
     }
 

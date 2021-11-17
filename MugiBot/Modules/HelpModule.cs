@@ -25,19 +25,24 @@ namespace PartyBot.Modules
             => await ReplyAsync(embed: await HelpService.AllCommands(CommandService));  
 
         [Command("AudioHelp")]
-        [Summary("List all commands")]
+        [Summary("Prints out helpful information for the audio commands.")]
         public async Task AudioHelp()
             => await ReplyAsync(embed: await HelpService.AudioHelp()); 
 
         [Command("TrackingHelp")]
-        [Summary("List all commands")]
+        [Summary("Prints out helpful information for the database tracking commands.")]
         public async Task TrackingHelp()
             => await ReplyAsync(embed: await HelpService.DatabaseTrackingHelp()); 
 
         [Command("SearchHelp")]
-        [Summary("List all commands")]
+        [Summary("Prints out helpful information for the search commands.")]
         public async Task SearchHelp()
             => await ReplyAsync(embed: await HelpService.DatabaseSearchHelp()); 
+        
+        [Command("RadioHelp")]
+        [Summary("Prints out helpful information for the radio.")]
+        public async Task RadioHelp()
+            => await ReplyAsync(embed: await HelpService.RadioHelp());
         
     }
 }
