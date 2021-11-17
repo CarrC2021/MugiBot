@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using PartyBot.Handlers;
 using PartyBot.Services;
 using System.Threading.Tasks;
 
@@ -40,21 +41,11 @@ namespace PartyBot.Modules
         [Command("ListPlayers")]
         [Summary("This will list all players that the bot is tracking the data of.")]
         public async Task ListPlayersTracked()
-            => await ReplyAsync(embed: await PlayersRulesService.ListPlayersTracked());
+            => await ReplyAsync(embed: await PlayersRulesService.ListPlayersTracked(Context.Channel));
 
         [Command("DeleteRule")]
         [Summary("This will delete the rule you specify and the bot will stop keeping track of data based on that rule.")]
         public async Task DeleteRule(string rule)
             => await ReplyAsync(embed: await PlayersRulesService.DeleteRule(rule));
-
-        [Command("SetUsername")]
-        [Summary("This sets your AMQ username.")]
-        public async Task SetAMQUsername(string username)
-            => await ReplyAsync(embed: await PlayersRulesService.SetUsername(Context.Message, username));
-
-        [Command("RemovesUsername")]
-        [Summary("This removes your AMQ username.")]
-        public async Task RemovesAMQUsername()
-            => await ReplyAsync(embed: await PlayersRulesService.RemoveUsername(Context.Message));
     }
 }

@@ -39,6 +39,8 @@ namespace PartyBot.Handlers
             string MP3Link = await DownloadMP3(song.MP3, musicPath);
             Console.WriteLine(MP3Link);
             var search = await _lavaNode.SearchAsync(MP3Link);
+            if (search.Tracks.FirstOrDefault() == null)
+                await LoggingService.LogCriticalAsync("Lavanode.SearchAsync", "returned a null track");
             LavaTrack track = search.Tracks.FirstOrDefault();
             Console.WriteLine(track.Url);
             GC.Collect();
@@ -60,16 +62,9 @@ namespace PartyBot.Handlers
                 await LoggingService.LogInformationAsync("QueueRadioSong", "Somehow a null songtableobject was passed.");
                 return "Please ping the creator of this app to show this error message. A null SongTableObject was passed to QueueRadioSong.";
             }
-            try
-            {
-                var track = await DownloadAndMakeTrack(sto, musicPath, _lavaNode);
-                var player = _lavaNode.GetPlayer(guild);
-                player.Queue.Enqueue(track);
-            }
-            catch (Exception ex)
-            {
-                await LoggingService.LogInformationAsync("Queue Catbox Song", ex.Message);
-            }
+            var track = await DownloadAndMakeTrack(sto, musicPath, _lavaNode);
+            var player = _lavaNode.GetPlayer(guild);
+            player.Queue.Enqueue(track);
             return "success";
         }
     }

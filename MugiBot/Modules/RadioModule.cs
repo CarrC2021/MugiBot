@@ -87,28 +87,28 @@ namespace PartyBot.Modules
 
         [Command("LoadShow")]
         [Summary("Loads all songs where the show contains the query specified.")]
-        public async Task CreateShowPlaylist([Remainder] string show)
+        public async Task LoadShow([Remainder] string show)
             => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild).PopulateQueue(
                 await PlaylistHandler.LoadSongsForQuery(show, "show", "any")));
 
         [Command("LoadShowEds")]
         [Summary("Loads all endings where the show contains the query specified.")]
-        public async Task CreateShowEDPlaylist([Remainder] string show)
+        public async Task LoadShowED([Remainder] string show)
             => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild).PopulateQueue(
                 await PlaylistHandler.LoadSongsForQuery(show, "show", "Ending")));
 
         [Command("LoadShowINS")]
         [Summary("Loads all inserts where the show contains the query specified.")]
-        public async Task CreateShowINSPlaylist([Remainder] string show)
+        public async Task LoadShowINS([Remainder] string show)
             => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild).PopulateQueue(
                 await PlaylistHandler.LoadSongsForQuery(show, "show", "Insert")));
 
         [Command("LoadShowOPs")]
         [Summary("Loads all openings from shows that contain the query specified.")]
-        public async Task CreateShowOPPlaylist([Remainder] string show)
+        public async Task LoadShowOP([Remainder] string show)
             => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild).PopulateQueue(
                 await PlaylistHandler.LoadSongsForQuery(show, "show", "Opening")));

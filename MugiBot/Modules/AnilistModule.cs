@@ -17,7 +17,7 @@ namespace PartyBot.Modules
 
         [Command("UpdateAL")]
         [Summary("Updates the file containing the user's anilist.")]
-        public async Task UpdateUserListAsync([Remainder] string anilistName)
+        public async Task UpdateUserListAsync()
             => await ReplyAsync(embed: await AnilistService.GetUserListAsync(Context.User.Id));
     }
 }

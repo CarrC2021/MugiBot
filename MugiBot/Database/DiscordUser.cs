@@ -22,6 +22,10 @@ namespace PartyBot.Database
         {
 
         }
+        public DiscordUser(ulong id)
+        {
+            ID = id;
+        }
         public DiscordUser(ulong id, string dbName)
         {
             ID = id;

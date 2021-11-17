@@ -147,9 +147,8 @@ namespace PartyBot.Services
             var entries = new List<Entry>();
             var SongsToReturn = new List<SongTableObject>();
             for (int i = 0; i < 6; i++)
-            {
                 entries.AddRange(anilist.MediaListCollection.Lists[i].Entries);
-            }
+            
             // Get rid of the shows which are not the correct type, (planning, watching, completed, etc.)
             entries = entries.Where(x => validListNums.Contains(ListStatusConversion[x.Status.ToLower()])).ToList();
             using var db = new AMQDBContext();

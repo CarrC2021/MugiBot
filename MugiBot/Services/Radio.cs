@@ -168,6 +168,13 @@ public class Radio
         return stringArray;
     }
 
+    public bool IsQueueEmpty()
+    {
+        if (Queue.Count > 0)
+            return false;
+        return true;
+    }
+
     public async Task<SongTableObject> NextSong()
     {
         Queue.TryPeek(out var result);

@@ -413,10 +413,12 @@ namespace PartyBot.Services
         {
             try
             {
-                // First try to see if there is anything queued up.
-                var outVal = await radio.NextSong();
-                if (outVal != null)
+                // First try to see if the queue is empty.
+                if (!radio.IsQueueEmpty())
+                {
+                    var outVal = await radio.NextSong();
                     await CatboxHandler.QueueRadioSong(outVal, radio.Guild, _lavaNode, path);
+                }
                 // If there is nothing then try to queue from the random radio selection.
                 if (radio.RadioMode)
                     await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);

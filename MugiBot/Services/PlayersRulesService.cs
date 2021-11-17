@@ -9,6 +9,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using PartyBot.DataStructs;
+using System.Text;
+using Discord.WebSocket;
+using PartyBot.Database;
 
 namespace PartyBot.Services
 {
@@ -109,13 +112,21 @@ namespace PartyBot.Services
         }
 
         // Returns an embed to print to discord which has all the players tracked in the database.
-        public async Task<Embed> ListPlayersTracked()
+        public async Task<Embed> ListPlayersTracked(ISocketMessageChannel channel)
         {
             var playersDict = await GetPlayersTracked();
-            string f = "the --> means, tracked in the database as \n";
-            foreach (string s in playersDict.Keys)
-                f += $"{s} --> {playersDict[s]}\n";
-            return await EmbedHandler.CreateBasicEmbed("Data", f, Color.Blue);
+            var sb = new StringBuilder();
+            sb.Append("the --> means, tracked in the database as \n");
+            foreach (string playerName in playersDict.Keys)
+            {
+                if ((sb.ToString() + $"{playerName} --> {playersDict[playerName]}\n").Length >= 2048)
+                {
+                    await channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Data", sb.ToString(), Color.Blue));
+                    sb.Clear();
+                }
+                sb.Append($"{playerName} --> {playersDict[playerName]}\n");
+            }
+            return await EmbedHandler.CreateBasicEmbed("Data", sb.ToString(), Color.Blue);
         }
 
         // Returns the rules the bot currently keeps track of.
@@ -145,44 +156,6 @@ namespace PartyBot.Services
             await Task.Run(() => File.WriteAllLines(rulesPath,
                File.ReadLines(rulesPath).Where(l => l != rule).ToList()));
             return await EmbedHandler.CreateBasicEmbed("Data", rule + " has been deleted.", Color.Blue);
-        }
-
-        // This will assign an amq username to the person who sent the message.
-        public async Task<Embed> SetUsername(IUserMessage message, string username)
-        {
-            string contents = await File.ReadAllTextAsync(usernamesPath);
-            Dictionary<ulong, string> tempDict = await Task.Run(() =>
-                JsonConvert.DeserializeObject<Dictionary<ulong, string>>(contents, settings));
-            tempDict.TryAdd(((ulong)message.Author.Id), username);
-            await File.WriteAllTextAsync(usernamesPath, JsonConvert.SerializeObject(tempDict));
-            return await EmbedHandler.CreateBasicEmbed("Data", $"Your AMQ username is now set to {username}.", Color.Blue);
-        }
-
-        public async Task<Dictionary<ulong, string>> GetUsernameValues()
-        {
-            string contents = await File.ReadAllTextAsync(usernamesPath);
-            Dictionary<ulong, string> tempDict = await Task.Run(() =>
-                JsonConvert.DeserializeObject<Dictionary<ulong, string>>(contents, settings));
-            return tempDict;
-        }
-
-        // This will remove the amq username that was set to the person who sent the message.
-        public async Task<Embed> RemoveUsername(IUserMessage message)
-        {
-            string contents = await File.ReadAllTextAsync(usernamesPath);
-            Console.WriteLine(contents);
-            Dictionary<ulong, string> tempDict = await Task.Run(() =>
-                JsonConvert.DeserializeObject<Dictionary<ulong, string>>(contents, settings));
-            try
-            {
-                tempDict.Remove(((ulong)message.Author.Id));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            await File.WriteAllTextAsync(usernamesPath, JsonConvert.SerializeObject(tempDict));
-            return await EmbedHandler.CreateBasicEmbed("Data", $"You have had your AMQ username removed, you can set it to a new value now.", Color.Blue);
         }
     }
 }
