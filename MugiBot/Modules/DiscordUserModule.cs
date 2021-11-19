@@ -11,10 +11,10 @@ namespace MugiBot.Modules
 {
     public class DiscordUserModule : ModuleBase<SocketCommandContext>
     {
-        [Command("SetAMQUsername")]
-        [Summary("This sets your AMQ username.")]
-        public async Task SetAMQUsername(string username)
-            => await ReplyAsync(embed: await DiscordUserHandler.SetUsername(username, Context.User.Id));
+        [Command("SetDBUsername")]
+        [Summary("This sets what your username in the database is associated with your discord id.")]
+        public async Task SetDBUsername(string username)
+            => await ReplyAsync(embed: await DiscordUserHandler.SetUserDatabaseName(Context.User.Id, username));
 
         [Command("PrintMyInfo")]
         [Summary("Prints all the info that is associated to your discord user ID")]

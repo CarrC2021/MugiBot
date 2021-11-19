@@ -52,21 +52,6 @@ namespace PartyBot.Handlers
             return await EmbedHandler.CreateBasicEmbed("Anilist", $"Set your {listPlatform} to {listName}",  Color.DarkPurple);
         }
 
-        public static async Task<Embed> SetUsername(string username, ulong id)
-        {
-            using var db = new AMQDBContext();
-            var userData = await db.DiscordUsers.FindAsync(id);
-            if (userData == null)
-            {
-                await db.DiscordUsers.AddAsync(new DiscordUser(id, username));
-                await db.SaveChangesAsync();
-                return await EmbedHandler.CreateBasicEmbed("Data", $"Your AMQ username is now set to {username}.", Color.DarkPurple);
-            }
-            userData.DatabaseName = username;
-            await db.SaveChangesAsync();
-            return await EmbedHandler.CreateBasicEmbed("Data", $"Your AMQ username is now set to {username}.", Color.DarkPurple);
-        }
-
         public static async Task<Embed> PrintUserDBInformation(string discordUserName, ulong id)
         {
             using var db = new AMQDBContext();
@@ -78,11 +63,11 @@ namespace PartyBot.Handlers
                 return await EmbedHandler.CreateBasicEmbed("Discord User Data", $"Found nothing for you in the database, "
                 + "created an entry for you. Use !setal to set your anilist or !setamqusername to set your username.", Color.Blue);
             }
-            var sb = new StringBuilder($"AMQ and Anilist Information for {discordUserName}:\n\n");
+            var sb = new StringBuilder($"Database and Anilist Information for {discordUserName}:\n\n");
             if (userData.DatabaseName != null)
-                sb.Append($"AMQ username has been set to {userData.DatabaseName}\n\n");
+                sb.Append($"Database username is currently set to {userData.DatabaseName}\n\n");
             if (userData.AnilistName != null)
-                sb.Append($"Anilist username has been set to {userData.AnilistName}\n\n");
+                sb.Append($"Anilist username is currently set to {userData.AnilistName}\n\n");
 
             return await EmbedHandler.CreateBasicEmbed("Discord User Data", sb.ToString(), Color.DarkPurple);
         }

@@ -29,13 +29,16 @@ namespace PartyBot.Modules
         [Summary("Type in the name of a character and they will be rated.")]
         public async Task RateHusbando([Remainder] string name)
             => await Context.Channel.SendMessageAsync(embed: await RatingGenerator(name));
-
-        
         
         [Command("DogJam")]
         [Summary("Will dogJam in the chat.")]
         public async Task DogJam()
             => await Context.Channel.SendMessageAsync("https://tenor.com/view/dance-uporot-brazil-gif-13264739");
+
+        [Command("RatJam")]
+        [Summary("Will ratJam in the chat.")]
+        public async Task RatJam()
+            => await Context.Channel.SendMessageAsync("https://tenor.com/view/rat-jam-gif-19408520"); 
 
         private async Task<Embed> RatingGenerator(string name)
         {

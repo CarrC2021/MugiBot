@@ -195,8 +195,9 @@ public class Radio
         List<SongTableObject> potentialSongs = new List<SongTableObject>();
         List<SongTableObject> final = new List<SongTableObject>();
         if (_as != null)
-            final.AddRange(await SongsFromAnimeListsAsync(_as));
+            final.AddRange(await SongsFromAnimeListsAsync(_db, _as));
         final = final.Where(x => types.Contains(x.Type)).ToList();
+        var playersTracked = await _db._rs.GetPlayersTracked();
         //loop through each desired type
         foreach (string type in types)
         {
@@ -212,7 +213,6 @@ public class Radio
                 //loop through each player set in the radio
                 foreach (string player in CurrPlayers.Split())
                 {
-                    var playersTracked = await _db._rs.GetPlayersTracked();
                     var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
                     foreach (PlayerTableObject pto in Query)
                         potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(pto)));
@@ -224,7 +224,7 @@ public class Radio
         SongSelection = final;
     }
 
-    public async Task<List<SongTableObject>> SongsFromAnimeListsAsync(AnilistService _as)
+    public async Task<List<SongTableObject>> SongsFromAnimeListsAsync(DBManager manager, AnilistService _as)
     {
         var songs = new List<SongTableObject>();
         var users = new List<DiscordUser>();
@@ -232,12 +232,13 @@ public class Radio
         string[] types = CurrType.Split(" ");
         using var db = new AMQDBContext();
         var playersSplit = CurrPlayers.Split();
+        var playersTracked = await manager._rs.GetPlayersTracked();
         foreach (string name in playersSplit)
         {
             var list = await db.DiscordUsers
                         .AsNoTracking()
+                        .Where(y => y.DatabaseName == playersTracked[name])
                         .ToListAsync();
-            list = list.Where(y => y.DatabaseName == name).ToList();
             users.AddRange(list);
         }
         foreach (DiscordUser user in users)
