@@ -29,6 +29,11 @@ namespace PartyBot.Modules
         public async Task AudioHelp()
             => await ReplyAsync(embed: await HelpService.AudioHelp()); 
 
+        [Command("AudioHelp2")]
+        [Summary("Prints out helpful information for the audio commands.")]
+        public async Task AudioHelp2()
+            => await ReplyAsync(embed: await HelpService.AudioHelp());
+
         [Command("TrackingHelp")]
         [Summary("Prints out helpful information for the database tracking commands.")]
         public async Task TrackingHelp()

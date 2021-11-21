@@ -17,6 +17,15 @@ namespace PartyBot.DataStructs
         + "\nTo pause the playback use !pause, to resume the playback use !resume. \nTo get the bot to stop playing and clear the queue, use"
         + "!stop. \nTo get the bot to leave the voice channel use !leave.";
 
+        public readonly string AudioHelp2String =
+        "Before using any of these commands I recommend getting used to the search commands found in !searchhelp. "
+        + "If you would like to load all songs by a certain show or artist into a playlist use the following commands."
+        + "\n !loadartist {artistname} \n !loadshow {show name} \n !loadshowexact {exact show name}"
+        + "\n Similar to the searching commands there are op, ed, ins variants. Use them as seen below,"
+        + "\n !loadshowops {show name} \n !loadshoweds {show name} \n !loadshowins {show name}"
+        + "\nAll of these have exact variants called !loadshowopsexact, !loadshowedsexact, and !loadshowinsexact respectively."
+        + "\nEach command will only load these songs into a playlist, in order for the music to actually play use !startradio.";
+
         public readonly string RadioHelpString = 
         "In order to use the radio you should first join a voice channel with !join. \n"
         + "If you want the bot to start playing songs from your list you can use !rcp {your user name}."
@@ -45,6 +54,7 @@ namespace PartyBot.DataStructs
         "If you want help with a specific command use !help {yourcommand} to get information about the command."
         + " Otherwise, look below and react with the relevant emote to get info on that part of the bot."
         + $"\n For help with basic audio commands use !audiohelp."
+        + $"\n For help with more advanced audio commands use !audiohelp2"
         + $"\n For help with database tracking use !trackinghelp."
         + $"\n For help with searching the database use !searchhelp."
         + "\n For help with the radio use !radiohelp."

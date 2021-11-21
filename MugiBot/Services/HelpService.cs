@@ -50,13 +50,18 @@ namespace PartyBot.Services
 
         public async Task<Embed> MainHelp()
         {
-            var embed = await EmbedHandler.CreateBasicEmbed("Main Help", help.MainHelpString, Color.Green);
-            return await EmbedHandler.CreateBasicEmbed("Main Help", help.MainHelpString, Color.Green);
+            var embed = await EmbedHandler.CreateBasicEmbed("Help", help.MainHelpString, Color.Green);
+            return await EmbedHandler.CreateBasicEmbed("Help", help.MainHelpString, Color.Green);
         }
 
         public async Task<Embed> AudioHelp()
         {
             return await EmbedHandler.CreateBasicEmbed("Audio Help", help.AudioHelpString, Color.Green);
+        }
+        
+        public async Task<Embed> AudioHelp2()
+        {
+            return await EmbedHandler.CreateBasicEmbed("Audio Help", help.AudioHelp2String, Color.Green);
         }
 
         public async Task<Embed> DatabaseTrackingHelp() 
