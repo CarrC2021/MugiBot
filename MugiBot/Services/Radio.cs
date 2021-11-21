@@ -194,9 +194,11 @@ public class Radio
         string[] types = CurrType.Split(" ");
         List<SongTableObject> potentialSongs = new List<SongTableObject>();
         List<SongTableObject> final = new List<SongTableObject>();
+        List<SongTableObject> temp = new List<SongTableObject>();
         if (_as != null)
-            final.AddRange(await SongsFromAnimeListsAsync(_db, _as));
-        final = final.Where(x => types.Contains(x.Type)).ToList();
+            temp.AddRange(await SongsFromAnimeListsAsync(_db, _as));
+        foreach (string type in types)
+            final.AddRange(temp.Where(x => x.Type.ToLower().Contains(type.ToLower())));
         var playersTracked = await _db._rs.GetPlayersTracked();
         //loop through each desired type
         foreach (string type in types)
