@@ -26,8 +26,10 @@ public class Radio
     public Dictionary<int, string> listStatusReverse = new Dictionary<int, string>();
     private List<SongTableObject> SongSelection = new List<SongTableObject>();
     private Queue<SongTableObject> Queue = new Queue<SongTableObject>();
+    private readonly Random rnd;
     public Radio(IMessageChannel c, SocketGuild g)
     {
+        rnd = new Random();
         Guild = g;
         Channel = c;
         CurrType = "Opening Ending";
@@ -252,7 +254,6 @@ public class Radio
     {
         if (SongSelection.Count == 0)
             return null;
-        Random rnd = new Random();
         int r = rnd.Next(SongSelection.Count);
         return SongSelection[r];
     }

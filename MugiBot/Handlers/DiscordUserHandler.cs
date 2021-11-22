@@ -31,6 +31,7 @@ namespace PartyBot.Handlers
                 await db.AddAsync(new DiscordUser(id, DatabaseName));
             else
                 user.DatabaseName = DatabaseName;
+            await db.SaveChangesAsync();
             return await EmbedHandler.CreateBasicEmbed("Database", $"Set your database name to {DatabaseName}",  Color.DarkPurple);
         }
 
