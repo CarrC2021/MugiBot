@@ -398,10 +398,13 @@ namespace PartyBot.Services
         {
             try
             {
+                if (!radio.IsQueueEmpty())
+                {
+                    var nextSong = await radio.NextSong();
+                    if (Uri.IsWellFormedUriString(nextSong.MP3, UriKind.Absolute))
+                        return await PlayAsync(user, radio.Guild, nextSong.MP3, nextSong);
+                }
                 radio.RadioMode = true;
-                var nextSong = await radio.NextSong();
-                if (nextSong != null && Uri.IsWellFormedUriString(nextSong.MP3, UriKind.Absolute))
-                    return await PlayAsync(user, radio.Guild, nextSong.MP3, nextSong);
                 var song = radio.GetRandomSong();
                 if (Uri.IsWellFormedUriString(song.MP3, UriKind.Absolute))
                     return await PlayAsync(user, radio.Guild, song.MP3, song);

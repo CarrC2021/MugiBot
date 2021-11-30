@@ -36,6 +36,11 @@ namespace PartyBot.Services
             return await JsonHandler.ListJsons(DBManager.JsonFiles);
         }
 
+        public async Task<Embed> DeleteJson(string fileName)
+        {
+            return await JsonHandler.DeleteJson(DBManager.JsonFiles, fileName);
+        }
+
         public async Task MessageReceived(SocketMessage message)
         {
             await JsonHandler.DownloadJson(message, DBManager.JsonFiles);

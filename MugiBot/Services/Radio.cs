@@ -119,7 +119,10 @@ public class Radio
     }
     public async Task<Embed> PrintRadio()
     {
-        string toPrint = $"Current Players:\n{CurrPlayers}\nCurrent Types:\n{CurrType}\n";
+        var sb = new StringBuilder();
+        foreach (int num in ListNums)
+            sb.Append(listStatusReverse[num]+"\n");
+        string toPrint = $"Current Players:\n{CurrPlayers}\nCurrent Types:\n{CurrType}\nCurrent List Types: {sb.ToString()}";
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint, Color.Blue);
     }
     public async Task<Embed> ListTypes()

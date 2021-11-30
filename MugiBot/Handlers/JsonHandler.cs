@@ -121,6 +121,16 @@ namespace PartyBot.Handlers
 
             return await EmbedHandler.CreateBasicEmbed("Data", toPrint, Color.Blue);
         }
+
+        public static async Task<Embed> DeleteJson(string JsonFolder, string JsonName)
+        {
+            if (File.Exists(Path.Combine(JsonFolder, JsonName)))
+            {
+                File.Delete(Path.Combine(JsonFolder, JsonName));
+                return await EmbedHandler.CreateBasicEmbed("Data", $"Deleted the file named {JsonName}", Color.Blue);
+            }
+            return await EmbedHandler.CreateErrorEmbed("Data", $"Could not find the file named {JsonName}");
+        }
     }
 }
 

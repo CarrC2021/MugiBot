@@ -21,6 +21,11 @@ namespace PartyBot.Modules
         public async Task ListJsons()
             => await ReplyAsync(embed: await DataService.ListJsons());
 
+        [Command("DeleteJson")]
+        [Summary("This will delete the specified json in the Json folder.")]
+        public async Task DeleteJson([Remainder] string fileName)
+            => await ReplyAsync(embed: await DataService.DeleteJson(fileName));
+
         [Command("UpdateDB")]
         [Summary("This command will update the player stats database please do not uplad teams matches.")]
         public async Task UpdateDatabase()
