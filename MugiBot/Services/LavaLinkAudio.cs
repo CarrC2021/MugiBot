@@ -142,8 +142,7 @@ namespace PartyBot.Services
                     await player.StopAsync();
                 
                 var radio = RadioHandler.FindRadio(radios, (SocketGuild)guild);
-                if (radio != null)
-                    radio.DeQueueAll();
+                radios.Remove(radio);
 
                 //Leave the voice channel.
                 await _lavaNode.LeaveAsync(player.VoiceChannel);
