@@ -224,6 +224,8 @@ namespace PartyBot.Database
             using var _db = new AMQDBContext();
             foreach (Song song in question.Songs)
             {
+                if (song.Examples.Mp3 == null)
+                    continue;
                 string Type = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
                 // Need to work on incorporating the artist ID for this not to be a nightmare.
                 var result = await _db.SongTableObject.FindAsync(SongTableObject.MakeSongTableKey(question.AnnId, Type, song.Name, song.Artist));

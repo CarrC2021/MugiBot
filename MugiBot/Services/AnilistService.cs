@@ -146,7 +146,7 @@ namespace PartyBot.Services
         {
             var entries = new List<Entry>();
             var SongsToReturn = new List<SongTableObject>();
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < anilist.MediaListCollection.Lists.Count; i++)
                 entries.AddRange(anilist.MediaListCollection.Lists[i].Entries);
             
             // Get rid of the shows which are not the correct type, (planning, watching, completed, etc.)
