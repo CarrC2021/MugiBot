@@ -249,7 +249,7 @@ public class Radio
             users.AddRange(list);
         }
         foreach (DiscordUser user in users)
-            userAnilists.Add(await _as.ReturnUserAnilistAsync(user.AnilistName));
+            userAnilists.Add(await _as.ReturnUserAnilistAsync(user.AnilistName, user.ID));
         return await _as.ReturnSongsFromLists(userAnilists, ListNums);
     }
 
