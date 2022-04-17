@@ -128,7 +128,7 @@ namespace PartyBot.Handlers
             return true;
 
         }
-        public static async Task<Tuple<bool, string>> AddToPlaylist(string filePath, string songkey, string author = "public")
+        public static async Task<Tuple<bool, string>> AddToPlaylist(string filePath, string songkey, ulong author = 1)
         {
             if (File.Exists(filePath))
             {
@@ -145,7 +145,7 @@ namespace PartyBot.Handlers
             }
             return new Tuple<bool, string>(false, "This playlist does not exist");
         }
-        public static async Task<Tuple<bool, string>> RemoveFromPlaylist(string filePath, string songkey, string author = "public")
+        public static async Task<Tuple<bool, string>> RemoveFromPlaylist(string filePath, string songkey, ulong author = 1)
         {
             if (File.Exists(filePath))
             {

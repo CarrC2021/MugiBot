@@ -32,7 +32,9 @@ public class Radio
         rnd = new Random();
         Guild = g;
         Channel = c;
+        //Why is this not an Array?
         CurrType = "Opening Ending";
+        //Why is this not an Array?
         CurrPlayers = "any";
         ListNums.AddRange(new int[] { 1, 2, 3, 4, 5 });
         listStatus = new Dictionary<string, int>
@@ -204,29 +206,29 @@ public class Radio
             temp.AddRange(await SongsFromAnimeListsAsync(_db, _as));
         foreach (string type in types)
             final.AddRange(temp.Where(x => x.Type.ToLower().Contains(type.ToLower())));
-        var playersTracked = await _db._rs.GetPlayersTracked();
+        //var playersTracked = await _db._rs.GetPlayersTracked();
         //loop through each desired type
-        foreach (string type in types)
-        {
-            if (CurrPlayers.Equals("any"))
-            {
-                var Query = await DBSearchService.ReturnAllSongObjectsByType(type);
-                final.AddRange(Query);
-                continue;
-            }
+        //foreach (string type in types)
+        //{
+           // if (CurrPlayers.Equals("any"))
+            //{
+               // var Query = await DBSearchService.ReturnAllSongObjectsByType(type);
+                //final.AddRange(Query);
+                //continue;
+            //}
             //loop through each desired list status
-            foreach (int num in ListNums)
-            {
+            //foreach (int num in ListNums)
+            //{
                 //loop through each player set in the radio
-                foreach (string player in CurrPlayers.Split())
-                {
-                    var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
-                    foreach (PlayerTableObject pto in Query)
-                        potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(pto)));
-                    final.AddRange(potentialSongs);
-                }
-            }
-        }
+               // foreach (string player in CurrPlayers.Split())
+                //{
+                 //   var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
+                    //foreach (PlayerTableObject pto in Query)
+                        //potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(pto)));
+                    //final.AddRange(potentialSongs);
+                //}
+            //}
+        //}
         final = final.Distinct().ToList();
         SongSelection = final;
     }

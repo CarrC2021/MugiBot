@@ -83,20 +83,20 @@ namespace PartyBot.Services
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"A private playlist with the name {name} now exists", Color.Blue);
         }
 
-        public async Task<Embed> AddToPlaylist(string playlistName, string key)
+        public async Task<Embed> AddToPlaylist(string playlistName, string key, ulong author = 10)
         {
             if (DBSearchService.UseSongKey(key) == null)
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"Song key {key} is invalid");
-            var tuple = await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key);
+            var tuple = await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key, author);
             if (!tuple.Item1)
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"{tuple.Item2}");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"The song {key} has been added to the playlist {playlistName}", Color.Blue);
         }
-        public async Task<Embed> RemoveFromPlaylist(string playlistName, string key)
+        public async Task<Embed> RemoveFromPlaylist(string playlistName, string key, ulong author = 1)
         {
             if (!File.Exists(Path.Combine(path, "playlists", playlistName.ToLower())))
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"Playlist {playlistName.ToLower()} does not exist");
-            var tuple = await PlaylistHandler.RemoveFromPlaylist(Path.Combine(path, "playlists", playlistName.ToLower()), key);
+            var tuple = await PlaylistHandler.RemoveFromPlaylist(Path.Combine(path, "playlists", playlistName.ToLower()), key, author);
             if (!tuple.Item1)
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"{tuple.Item2}");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"{key} has been removed from {playlistName}", Color.Blue);

@@ -88,12 +88,12 @@ namespace PartyBot.Modules
         [Command("AddToPlaylist")]
         [Summary("Enter a playlist and song key to add a song to a playlist.")]
         public async Task AddToPlaylist(string playlistName, [Remainder] string key)
-            => await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName.ToLower(), key));
+            => await ReplyAsync(embed: await DataService.AddToPlaylist(playlistName.ToLower(), key, Context.User.Id));
             
         [Command("RemoveFromPlaylist")]
         [Summary("Removes the song you enter from the playlist.")]
         public async Task RemoveFromPlaylist(string playlistName, [Remainder] string key)
-            => await ReplyAsync(embed: await DataService.RemoveFromPlaylist(playlistName.ToLower(), key));
+            => await ReplyAsync(embed: await DataService.RemoveFromPlaylist(playlistName.ToLower(), key, Context.User.Id));
 
         [Command("PrintPlaylist")]
         [Summary("Prints the content of the specified playlist.")]
