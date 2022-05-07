@@ -17,7 +17,7 @@ public class Radio
 {
     public bool RadioMode;
     public string CurrType;
-    public string CurrPlayers;
+    public Array<string> CurrPlayers;
     private readonly List<string> SongTypes;
     public readonly SocketGuild Guild;
     public readonly IMessageChannel Channel;
@@ -35,7 +35,7 @@ public class Radio
         //Why is this not an Array?
         CurrType = "Opening Ending";
         //Why is this not an Array?
-        CurrPlayers = "any";
+        CurrPlayers = new string[] {"any"};
         ListNums.AddRange(new int[] { 1, 2, 3, 4, 5 });
         listStatus = new Dictionary<string, int>
         {
@@ -53,6 +53,7 @@ public class Radio
             { 4, "Dropped" },
             { 5, "Planning"}
         };
+        //why is this not a List of string arrays??
         SongTypes = new List<string> {"Opening",
             "Opening Ending", "Ending", "Opening Ending Insert", "Insert", "Opening Insert", "Ending Insert"};
         RadioMode = false;
@@ -67,7 +68,7 @@ public class Radio
             if (!playersTracked.ContainsKey(player))
                 return await EmbedHandler.CreateErrorEmbed("Radio Service", $"Could not find {player} in the database. Radio is still set to {CurrPlayers}.");
         }
-        CurrPlayers = players;
+        CurrPlayers = players.Split();
 
         await UpdatePotentialSongs(_db, _as);
         return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {CurrPlayers}", Color.Blue);
@@ -127,6 +128,8 @@ public class Radio
         string toPrint = $"Current Players:\n{CurrPlayers}\nCurrent Types:\n{CurrType}\nCurrent List Types: {sb.ToString()}";
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint, Color.Blue);
     }
+
+    
     public async Task<Embed> ListTypes()
     {
         StringBuilder toPrint = new StringBuilder();
@@ -167,17 +170,6 @@ public class Radio
         Queue.Clear();
     }
 
-    public async Task<List<string>> PrintQueue()
-    {
-        var sb = new StringBuilder();
-        var array = await Task.Run(() => Queue.ToArray());
-        var stringArray = new List<string>();
-        foreach (SongTableObject song in array)
-            stringArray.Add(SongTableObject.PrintSong(song));
-
-        return stringArray;
-    }
-
     public bool IsQueueEmpty()
     {
         if (Queue.Count > 0)
@@ -199,36 +191,12 @@ public class Radio
     public async Task UpdatePotentialSongs(DBManager _db, AnilistService _as = null)
     {
         string[] types = CurrType.Split(" ");
-        List<SongTableObject> potentialSongs = new List<SongTableObject>();
         List<SongTableObject> final = new List<SongTableObject>();
         List<SongTableObject> temp = new List<SongTableObject>();
         if (_as != null)
             temp.AddRange(await SongsFromAnimeListsAsync(_db, _as));
         foreach (string type in types)
             final.AddRange(temp.Where(x => x.Type.ToLower().Contains(type.ToLower())));
-        //var playersTracked = await _db._rs.GetPlayersTracked();
-        //loop through each desired type
-        //foreach (string type in types)
-        //{
-           // if (CurrPlayers.Equals("any"))
-            //{
-               // var Query = await DBSearchService.ReturnAllSongObjectsByType(type);
-                //final.AddRange(Query);
-                //continue;
-            //}
-            //loop through each desired list status
-            //foreach (int num in ListNums)
-            //{
-                //loop through each player set in the radio
-               // foreach (string player in CurrPlayers.Split())
-                //{
-                 //   var Query = await DBSearchService.ReturnAllPlayerObjects(playersTracked[player], type, num, "");
-                    //foreach (PlayerTableObject pto in Query)
-                        //potentialSongs.Add(await DBSearchService.UseSongKey(SongTableObject.MakeSongTableKey(pto)));
-                    //final.AddRange(potentialSongs);
-                //}
-            //}
-        //}
         final = final.Distinct().ToList();
         SongSelection = final;
     }
