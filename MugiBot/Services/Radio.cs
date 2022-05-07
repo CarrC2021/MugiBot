@@ -67,7 +67,7 @@ public class Radio
         CurrPlayers = players.Split().ToList();
 
         await UpdatePotentialSongs(_db, _as);
-        return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {CurrPlayers}", Color.Blue);
+        return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {String.Join("  ", CurrPlayers)}", Color.Blue);
     }
     public async Task<Embed> SetType(int type, DBManager _db, AnilistService _as = null)
     {
@@ -77,14 +77,14 @@ public class Radio
             CurrType = SongTypes[type];
 
         await UpdatePotentialSongs(_db, _as);
-        return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio song type now set to {CurrType}", Color.Blue);
+        return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio song type now set to {String.Join("  ", CurrType)}", Color.Blue);
     }
     public async Task<Embed> SetType(string type, DBManager _db, AnilistService _as = null)
     {
         if (SongTypes.Contains(type.Split().ToList()))
             CurrType = type.Split().ToList();
         await UpdatePotentialSongs(_db, _as);
-        return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio song type now set to {CurrType}", Color.Blue);
+        return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio song type now set to {String.Join("  ", CurrType)}", Color.Blue);
     }
     public async Task<Embed> AddListStatus(string[] listArray, DBManager _db, AnilistService _as = null)
     {
