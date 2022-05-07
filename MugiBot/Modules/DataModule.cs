@@ -55,7 +55,6 @@ namespace PartyBot.Modules
         public async Task GithubTest(string repo, int page, int perPage)
             => await ReplyAsync(embed: await DataService.DBManager.AddSongListFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
 
-
         [Command("RemoveDeadSongs")]
         public async Task RemoveDeadSongs()
             => await ReplyAsync(embed: await DataService.DBManager.RemoveDeadSongs());
@@ -99,16 +98,6 @@ namespace PartyBot.Modules
         [Summary("Prints the content of the specified playlist.")]
         public async Task PrintPlaylist([Remainder] string playlistName)
             => await ReplyAsync(embed: await DataService.PrintPlaylist(playlistName.ToLower(), Context.Channel));
-
-        [Command("PlaylistsToJson")]
-        [Summary("Converts playlists to the new format.")]
-        public async Task UpdateAPlaylistFormat()
-            => await ReplyAsync(embed: await PlaylistHandler.UpdatePlaylists(Path.Combine(DataService.path, "playlists")));
-
-        [Command("PlaylistToJson")]
-        [Summary("Converts playlists to the new format.")]
-        public async Task UpdatePlaylistFormat([Remainder] string name)
-            => await PlaylistHandler.UpdatePlaylist(Path.Combine(DataService.path, "playlists", name));
 
         [Command("urm")]
         [Summary("Converts playlists to the new format.")]

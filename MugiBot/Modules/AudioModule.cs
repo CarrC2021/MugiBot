@@ -124,17 +124,5 @@ namespace PartyBot.Modules
         public async Task LoadPlaylist([Remainder] string name)
         => await ReplyAsync(embed: await AudioService.LoadPlaylist(RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild), Context.User as SocketGuildUser, Context.Channel, name.ToLower()));
-
-        [Command("LAP")]
-        [Summary("Starts the radio and will keep playing songs until you turn it off.")]
-        public async Task LoadArtistPlaylist([Remainder] string name)
-        => await ReplyAsync(embed: await AudioService.LoadPlaylist(RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild), Context.User as SocketGuildUser, Context.Channel, name, "artists"));
-
-        [Command("LSP")]
-        [Summary("Loads a show playlist with the given name.")]
-        public async Task LoadShowPlaylist([Remainder] string name)
-        => await ReplyAsync(embed: await AudioService.LoadPlaylist(RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild), Context.User as SocketGuildUser, Context.Channel, name, "shows"));
     }
 }

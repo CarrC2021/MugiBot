@@ -177,27 +177,6 @@ namespace PartyBot.Handlers
             var jsonObject = JsonConvert.SerializeObject(content);
             await File.WriteAllTextAsync(filePath, jsonObject);
         }
-        public static async Task<Embed> UpdatePlaylists(string directoryName)
-        {
-            foreach (string file in Directory.EnumerateFiles(directoryName))
-            {
-                await UpdatePlaylist(file);
-            }
-            return await EmbedHandler.CreateBasicEmbed("Playlists", "All the playlists should be updated", Color.Blue);
-        }
-        public static async Task UpdatePlaylist(string fileName)
-        {
-            var contents = await File.ReadAllLinesAsync(fileName);
-            Playlist newContents = new Playlist("public", new Dictionary<string, string>());
-            var filtered = contents.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-            foreach (string line in filtered)
-            {
-                var songObject = await DBSearchService.UseSongKey(line);
-                if (songObject != null && !newContents.Songs.ContainsKey(songObject.Key))
-                    newContents.Songs.Add(line, SongTableObject.PrintSong(songObject));
-            }
-            await SerializeAndWrite(newContents, fileName);
-        }
 
         public static string SearchPlaylistDirectories(string path, string query)
         {
@@ -227,25 +206,6 @@ namespace PartyBot.Handlers
             if (searchType.Equals("show"))
                 songs = await SearchHandler.ShowSearch(query, songType, exact);
             return songs;
-        }
-
-        // This function will return all of the names of the files in the specified playlist directory.
-        public static async Task<Embed> ListPlaylistsInDirectory(string directoryName, ISocketMessageChannel channel)
-        {
-            var sb = new StringBuilder();
-            var fileNames = Directory
-                    .GetFiles(directoryName, "*", SearchOption.AllDirectories)
-                    .Select(f => Path.GetFileName(f));
-            foreach (string file in fileNames)
-            {
-                if (sb.Length + file.Length > 2000)
-                {
-                    await channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue));
-                    sb.Clear();
-                }
-                sb.Append(file);
-            }
-            return await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue);
         }
     }
 }
