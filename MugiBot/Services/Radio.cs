@@ -7,18 +7,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using PartyBot.Database;
-using Victoria;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.IO;
 using PartyBot.DataStructs;
 
 public class Radio
 {
     public bool RadioMode;
-    public string CurrType;
-    public Array<string> CurrPlayers;
-    private readonly List<string> SongTypes;
+    public List<string> CurrType;
+    public List<string> CurrPlayers;
+    private readonly List<List<string>> SongTypes;
     public readonly SocketGuild Guild;
     public readonly IMessageChannel Channel;
     public List<int> ListNums = new List<int>();
@@ -32,10 +30,8 @@ public class Radio
         rnd = new Random();
         Guild = g;
         Channel = c;
-        //Why is this not an Array?
-        CurrType = "Opening Ending";
-        //Why is this not an Array?
-        CurrPlayers = new string[] {"any"};
+        CurrType = new List<string>{"Opening", "Ending"};
+        CurrPlayers = new List<string>{"any"};
         ListNums.AddRange(new int[] { 1, 2, 3, 4, 5 });
         listStatus = new Dictionary<string, int>
         {
@@ -53,12 +49,12 @@ public class Radio
             { 4, "Dropped" },
             { 5, "Planning"}
         };
-        //why is this not a List of string arrays??
-        SongTypes = new List<string> {"Opening",
-            "Opening Ending", "Ending", "Opening Ending Insert", "Insert", "Opening Insert", "Ending Insert"};
+        List<List<string>> list = new List<List<string>> {new List<string>{"Opening"},
+            new List<string>{"Opening", "Ending"}, new List<string>{"Ending"}, new List<string>{"Opening", "Ending", "Insert"}, new List<string>{"Insert"},
+             new List<string>{"Opening", "Insert"}, new List<string>{"Ending", "Insert"}};
+        SongTypes = list;
         RadioMode = false;
     }
-
     public async Task<Embed> ChangePlayer(string players, DBManager _db, AnilistService _as = null)
     {
         var playersTracked = await _db._rs.GetPlayersTracked();
@@ -68,7 +64,7 @@ public class Radio
             if (!playersTracked.ContainsKey(player))
                 return await EmbedHandler.CreateErrorEmbed("Radio Service", $"Could not find {player} in the database. Radio is still set to {CurrPlayers}.");
         }
-        CurrPlayers = players.Split();
+        CurrPlayers = players.Split().ToList();
 
         await UpdatePotentialSongs(_db, _as);
         return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {CurrPlayers}", Color.Blue);
@@ -85,8 +81,8 @@ public class Radio
     }
     public async Task<Embed> SetType(string type, DBManager _db, AnilistService _as = null)
     {
-        if (SongTypes.Contains(type))
-            CurrType = type;
+        if (SongTypes.Contains(type.Split().ToList()))
+            CurrType = type.Split().ToList();
         await UpdatePotentialSongs(_db, _as);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio song type now set to {CurrType}", Color.Blue);
     }
@@ -127,21 +123,18 @@ public class Radio
             sb.Append(listStatusReverse[num]+"\n");
         string toPrint = $"Current Players:\n{CurrPlayers}\nCurrent Types:\n{CurrType}\nCurrent List Types: {sb.ToString()}";
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint, Color.Blue);
-    }
-
-    
+    }    
     public async Task<Embed> ListTypes()
     {
         StringBuilder toPrint = new StringBuilder();
         var num = 1;
-        foreach (string s in SongTypes)
+        foreach (List<string> s in SongTypes)
         {
-            toPrint.Append($"Set the radio to play {s} with !rct {num}.\n");
+            toPrint.Append($"Set the radio to play {String.Join("  ", s)} with !rct {num}.\n");
             num++;
         }
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint.ToString(), Color.Blue);
     }
-
     public async Task<Embed> PopulateQueue(List<SongTableObject> songs)
     {
         if (songs.Count == 0)
@@ -159,24 +152,20 @@ public class Radio
             await Task.Run(() => Queue.Enqueue(song));
         return await EmbedHandler.CreateBasicEmbed("Radio", "The radio queue has been populated with songs use the !startradio command to begin listening.", Color.Blue);
     }
-
     public async Task DeQueue()
     {
         await Task.Run(() => Queue.TryDequeue(out var result));
     }
-
     public void DeQueueAll()
     {
         Queue.Clear();
     }
-
     public bool IsQueueEmpty()
     {
         if (Queue.Count > 0)
             return false;
         return true;
     }
-
     public async Task<SongTableObject> NextSong()
     {
         Queue.TryPeek(out var result);
@@ -187,30 +176,29 @@ public class Radio
         }
         return null;
     }
-
+    public Queue<SongTableObject> GetQueue()
+    {
+        return Queue;
+    }
     public async Task UpdatePotentialSongs(DBManager _db, AnilistService _as = null)
     {
-        string[] types = CurrType.Split(" ");
         List<SongTableObject> final = new List<SongTableObject>();
         List<SongTableObject> temp = new List<SongTableObject>();
         if (_as != null)
             temp.AddRange(await SongsFromAnimeListsAsync(_db, _as));
-        foreach (string type in types)
+        foreach (string type in CurrType)
             final.AddRange(temp.Where(x => x.Type.ToLower().Contains(type.ToLower())));
         final = final.Distinct().ToList();
         SongSelection = final;
     }
-
     public async Task<List<SongTableObject>> SongsFromAnimeListsAsync(DBManager manager, AnilistService _as)
     {
         var songs = new List<SongTableObject>();
         var users = new List<DiscordUser>();
         var userAnilists = new List<UserAnilist>();
-        string[] types = CurrType.Split(" ");
         using var db = new AMQDBContext();
-        var playersSplit = CurrPlayers.Split();
         var playersTracked = await manager._rs.GetPlayersTracked();
-        foreach (string name in playersSplit)
+        foreach (string name in CurrPlayers)
         {
             var list = await db.DiscordUsers
                         .AsNoTracking()
@@ -222,7 +210,6 @@ public class Radio
             userAnilists.Add(await _as.ReturnUserAnilistAsync(user.AnilistName, user.ID));
         return await _as.ReturnSongsFromLists(userAnilists, ListNums);
     }
-
     public SongTableObject GetRandomSong()
     {
         if (SongSelection.Count == 0)

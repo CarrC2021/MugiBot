@@ -166,9 +166,9 @@ namespace PartyBot.Services
                 var descriptionBuilder = new StringBuilder();
 
                 var radio = RadioHandler.FindRadio(radios, guild);
-                var radioQueue = new List<string>();
-                if (radio != null)
-                    radioQueue = await radio.PrintQueue();
+                var queue = new Queue<SongTableObject>();
+                if(radio != null)
+                    queue = radio.GetQueue();
 
                 /* Get The Player and make sure it isn't null. */
                 var player = _lavaNode.GetPlayer(guild);
@@ -179,7 +179,7 @@ namespace PartyBot.Services
                     return await EmbedHandler.CreateErrorEmbed("Music, List", "Player doesn't seem to be playing anything right now.");
                 /*If the queue count is less than 1 and the current track IS NOT null then we wont have a list to reply with.
                     In this situation we simply return an embed that displays the current track instead. */
-                if (player.Queue.Count < 1 && radioQueue.Count() < 1 && player.Track != null)
+                if (player.Queue.Count < 1 && radio.GetQueue().Count() < 1 && player.Track != null)
                     return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", $"Nothing else queued", Color.Blue);
                 /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
                  *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
@@ -192,9 +192,9 @@ namespace PartyBot.Services
                     descriptionBuilder.Append($"{trackNum}: {track.Title}\n");
                     trackNum++;
                 }
-                foreach (string song in radioQueue)
+                foreach (SongTableObject song in radio.GetQueue())
                 {
-                    if (($"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {song}\n").Length >= 2048)
+                    if (($"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {song.PrintSong()}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {song}\n");
                     trackNum++;
