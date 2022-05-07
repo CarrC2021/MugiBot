@@ -98,11 +98,11 @@ namespace PartyBot.Handlers
                     embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
                 sb.Append($"{SongTableObject.PrintSong(songObjects[i])}\n\n");
                 // If any of the links are not null and we want to print the links then append them
-                if (songObjects[i].MP3 != null && printLinks)
+                if (printLinks && songObjects[i].MP3 != null)
                     sb.Append($"MP3 {songObjects[i].MP3}\n");
-                if (songObjects[i]._720 != null && printLinks)
+                if (printLinks && songObjects[i]._720 != null)
                     sb.Append($"720 {songObjects[i]._720}\n");
-                if (songObjects[i]._480 != null && printLinks)
+                if (printLinks && songObjects[i]._480 != null)
                     sb.Append($"480 {songObjects[i]._480}\n");
                 allKeys.Append($"{songObjects[i].Key}\n");
                 if (!uniqueShows.Contains(songObjects[i].Show))
@@ -190,8 +190,8 @@ namespace PartyBot.Handlers
             }
             catch (Exception ex)
             {
-                return await CreateBasicEmbed("Data, Search",
-                "That is a lot of songs, please try and be more specific. Try typing the name of the exact season." + ex.Message, Color.Blue);
+                return await CreateErrorEmbed("Data, Search",
+                "Something went wrong trying to print the ouput." + ex.Message);
             }
         }
 

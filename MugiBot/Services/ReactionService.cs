@@ -75,8 +75,8 @@ namespace PartyBot.Services
             if (Unicodes.Contains(reaction.Emote.Name))
             {
                 IUserMessage result = await cachedMessage.GetOrDownloadAsync();
-                if(result.Author.Id == 840000261581045800)
-                    await OneToTenReceived(result, channel, reaction, _dataService.DBManager, _audioservice);
+                // Not sure why that was here so will try without it.
+                await OneToTenReceived(result, channel, reaction, _dataService.DBManager, _audioservice);
             }
             if (reaction.Emote.Name == pepega.Name)
             {
