@@ -372,7 +372,7 @@ namespace PartyBot.Services
             {
                 await RadioQueue(guildRadio);
                 if (!guildRadio.CurrPlayers.Equals("any"))
-                    toPrint = $"You are Listening to {guildRadio.CurrPlayers} Radio. Now Playing:";
+                    toPrint = $"You are Listening to {guildRadio.GetPlayers()} Radio. Now Playing:";
             }
 
             if (!args.Player.Queue.TryDequeue(out var queueable))

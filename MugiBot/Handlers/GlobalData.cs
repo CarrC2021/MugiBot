@@ -64,7 +64,8 @@ namespace PartyBot.Handlers
             BlacklistedChannels = new List<ulong>(),
             DatabaseAdmins = new List<ulong>(),
             LocalEndPoint = "Not Assigned",
-            RootFolderPath = RootFolderPath()
+            RootFolderPath = RootFolderPath(),
+            Id = 1
         };
     }
 }

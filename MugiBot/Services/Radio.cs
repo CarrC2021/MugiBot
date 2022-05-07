@@ -55,7 +55,7 @@ public class Radio
         SongTypes = list;
         RadioMode = false;
     }
-    public async Task<Embed> ChangePlayer(string players, DBManager _db, AnilistService _as = null)
+    public async Task<Embed> ChangePlayers(string players, DBManager _db, AnilistService _as = null)
     {
         var playersTracked = await _db._rs.GetPlayersTracked();
         var playerArr = players.Split();
@@ -68,6 +68,13 @@ public class Radio
 
         await UpdatePotentialSongs(_db, _as);
         return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {String.Join("  ", CurrPlayers)}", Color.Blue);
+    }
+    public string GetPlayers()
+    {
+        var sb = new StringBuilder();
+        foreach(string player in CurrPlayers)
+            sb.Append($"{player} ");
+        return sb.ToString();
     }
     public async Task<Embed> SetType(int type, DBManager _db, AnilistService _as = null)
     {

@@ -17,5 +17,8 @@ namespace PartyBot.DataStructs
 
         [JsonProperty("RootFolderPath")]
         public string RootFolderPath { get; set; }
+
+        [JsonProperty("Id")]
+        public ulong Id { get; set; }
     }
 }
