@@ -137,7 +137,11 @@ namespace PartyBot.Services
                 //Get The Player Via GuildID.
                 var player = _lavaNode.GetPlayer(guild);
 
-                //if The Player is playing, Stop it.
+                //If The Player has not been created then tell the user that.
+                if (player == null)
+                    return await EmbedHandler.CreateBasicEmbed("Music", $"I was never even a voice channel to begin with leave me alone.", Color.Red);
+
+                //If The Player is playing, Stop it.
                 if (player.PlayerState is PlayerState.Playing)
                     await player.StopAsync();
                 
