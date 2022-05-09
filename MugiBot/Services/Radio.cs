@@ -183,9 +183,9 @@ public class Radio
         }
         return null;
     }
-    public Queue<SongTableObject> GetQueue()
+    public List<SongTableObject> GetQueue()
     {
-        return Queue;
+        return Queue.ToList();
     }
     public async Task UpdatePotentialSongs(DBManager _db, AnilistService _as = null)
     {
