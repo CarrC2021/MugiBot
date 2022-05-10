@@ -14,6 +14,8 @@ MugiBot/logs/*
 MugiBot/logs
 MugiBot/tempMusic
 MugiBot/Migrations
+MugiBot/AniLists/*
+MugiBot/playlists/*
 MugiBot/DataBase/csharpi.db
 MugiBot/DataBase/csharpi.db-wal
 MugiBot/DataBase/csharpi.db-shm
