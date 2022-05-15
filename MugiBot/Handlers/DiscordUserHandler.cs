@@ -69,6 +69,8 @@ namespace PartyBot.Handlers
                 sb.Append($"Database username is currently set to {userData.DatabaseName}\n\n");
             if (userData.AnilistName != null)
                 sb.Append($"Anilist username is currently set to {userData.AnilistName}\n\n");
+            if (userData.MALName != null)
+                sb.Append($"MyAnimeList username is currently set to {userData.MALName}\n\n");
 
             return await EmbedHandler.CreateBasicEmbed("Discord User Data", sb.ToString(), Color.DarkPurple);
         }

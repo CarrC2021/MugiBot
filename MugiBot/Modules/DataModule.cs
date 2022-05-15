@@ -104,8 +104,8 @@ namespace PartyBot.Modules
         public async Task UpdateRelationalMap()
             => await DataService.DBManager.animeRelationManager.UpdateRelationalMapUsingSongTable();
 
-        [Command("getauth")]
-        public async Task GetAuth()
-            => await DataService.DBManager.animeRelationManager.GetAuthAsync();
+        [Command("GetMalUserList")]
+        public async Task GetMalUserList([Remainder] string userName)
+            => await MALHandler.GetMalUserList(userName);
     }
 }

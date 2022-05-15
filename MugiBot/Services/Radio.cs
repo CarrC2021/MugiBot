@@ -214,8 +214,14 @@ public class Radio
             users.AddRange(list);
         }
         foreach (DiscordUser user in users)
-            userAnilists.Add(await _as.ReturnUserAnilistAsync(user.AnilistName, user.ID));
-        return await _as.ReturnSongsFromLists(userAnilists, ListNums);
+        {
+            if (user.AnilistName != null)
+                userAnilists.Add(await _as.ReturnUserAnilistAsync(user.AnilistName, user.ID));
+            if (user.MALName != null)
+                songs.AddRange(await MALHandler.GetSongsFromMAL(user.MALName, ListNums));
+        }
+        songs.AddRange(await _as.ReturnSongsFromLists(userAnilists, ListNums));
+        return songs;
     }
     public SongTableObject GetRandomSong()
     {

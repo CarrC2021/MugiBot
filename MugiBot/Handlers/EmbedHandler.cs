@@ -106,6 +106,7 @@ namespace PartyBot.Handlers
                         sb.Append($"720 {songObjects[i]._720}\n");
                     if (songObjects[i]._480 != null)
                         sb.Append($"480 {songObjects[i]._480}\n");
+                    sb.Append("\n");
                 }
                 allKeys.Append($"{songObjects[i].Key}\n");
                 if (!uniqueShows.Contains(songObjects[i].Show))
