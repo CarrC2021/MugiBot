@@ -134,7 +134,7 @@ public class Radio
             sb.Append($"{type}\n");
         sb.Append("\nCurrent List Types:\n");     
         foreach (int num in ListNums)
-            sb.Append($"listStatusReverse[num]\n");
+            sb.Append($"{listStatusReverse[num]}\n");
         return await EmbedHandler.CreateBasicEmbed("Radio", sb.ToString(), Color.Blue);
     }    
     public async Task<Embed> ListTypes()
