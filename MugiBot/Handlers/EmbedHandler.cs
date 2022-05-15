@@ -94,20 +94,23 @@ namespace PartyBot.Handlers
             for (int i = 0; i < num; i++)
             {
                 count++;
-                if (sb.Length + allKeys.Length + SongTableObject.PrintSong(songObjects[i]).Length + songObjects[i].Key.Length > 2018)
+                if (sb.Length + allKeys.Length + LengthOfMessageContent(printLinks, songObjects[i]) > 2018)
                     embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
                 sb.Append($"{SongTableObject.PrintSong(songObjects[i])}\n\n");
-                // If any of the links are not null and we want to print the links then append them
-                if (printLinks && songObjects[i].MP3 != null)
-                    sb.Append($"MP3 {songObjects[i].MP3}\n");
-                if (printLinks && songObjects[i]._720 != null)
-                    sb.Append($"720 {songObjects[i]._720}\n");
-                if (printLinks && songObjects[i]._480 != null)
-                    sb.Append($"480 {songObjects[i]._480}\n");
+                if (printLinks)
+                {
+                    // This could be done in a much smarter way.
+                    if (songObjects[i].MP3 != null)
+                        sb.Append($"MP3 {songObjects[i].MP3}\n");
+                    if (songObjects[i]._720 != null)
+                        sb.Append($"720 {songObjects[i]._720}\n");
+                    if (songObjects[i]._480 != null)
+                        sb.Append($"480 {songObjects[i]._480}\n");
+                }
                 allKeys.Append($"{songObjects[i].Key}\n");
                 if (!uniqueShows.Contains(songObjects[i].Show))
                     uniqueShows.Add(songObjects[i].Show); 
-                if ( (count % 10) == 0 || sb.Length + allKeys.Length > 1880)
+                if ( (count % 10) == 0 )
                     embeds = await AppendEmbedAndClear(embeds, sb, allKeys);
             }
 
@@ -123,6 +126,23 @@ namespace PartyBot.Handlers
                 titleCard.Append(showFound + "\n");
 
             return await PrintEmbeds(ch, embeds, sb, allKeys, titleCard);
+        }
+
+        public static int LengthOfMessageContent(bool printLinks, SongTableObject song)
+        {
+            int value = 0;
+            value += song.PrintSong().Length;
+            value += song.Key.Length;
+            if (printLinks)
+            {
+                if(song.MP3 != null)
+                    value += song.MP3.Length;
+                if(song._720 != null)
+                    value += song._720.Length;
+                if(song._480 != null)
+                    value += song._480.Length;
+            }
+            return value;
         }
 
         public static async Task<Embed> PrintRecommendedSongs(ISocketMessageChannel ch,
