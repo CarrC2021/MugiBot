@@ -53,6 +53,24 @@ namespace PartyBot.Handlers
             return await EmbedHandler.CreateBasicEmbed("Anilist", $"Set your {listPlatform} to {listName}",  Color.DarkPurple);
         }
 
+         public static async Task<Embed> RemoveUserListNameAsync(ulong id, string listPlatform)
+        {
+            using var db = new AMQDBContext();
+            var user = await db.DiscordUsers.FindAsync(id);
+            if (user == null)
+                await DiscordUserHandler.AddUserToDBAsync(id);
+            user = await db.DiscordUsers.FindAsync(id);
+            // Very ugly but works for now, sets the list platform correctly.
+            if (listPlatform.Equals("anilist"))
+                user.AnilistName = null;
+            if (listPlatform.Equals("mal"))
+                user.MALName = null;
+            if (listPlatform.Equals("kitsu"))
+                user.KitsuName = null;
+            await db.SaveChangesAsync();
+            return await EmbedHandler.CreateBasicEmbed("Anilist", $"Removed your {listPlatform}",  Color.DarkPurple);
+        }
+
         public static async Task<Embed> PrintUserDBInformation(string discordUserName, ulong id)
         {
             using var db = new AMQDBContext();
