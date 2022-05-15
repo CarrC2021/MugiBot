@@ -200,7 +200,7 @@ namespace PartyBot.Services
                 {
                     if (($"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {song.PrintSong()}\n").Length >= 2048)
                         break;
-                    descriptionBuilder.Append($"{trackNum}: {song}\n");
+                    descriptionBuilder.Append($"{trackNum}: {song.PrintSong()}\n");
                     trackNum++;
                 }
 
