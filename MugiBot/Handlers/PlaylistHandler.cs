@@ -128,36 +128,34 @@ namespace PartyBot.Handlers
             return true;
 
         }
-        public static async Task<Tuple<bool, string>> AddToPlaylist(string filePath, string songkey, ulong author = 1)
+        public static async Task<Tuple<bool, string, SongTableObject>> AddToPlaylist(string filePath, string songkey, ulong author = 1)
         {
             if (File.Exists(filePath))
             {
                 var contents = await DeserializePlaylistAsync(filePath);
                 if (contents.Private && !contents.Author.Equals(author))
-                    return new Tuple<bool, string>(false, "You do not have permission to add to this playlist.");
+                    return new Tuple<bool, string, SongTableObject>(false, "You do not have permission to add to this playlist.", null);
                 if (!contents.Songs.ContainsKey(songkey))
                 {
                     var songObject = await DBSearchService.UseSongKey(songkey);
                     contents.Songs.Add(songkey, SongTableObject.PrintSong(songObject));
+                    await SerializeAndWrite(contents, filePath);
+                    return new Tuple<bool, string, SongTableObject>(true, "", songObject);
                 }
-                await SerializeAndWrite(contents, filePath);
-                return new Tuple<bool, string>(true, "");
             }
-            return new Tuple<bool, string>(false, "This playlist does not exist");
+            return new Tuple<bool, string, SongTableObject>(false, "This playlist does not exist", null);
         }
         public static async Task<Tuple<bool, string>> RemoveFromPlaylist(string filePath, string songkey, ulong author = 1)
         {
-            if (File.Exists(filePath))
-            {
-                var contents = await DeserializePlaylistAsync(filePath);
-                if (contents.Private && !contents.Author.Equals(author))
-                    return new Tuple<bool, string>(true, "You do not have permission to add to this playlist.");
-                if (contents.Songs.ContainsKey(songkey))
-                    contents.Songs.Remove(songkey);
-
-                await SerializeAndWrite(contents, filePath);
+            if (!File.Exists(filePath))
                 return new Tuple<bool, string>(true, "");
-            }
+                var contents = await DeserializePlaylistAsync(filePath);
+            if (contents.Private && !contents.Author.Equals(author))
+                return new Tuple<bool, string>(true, "You do not have permission to add to this playlist.");
+            if (!contents.Songs.ContainsKey(songkey))
+                return new Tuple<bool, string>(true, "");
+            contents.Songs.Remove(songkey);
+            await SerializeAndWrite(contents, filePath);
             return new Tuple<bool, string>(false, "");
         }
 

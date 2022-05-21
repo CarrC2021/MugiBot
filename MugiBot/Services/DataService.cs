@@ -90,7 +90,7 @@ namespace PartyBot.Services
             var tuple = await PlaylistHandler.AddToPlaylist(Path.Combine(path, "playlists", playlistName), key, author);
             if (!tuple.Item1)
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"{tuple.Item2}");
-            return await EmbedHandler.CreateBasicEmbed("Playlist", $"The song {key} has been added to the playlist {playlistName}", Color.Blue);
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"The song {tuple.Item3.PrintSong()} has been added to the playlist {playlistName}", Color.Blue);
         }
         public async Task<Embed> RemoveFromPlaylist(string playlistName, string key, ulong author = 1)
         {
@@ -99,7 +99,8 @@ namespace PartyBot.Services
             var tuple = await PlaylistHandler.RemoveFromPlaylist(Path.Combine(path, "playlists", playlistName.ToLower()), key, author);
             if (!tuple.Item1)
                 return await EmbedHandler.CreateErrorEmbed("Playlist", $"{tuple.Item2}");
-            return await EmbedHandler.CreateBasicEmbed("Playlist", $"{key} has been removed from {playlistName}", Color.Blue);
+            SongTableObject songObject = await DBSearchService.UseSongKey(key);
+            return await EmbedHandler.CreateBasicEmbed("Playlist", $"{songObject.PrintSong()} has been removed from {playlistName}", Color.Blue);
         }
         public async Task<Embed> PrintPlaylist(string playlistName, ISocketMessageChannel channel)
         {
