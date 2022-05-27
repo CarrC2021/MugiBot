@@ -20,5 +20,8 @@ namespace PartyBot.DataStructs
 
         [JsonProperty("Id")]
         public ulong Id { get; set; }
+
+        [JsonProperty("MalClientID")]
+        public string MalClientID { get; set; }
     }
 }
