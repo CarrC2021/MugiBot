@@ -52,7 +52,7 @@ namespace PartyBot.Modules
             => await ReplyAsync(embed: await DataService.RecommendPracticeSongs(Context.Channel, playerName, num, true));
 
         [Command("GithubTest")]
-        public async Task GithubTest(string repo, int page, int perPage)
+        public async Task GithubTest(string repo="blissfulyoshi", int page=1, int perPage=100)
             => await ReplyAsync(embed: await DataService.DBManager.AddSongListFilesToDataBase(await GithubHandler.ReturnJsonGists(repo, page, perPage)));
 
         [Command("RemoveDeadSongs")]

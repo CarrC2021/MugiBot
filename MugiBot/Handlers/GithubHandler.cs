@@ -21,7 +21,7 @@ namespace PartyBot.Handlers
         /// the desired page of the request. The third is <param name="numPerPage"/>, the number
         /// of things from the page you want. 
         /// <returns> A list of strings which are the direct paths to the now downladed json files. </returns>
-        public static async Task<List<string>> ReturnJsonGists(string user, int page, int numPerPage)
+        public static async Task<List<string>> ReturnJsonGists(string user="blissfulyoshi", int page=1, int numPerPage=100)
         {
             List<string> jsonData = new List<string>();
             var httpClient = new HttpClient();

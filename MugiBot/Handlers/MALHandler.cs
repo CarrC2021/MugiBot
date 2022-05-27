@@ -3,7 +3,6 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using PartyBot.DataStructs;
-using MyAnimeList.API;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using PartyBot.Database;
@@ -23,18 +22,9 @@ namespace PartyBot.Handlers
                 MissingMemberHandling = MissingMemberHandling.Ignore
             };
             
-            string path = Path.Combine(GlobalData.Config.RootFolderPath, "malAPI.json");
-            var returned = JsonConvert.DeserializeObject<UserParams>(await File.ReadAllTextAsync(path));
-            // Eventually when I am not lazy I should remove UserParams and the MyAnimeList.API dependency
-            var userParams = new UserParams
-            {
-                ClientId = returned.ClientId,
-                OAuth2State = returned.OAuth2State,
-                RedirectURI = returned.RedirectURI
-            };
             MalUserList tempList = new MalUserList(new List<Datum>(), new Paging($"https://api.myanimelist.net/v2/users/{userName}/animelist?fields=list_status&limit=1000"));
 
-            MalUserList toReturn = await GetListData(userParams.ClientId, tempList);
+            MalUserList toReturn = await GetListData(GlobalData.Config.MalClientID, tempList);
             await File.WriteAllTextAsync(Path.Combine(GlobalData.Config.RootFolderPath, "MALUserLists", $"{userName}.json"), JsonConvert.SerializeObject(toReturn));
         }
 

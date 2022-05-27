@@ -65,7 +65,8 @@ namespace PartyBot.Handlers
             DatabaseAdmins = new List<ulong>(),
             LocalEndPoint = "Not Assigned",
             RootFolderPath = RootFolderPath(),
-            Id = 1
+            Id = 1,
+            MalClientID = ""
         };
     }
 }
