@@ -29,6 +29,11 @@ namespace PartyBot.Services
         public DiscordService()
         {
             _services = ConfigureServices();
+            var _config = new DiscordSocketConfig()
+            {
+                GatewayIntents = GatewayIntents.AllUnprivileged
+            };
+            //_client = new DiscordSocketClient(_config);
             _client = _services.GetRequiredService<DiscordSocketClient>();
             _commandHandler = _services.GetRequiredService<CommandHandler>();
             _lavaNode = _services.GetRequiredService<LavaNode>();
@@ -89,7 +94,7 @@ namespace PartyBot.Services
             _client.Ready += ReadyAsync;
             _client.Log += LogAsync;
             _client.MessageReceived += MessageReceivedAsync;
-            _client.ReactionAdded += ReactionAddedAsync;
+            //_client.ReactionAdded += ReactionAddedAsync;
         }
 
         private async Task InitializeGlobalDataAsync()

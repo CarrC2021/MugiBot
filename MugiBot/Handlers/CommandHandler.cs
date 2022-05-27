@@ -25,6 +25,15 @@ namespace PartyBot.Handlers
             HookEvents();
         }
 
+        public CommandHandler(IServiceProvider services, DiscordSocketClient client)
+        {
+            _commands = services.GetRequiredService<CommandService>();
+            _client = client;
+            _services = services;
+
+            HookEvents();
+        }
+
         /* Initialize the CommandService. */
         public async Task InitializeAsync()
         {

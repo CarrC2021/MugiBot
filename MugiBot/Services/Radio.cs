@@ -162,7 +162,7 @@ public class Radio
             songs[i] = key;
         }
         foreach (SongTableObject song in songs)
-            await Task.Run(() => Queue.Enqueue(song));
+            Queue.Enqueue(song);
         return await EmbedHandler.CreateBasicEmbed("Radio", "The radio queue has been populated with songs use the !startradio command to begin listening.", Color.Blue);
     }
     public async Task DeQueue()
