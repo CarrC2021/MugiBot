@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Newtonsoft.Json;
+using PartyBot.Database;
 using PartyBot.DataStructs;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace PartyBot.Handlers
 {
     public class JsonHandler
     {
-        public static async Task DownloadJson(SocketMessage message, string JsonFolder)
+        public static async Task DownloadJson(SocketMessage message, string JsonFolder, bool printMessage = true)
         {
             char separator = Path.DirectorySeparatorChar;
             string fileName = "";
@@ -22,21 +23,21 @@ namespace PartyBot.Handlers
                 for (int i = 0; i < message.Attachments.Count; i++)
                 {
                     fileName = message.Attachments.ElementAt(i).Filename;
-                    if (fileName.EndsWith("json"))
-                    {
-                        // Create a WebClient and download the attached file
+                    if (!fileName.EndsWith("json"))
+                        continue;
+                     // Create a WebClient and download the attached file
                         using var client = new WebClient();
 
-                        // If this file is an expand library export we want to download it to somewhere else.
-                        if (fileName.ToLower().Contains("expand library") || fileName.ToLower().Contains("expandlibrary"))
-                            await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
-                                Path.Combine(JsonFolder.Replace($"{separator}LocalJson", ""), fileName)));
-                        else
-                            await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
-                                Path.Combine(JsonFolder, fileName)));
-                        client.Dispose();
-                        await message.Channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("File Downloads", $"Downloaded a file named {fileName}", Color.Blue));
-                    }
+                    // If this file is an expand library export we want to download it to somewhere else.
+                    if (fileName.ToLower().Contains("expand library") || fileName.ToLower().Contains("expandlibrary"))
+                        await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
+                            Path.Combine(JsonFolder.Replace($"{separator}LocalJson", ""), fileName)));
+                    else
+                        await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
+                            Path.Combine(JsonFolder, fileName)));
+                    client.Dispose();
+                    if (printMessage)
+                        await message.Channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("File Downloads", $"Downloaded a file named {fileName}.", Color.Blue));
                 }
             }
             catch (Exception ex)
@@ -58,6 +59,16 @@ namespace PartyBot.Handlers
             var data = await Task.Run(() =>
                 JsonConvert.DeserializeObject<List<SongData>>(contents, settings));
             return data;
+        }
+        public static async Task<List<SongTableObject>> ConvertJsonToSongTableObject(FileInfo info)
+        {
+            var list = await ConvertJsonToSongData(info);
+            var returnList = new List<SongTableObject>();
+            foreach (SongData entry in list)
+            {
+                returnList.Add(SongTableObject.SongDataToSongTableObject(entry));
+            }
+            return returnList;
         }
         public static async Task<AMQExpandData> ConvertJsonToAMQExpandData(FileInfo info)
         {

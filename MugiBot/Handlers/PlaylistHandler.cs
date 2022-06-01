@@ -205,5 +205,38 @@ namespace PartyBot.Handlers
                 songs = await SearchHandler.ShowSearch(query, songType, exact);
             return songs;
         }
+
+        public static async Task<Embed> PlaylistFromGameData(Dictionary<string, string> PlayerDict, List<SongData> songs, ulong id, string path, string fileName)
+        {
+            using var db = new AMQDBContext();
+            var user = await db.DiscordUsers.FindAsync(id);
+            if (user == null || user.DatabaseName == null)
+                return await EmbedHandler.CreateErrorEmbed("Playlist Creation", "You have not set your database information. To do so use the !setdbusername command.");
+            try
+            {
+                var newPlaylist = new Playlist();
+                newPlaylist.Author = user.DatabaseName;
+                newPlaylist.AutomaticallyGenerated = true;
+                foreach (SongData song in songs)
+                {
+                    foreach (Player player in song.players)
+                    {
+                        // Only add songs that the player heard and got wrong
+                        if (PlayerDict[player.name] != user.DatabaseName || player.correct)
+                            continue;
+                        var tempObject = await db.SongTableObject.FindAsync(song.MakeSongTableKey());
+                        newPlaylist.Songs.Add(tempObject.Key, tempObject.PrintSong());
+                    }
+                }
+                await SerializeAndWrite(newPlaylist, Path.Combine(path, "playlists", fileName));
+                return await EmbedHandler.CreateBasicEmbed("Playlists", $"Created a playlist named {fileName} using the game data provided.", Color.Blue);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                return await EmbedHandler.CreateErrorEmbed("Playlists", "Something went wrong while trying to create the new playlist.");
+            }
+        }
     }
 }

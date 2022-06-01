@@ -8,6 +8,7 @@ using PartyBot.Handlers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using PartyBot.DataStructs;
 
 namespace PartyBot.Services
 {
@@ -102,6 +103,26 @@ namespace PartyBot.Services
             SongTableObject songObject = await DBSearchService.UseSongKey(key);
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"{songObject.PrintSong()} has been removed from {playlistName}", Color.Blue);
         }
+        public async Task<Embed> CreatePlaylistFromGameData(string name, ulong id, SocketUserMessage message)
+        {
+            if (message.Attachments.Count == 0)
+                return await EmbedHandler.CreateErrorEmbed("Playlists", "You did not attach a file. You need to do that to use this method.");
+            if (File.Exists(Path.Combine(path, "playlists", name)))
+                return await EmbedHandler.CreateErrorEmbed("Playlists", "A playlist with this name already exists, use a different name.");
+            var songs = new List<SongTableObject>(); 
+            await JsonHandler.DownloadJson(message, Path.Combine(path, "jsonsforplaylist"), false);
+            await JsonHandler.DownloadJson(message, Path.Combine(path, DBManager.JsonFiles));
+            await DBManager.AddAllToDatabase();
+            var finalList = new List<SongData>();
+            foreach (string fileName in Directory.EnumerateFiles(Path.Combine(path, "jsonsforplaylist")))
+            {
+                var dataList = await JsonHandler.ConvertJsonToSongData(new FileInfo(fileName));
+                finalList.AddRange(dataList);
+            }
+            return await PlaylistHandler.PlaylistFromGameData(await DBManager._rs.GetPlayersTracked(), finalList, id,
+            DBManager.mainpath, name);
+        }
+
         public async Task<Embed> PrintPlaylist(string playlistName, ISocketMessageChannel channel)
         {
             var result = PlaylistHandler.SearchPlaylistDirectories(Path.Combine(path, "playlists"), playlistName);

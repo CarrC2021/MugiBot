@@ -1,6 +1,3 @@
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
 using PartyBot.DataStructs;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
