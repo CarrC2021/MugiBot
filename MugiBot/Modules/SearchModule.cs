@@ -29,7 +29,7 @@ namespace PartyBot.Modules
         [Summary("Type the name of a show or a substring of it's name in English or Romaji form and this will return" +
             "the openings that match the query.")]
         public async Task SearchOpeningsLinks([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "opening", false, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "opening", false, true));
         [Command("SearchOPExact")]
         [Summary("Type the exact name of a show in English or Romaji form and this will return" +
             "the openings that match the query.")]
@@ -39,7 +39,7 @@ namespace PartyBot.Modules
         [Summary("Type the exact name of a show in English or Romaji form and this will return" +
             "the openings that match the query.")]
         public async Task SearchOpeningsExactLinks([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "opening", true, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "opening", true, true));
         [Command("SearchED")]
         [Summary("Type the name of a show or a substring of it's name in English or Romaji form and this will return" +
             "the endings that match the query.")]
@@ -49,7 +49,7 @@ namespace PartyBot.Modules
         [Summary("Type the name of a show or a substring of it's name in English or Romaji form and this will return" +
             "the endings that match the query.")]
         public async Task SearchEndingsLinks([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "ending", false, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "ending", false, true));
         [Command("SearchEDExact")]
         [Summary("Type the exact name of a show in English or Romaji form and this will return" +
             "the endings that match the query.")]
@@ -59,7 +59,7 @@ namespace PartyBot.Modules
         [Summary("Type the exact name of a show in English or Romaji form and this will return" +
             "the endings that match the query.")]
         public async Task SearchEndingsExactLinks([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "ending", true, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "ending", true, true));
         [Command("SearchINS")]
         [Summary("Type the name of a show or a substring of it's name in English or Romaji form and this will return" +
             "the inserts that match the query.")]
@@ -69,7 +69,7 @@ namespace PartyBot.Modules
         [Summary("Type the name of a show or a substring of it's name in English or Romaji form and this will return" +
             "the inserts that match the query.")]
         public async Task SearchInsertLinks([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", true, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", true, true));
         [Command("SearchINSExact")]
         [Summary("Type the exact name of a show in English or Romaji form and this will return" +
             "the inserts that match the query.")]
@@ -79,15 +79,15 @@ namespace PartyBot.Modules
         [Summary("Type the exact name of a show in English or Romaji form and this will return" +
             "the inserts that match the query.")]
         public async Task SearchInsertExactLinks([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", true, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", true, true));
         [Command("SearchDBLinks")]
         [Summary("This functions exactly the same as SearchDB except it will print the links out as well.")]
         public async Task SearchForSongLinks([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "any", false, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "any", false, true));
         [Command("SearchDBExactLinks")]
         [Summary("This functions exactly the same as SearchDBExact except it will print the links out as well.")]
         public async Task SearchForSongLinksExact([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "any", true, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "any", true, true));
 
         [Command("SearchArtist")]
         [Summary("Will return every song in the database by that author.")]

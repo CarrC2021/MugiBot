@@ -229,7 +229,7 @@ namespace PartyBot.Handlers
                     }
                 }
                 await SerializeAndWrite(newPlaylist, Path.Combine(path, "playlists", fileName));
-                return await EmbedHandler.CreateBasicEmbed("Playlists", $"Created a playlist named {fileName} using the game data provided.", Color.Blue);
+                return await EmbedHandler.CreateBasicEmbed("Playlists", $"Created a playlist named {fileName} where the songs are the songs you missed in the files provided.", Color.Blue);
             }
             catch (Exception ex)
             {

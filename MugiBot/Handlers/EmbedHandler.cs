@@ -85,6 +85,9 @@ namespace PartyBot.Handlers
         // Need to convert all these things to use the String Builder function.
         public static async Task<Embed> PrintSongs(ISocketMessageChannel ch, List<SongTableObject> songObjects, bool printLinks = false)
         {
+            if (songObjects.Count >= 400)
+                return await EmbedHandler.CreateErrorEmbed("Song Search", "Nice try pal but that is 400 or more songs you really expect me to print all that out?"+
+                "Make your search more specific so that you get less songs which meet the search criteria.");
             var sb = new StringBuilder();
             var allKeys = new StringBuilder("\n All keys:\n");
             var embeds = new List<Embed>();
