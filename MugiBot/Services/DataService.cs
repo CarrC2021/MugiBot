@@ -58,6 +58,20 @@ namespace PartyBot.Services
             return await DBCalculationHandler.CalcTotalCorrect(_playersRulesService, rule);
         }
 
+        public async Task<Embed> PrintAllLists()
+        {
+            var malLists = Directory.GetFiles(Path.Combine(GlobalData.Config.RootFolderPath, "MALUserLists")).Select(f => Path.GetFileName(f));
+            var anilists = Directory.EnumerateFiles(Path.Combine(GlobalData.Config.RootFolderPath, "AniLists")).Select(f => Path.GetFileName(f));
+            var sb = new StringBuilder();
+            sb.Append("All lists:\n\n My Anime Lists:\n");
+            foreach (string name in malLists)
+                sb.Append($"{name.Replace(".json","")}\n");
+            sb.Append("\nAnilists:\n");
+            foreach (string name in anilists)
+                sb.Append($"{name.Replace(".json","")}\n");
+            return await EmbedHandler.CreateBasicEmbed("User Lists", sb.ToString(), Color.Blue);
+        }
+
         public async Task<Embed> RecommendPracticeSongs(ISocketMessageChannel ch, string name, int numSongs, bool onlyFromList)
         {
             if (numSongs > 30)
@@ -67,7 +81,7 @@ namespace PartyBot.Services
                 return await EmbedHandler.CreateBasicEmbed("Name Error", "Could not find any players by that name in the database.", Color.Red);
 
             return await DBCalculationHandler.RecommendPracticeSongs(ch, players[name], numSongs, onlyFromList);
-        }
+        }   
 
         public async Task<Embed> CreatePlaylist(string name)
         {

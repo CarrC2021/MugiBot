@@ -109,6 +109,10 @@ namespace PartyBot.Modules
         public async Task UpdateRelationalMap()
             => await DataService.DBManager.animeRelationManager.UpdateRelationalMapUsingSongTable();
 
+        [Command("PrintLists")]
+        public async Task PrintLists()
+            => await ReplyAsync(embed: await DataService.PrintAllLists());    
+
         [Command("GetMalUserList")]
         public async Task GetMalUserList([Remainder] string userName)
             => await MALHandler.GetMalUserList(userName);

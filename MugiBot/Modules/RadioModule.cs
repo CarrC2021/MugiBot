@@ -26,12 +26,12 @@ namespace PartyBot.Modules
         [Summary("Changes the player name in the Radio to the given argument.")]
         public async Task ChangePlayerName([Remainder] string playerName = "any")
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).ChangePlayers(playerName, DBManager, AnilistService));
+                AudioService.radios, Context.Channel, Context.Guild).ChangePlayers(playerName, AnilistService));
         [Command("RCT")]
         [Summary("Changes the type of song played by the Radio to the given argument.")]
         public async Task ChangePlayerName(int type)
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).SetType(type, DBManager, AnilistService));
+                AudioService.radios, Context.Channel, Context.Guild).SetType(type, AnilistService));
         [Command("RCT")]
         [Summary("Changes the type of song played by the Radio to the given argument.")]
         public async Task ChangePlayerNameString([Remainder] string type)

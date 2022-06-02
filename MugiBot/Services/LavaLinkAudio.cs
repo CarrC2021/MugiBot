@@ -162,7 +162,7 @@ namespace PartyBot.Services
 
         /*This is ran when a user uses the command List 
             Task Returns an Embed which is used in the command call. */
-        public async Task<Embed> ListAsync(SocketGuild guild, ISocketMessageChannel channel)
+        public async Task<Embed> QueueAsync(SocketGuild guild, ISocketMessageChannel channel)
         {
             try
             {
@@ -171,7 +171,7 @@ namespace PartyBot.Services
 
                 var radio = RadioHandler.FindRadio(radios, guild);
                 var queue = new List<SongTableObject>();
-                if(radio != null)
+                if (radio != null)
                     queue = radio.GetQueue();
 
                 /* Get The Player and make sure it isn't null. */
@@ -179,26 +179,24 @@ namespace PartyBot.Services
                 if (player == null)
                     return await EmbedHandler.CreateErrorEmbed("Music, List", $"Could not aquire player.\nAre you using the bot right now? check{GlobalData.Config.DefaultPrefix}Help for info on how to use the bot.");
 
-                if (!(player.PlayerState is PlayerState.Playing))
-                    return await EmbedHandler.CreateErrorEmbed("Music, List", "Player doesn't seem to be playing anything right now.");
                 /*If the queue count is less than 1 and the current track IS NOT null then we wont have a list to reply with.
                     In this situation we simply return an embed that displays the current track instead. */
                 if (player.Queue.Count < 1 && queue.Count() < 1 && player.Track != null)
-                    return await EmbedHandler.CreateBasicEmbed($"Now Playing: {player.Track.Title}", $"Nothing else queued", Color.Blue);
+                    return await EmbedHandler.CreateBasicEmbed($"Current Song: {player.Track.Title} by {player.Track.Author}", $"Nothing else queued", Color.Blue);
                 /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
                  *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
                     This trackNum variable is used to display the number in which the song is in place. (Start at 2 because we're including the current song.*/
                 var trackNum = 2;
                 foreach (LavaTrack track in player.Queue)
                 {
-                    if (($"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {track.Title}\n").Length >= 2048)
+                    if (($"Current Song: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {track.Title}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {track.Title}\n");
                     trackNum++;
                 }
                 foreach (SongTableObject song in queue)
                 {
-                    if (($"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {song.PrintSong()}\n").Length >= 2048)
+                    if (($"Current Song: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {song.PrintSong()}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {song.PrintSong()}\n");
                     trackNum++;
