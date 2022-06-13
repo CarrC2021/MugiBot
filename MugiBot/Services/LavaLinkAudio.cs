@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Victoria;
@@ -144,7 +144,7 @@ namespace PartyBot.Services
                 //If The Player is playing, Stop it.
                 if (player.PlayerState is PlayerState.Playing)
                     await player.StopAsync();
-                
+
                 var radio = RadioHandler.FindRadio(radios, (SocketGuild)guild);
                 radios.Remove(radio);
 
@@ -231,7 +231,7 @@ namespace PartyBot.Services
                     var song = await radio.NextSong();
                     if (song != null)
                     {
-                        await CheckDeleteTempMusicFile(currentTrack.Url);
+                        await CheckDeleteTempMusicFile(currentTrack);
                         await PlayAsync(user, guild, song.Key, song);
                         await player.SkipAsync();
                         return await EmbedHandler.CreateBasicEmbed("Music Skip", $"I have successfully skipped {currentTrack.Title}\n Now playing {player.Track.Title} by {player.Track.Author}", Color.Blue);
@@ -246,7 +246,7 @@ namespace PartyBot.Services
                 /* Skip the current song. */
                 await player.SkipAsync();
 
-                await CheckDeleteTempMusicFile(currentTrack.Url);
+                await CheckDeleteTempMusicFile(currentTrack);
 
                 await LoggingService.LogInformationAsync("Music", $"Bot skipped: {currentTrack.Title}");
                 return await EmbedHandler.CreateBasicEmbed("Music Skip", $"I have successfully skipped {currentTrack.Title}\n Now playing {player.Track.Title} by {player.Track.Author}", Color.Blue);
@@ -291,7 +291,7 @@ namespace PartyBot.Services
         {
             foreach (LavaTrack track in player.Queue)
             {
-                await CheckDeleteTempMusicFile(track.Url);
+                await CheckDeleteTempMusicFile(track);
                 player.Queue.Remove(track);
             }
             await Task.Run(() => RadioHandler.FindRadio(radios, guild).DeQueueAll());
@@ -359,12 +359,13 @@ namespace PartyBot.Services
             if (!args.Reason.ShouldPlayNext())
                 return;
 
-            await CheckDeleteTempMusicFile(args.Track.Url);
-
             Radio guildRadio = RadioHandler.FindRadio(
                     radios,
                     args.Player.TextChannel.Guild as SocketGuild
                 );
+
+            await CheckDeleteTempMusicFile(args.Track, guildRadio);
+            
             string toPrint = "Now Playing:";
             if (guildRadio != null && args.Player.Queue.Count < 3)
             {
@@ -431,7 +432,7 @@ namespace PartyBot.Services
                 // If there is nothing then try to queue from the random radio selection.
                 if (radio.RadioMode)
                     await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);
-                
+
             }
             catch (Exception ex)
             {
@@ -441,13 +442,16 @@ namespace PartyBot.Services
             }
         }
 
-        public async Task CheckDeleteTempMusicFile(string filePath)
+        public async Task CheckDeleteTempMusicFile(LavaTrack track, Radio radio = null)
         {
-            if (filePath.Contains($"{separator}tempMusic"))
+            // if (radio.Queue != null)
+            //     var list = radio.Queue.Where(f => f.)
+
+            if (track.Url.Contains($"{separator}tempMusic"))
             {
                 try
                 {
-                    FileSystemInfo fileInfo = new FileInfo(filePath);
+                    FileSystemInfo fileInfo = new FileInfo(track.Url);
                     await Task.Run(() => fileInfo.Delete());
                 }
                 catch (Exception ex)
@@ -512,6 +516,48 @@ namespace PartyBot.Services
                 await LoggingService.LogInformationAsync("Playlists", ex.Source + "\n" + ex.Message + "\n" + ex.StackTrace);
                 return await EmbedHandler.CreateErrorEmbed("Playlists", ex.Message);
             }
+        }
+        public async Task<Embed> Loop(Radio radio, SocketGuildUser user, ISocketMessageChannel channel, int numTimes)
+        {
+            var embed = await CheckVoice(radio, user, channel);
+            if (embed != null)
+                return embed;
+
+            var currRadioQueue = Clone<List<SongTableObject>>(radio.GetQueue());
+            for (int i = 0; i < numTimes; i++)
+            {
+                foreach (SongTableObject song in currRadioQueue)
+                {
+                    radio.Queue.Enqueue(song);
+                }
+            }
+
+            return await EmbedHandler.CreateBasicEmbed("Loop", $"The current queue will be looped through {numTimes} times.", Color.Blue);
+        }
+
+        public static T Clone<T>(T source)
+        {
+
+            DataContractSerializer serializer = new DataContractSerializer(typeof(T));
+            using (MemoryStream ms = new MemoryStream())
+            {
+                serializer.WriteObject(ms, source);
+                ms.Seek(0, SeekOrigin.Begin);
+                return (T)serializer.ReadObject(ms);
+            }
+        }
+
+        public async Task<Embed> CheckVoice(Radio radio, SocketGuildUser user, ISocketMessageChannel channel)
+        {
+            // Check If User Is Connected To Voice Cahnnel.
+            if (user.VoiceChannel == null)
+                return await EmbedHandler.CreateErrorEmbed("Music, Join/Play", "You Must First Join a Voice Channel.");
+
+            // Check the guild has a player available.
+            if (!_lavaNode.HasPlayer(radio.Guild))
+                return await EmbedHandler.CreateErrorEmbed("Music, Play", "I'm not connected to a voice channel.");
+
+            return null;
         }
     }
 }

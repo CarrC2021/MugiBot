@@ -129,5 +129,12 @@ namespace PartyBot.Modules
         public async Task LoadPlaylist([Remainder] string name)
         => await ReplyAsync(embed: await AudioService.LoadPlaylist(RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild), Context.User as SocketGuildUser, Context.Channel, name.ToLower()));
+
+        [Command("Loop")]
+        [Summary("Will loop what is currently in the queue the specified number of times. Note if you use !play or !playkey this command will fail to loop those." +
+        " Realistically speaking I will probably never fix that, so it only works for things queued with the !load commands.")]
+        public async Task Loop([Remainder] int numTimes)
+        => await ReplyAsync(embed: await AudioService.Loop(RadioHandler.FindOrCreateRadio(
+                AudioService.radios, Context.Channel, Context.Guild), Context.User as SocketGuildUser, Context.Channel, numTimes));
     }
 }

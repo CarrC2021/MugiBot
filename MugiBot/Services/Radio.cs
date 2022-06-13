@@ -24,7 +24,7 @@ public class Radio
     public Dictionary<string, int> listStatus = new Dictionary<string, int>();
     public Dictionary<int, string> listStatusReverse = new Dictionary<int, string>();
     private List<SongTableObject> SongSelection = new List<SongTableObject>();
-    private Queue<SongTableObject> Queue = new Queue<SongTableObject>();
+    public Queue<SongTableObject> Queue = new Queue<SongTableObject>();
     private readonly Random rnd;
     public Radio(IMessageChannel c, SocketGuild g)
     {
