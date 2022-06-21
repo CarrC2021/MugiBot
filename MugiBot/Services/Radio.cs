@@ -180,10 +180,6 @@ public class Radio
     {
         await Task.Run(() => Queue.TryDequeue(out var result));
     }
-    public void DeQueueAll()
-    {
-        Queue.Clear();
-    }
     public bool IsQueueEmpty()
     {
         if (Queue.Count > 0)

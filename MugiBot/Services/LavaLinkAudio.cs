@@ -186,23 +186,29 @@ namespace PartyBot.Services
                 /* Now we know if we have something in the queue worth replying with, so we iterate through all the Tracks in the queue.
                  *  Next Add the Track title and the url however make use of Discords Markdown feature to display everything neatly.
                     This trackNum variable is used to display the number in which the song is in place. (Start at 2 because we're including the current song.*/
-                var trackNum = 2;
+                string title = "Nothing currently playing\n";
+                var trackNum = 1;
+                if (player.PlayerState is PlayerState.Playing)
+                {
+                    title = $"Now Playing: {player.Track.Title}\n";
+                    trackNum = 2;
+                }
                 foreach (LavaTrack track in player.Queue)
                 {
-                    if (($"Current Song: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {track.Title}\n").Length >= 2048)
+                    if (($"{title} {descriptionBuilder.ToString()}\n" + $"{trackNum}: {track.Title}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {track.Title}\n");
                     trackNum++;
                 }
                 foreach (SongTableObject song in queue)
                 {
-                    if (($"Current Song: {player.Track.Title} \n{descriptionBuilder.ToString()}\n" + $"{trackNum}: {song.PrintSong()}\n").Length >= 2048)
+                    if (($"{title} {descriptionBuilder.ToString()}\n" + $"{trackNum}: {song.PrintSong()}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {song.PrintSong()}\n");
                     trackNum++;
                 }
 
-                return await EmbedHandler.CreateBasicEmbed("Music, List", $"Now Playing: {player.Track.Title} \n{descriptionBuilder.ToString()}\n", Color.Blue);
+                return await EmbedHandler.CreateBasicEmbed("Music, List", $"{title} \n{descriptionBuilder.ToString()}\n", Color.Blue);
             }
             catch (Exception ex)
             {
@@ -294,7 +300,7 @@ namespace PartyBot.Services
                 await CheckDeleteTempMusicFile(track);
                 player.Queue.Remove(track);
             }
-            await Task.Run(() => RadioHandler.FindRadio(radios, guild).DeQueueAll());
+            await Task.Run(() => RadioHandler.FindRadio(radios, guild).Queue.Clear());
         }
 
         /*This is ran when a user uses the command Volume 
@@ -473,7 +479,7 @@ namespace PartyBot.Services
 
             try
             {
-                var fileName = PlaylistHandler.SearchPlaylistDirectories(Path.Combine(path, "playlists"), name);
+                var fileName = Path.Combine(path, "playlists", name);
                 var playlistPath = "";
                 if (type.Equals("default"))
                     playlistPath = Path.Combine(path, "playlists", name);
@@ -482,7 +488,7 @@ namespace PartyBot.Services
                 if (!File.Exists(playlistPath))
                     return await EmbedHandler.CreateErrorEmbed("Playlists", $"Could not find playlist with the name {name}");
 
-                var playlist = await PlaylistHandler.LoadPlaylist(playlistPath);
+                List<String> playlist = await PlaylistHandler.LoadPlaylist(playlistPath);
 
                 Random rnd = new Random();
                 for (int i = 0; i < playlist.Count; i++)
@@ -519,6 +525,7 @@ namespace PartyBot.Services
         }
         public async Task<Embed> Loop(Radio radio, SocketGuildUser user, ISocketMessageChannel channel, int numTimes)
         {
+            numTimes = Math.Abs(numTimes);
             var embed = await CheckVoice(radio, user, channel);
             if (embed != null)
                 return embed;

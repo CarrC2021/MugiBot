@@ -139,12 +139,12 @@ namespace PartyBot.Services
 
         public async Task<Embed> PrintPlaylist(string playlistName, ISocketMessageChannel channel)
         {
-            var result = PlaylistHandler.SearchPlaylistDirectories(Path.Combine(path, "playlists"), playlistName);
-            if (result == null)
+            string fileName = Path.Combine(path, "playlists", playlistName);
+            if (fileName == null)
                 return await EmbedHandler.CreateErrorEmbed("Playlist does not exist", $"{playlistName} does not exist");
             var embeds = new List<Embed>();
 
-            var content = await PlaylistHandler.LoadPlaylist(result);
+            var content = await PlaylistHandler.LoadPlaylist(fileName);
 
             var sb = new StringBuilder();
             sb.Append($"{playlistName} songs: \n\n");
@@ -164,8 +164,7 @@ namespace PartyBot.Services
             {
                 await channel.SendMessageAsync(embed: embed);
             }
-            return await EmbedHandler.CreateBasicEmbed("Playlists", $"A total of {content.Count} songs are in {playlistName}. To shuffle the order "
-                + "of the songs use the !shuffleplaylist command.", Color.Blue);
+            return await EmbedHandler.CreateBasicEmbed("Playlists", $"A total of {content.Count} songs are in {playlistName}.", Color.Blue);
         }
     }
 }
