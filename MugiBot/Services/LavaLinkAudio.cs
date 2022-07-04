@@ -426,25 +426,30 @@ namespace PartyBot.Services
 
         public async Task RadioQueue(Radio radio)
         {
+            var nextSong = new SongTableObject();
             try
             {
                 // First try to see if the queue is not empty.
                 if (!radio.IsQueueEmpty())
                 {
-                    var outVal = await radio.NextSong();
-                    await CatboxHandler.QueueRadioSong(outVal, radio.Guild, _lavaNode, path);
+                    nextSong = await radio.NextSong();
+                    await CatboxHandler.QueueRadioSong(nextSong, radio.Guild, _lavaNode, path);
                     return;
                 }
                 // If there is nothing then try to queue from the random radio selection.
                 if (radio.RadioMode)
-                    await CatboxHandler.QueueRadioSong(radio.GetRandomSong(), radio.Guild, _lavaNode, path);
+                {
+                    nextSong = radio.GetRandomSong();
+                    await CatboxHandler.QueueRadioSong(nextSong, radio.Guild, _lavaNode, path);
+                }
 
             }
             catch (Exception ex)
             {
                 await radio.Channel.SendMessageAsync(embed: await
-                    EmbedHandler.CreateErrorEmbed("Radio", "Something went wrong trying to queue a song from the radio."));
-                await LoggingService.LogInformationAsync(ex.Source, ex.Message + "\n" + ex.StackTrace);
+                    EmbedHandler.CreateErrorEmbed("Radio", $"Something went wrong trying to queue a song from the radio. The song that failed was "
+                    +$"{nextSong.PrintSong()}.\n It's url is {nextSong.MP3}"));
+                await LoggingService.LogInformationAsync(ex.Source, ex.Message + "\n" + ex.StackTrace + $"\n {nextSong.MP3}");
             }
         }
 

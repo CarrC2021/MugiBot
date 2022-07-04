@@ -110,11 +110,13 @@ namespace PartyBot.Modules
             => await DataService.DBManager.animeRelationManager.UpdateRelationalMapUsingSongTable();
 
         [Command("PrintLists")]
+        [Summary("This command will print all MAL and Anilists that the bot has saved.")]
         public async Task PrintLists()
             => await ReplyAsync(embed: await DataService.PrintAllLists());    
-
-        [Command("GetMalUserList")]
-        public async Task GetMalUserList([Remainder] string userName)
-            => await MALHandler.GetMalUserList(userName);
+        
+        [Command("PrintPlaylists")]
+        [Summary("This command will print all playlists that the bot has saved. This command takes no arguments.")]
+        public async Task PrintPlaylists()
+            => await ReplyAsync(embed: await PlaylistHandler.PrintAllPlaylists(DataService.path));
     }
 }

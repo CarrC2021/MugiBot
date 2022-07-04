@@ -203,6 +203,16 @@ namespace PartyBot.Handlers
             return songs;
         }
 
+        public static async Task<Embed> PrintAllPlaylists(string path) 
+        {
+            var fileNames = Directory.EnumerateFiles(Path.Combine(path, "playlists"));
+            var sb = new StringBuilder();
+            sb.Append("Playlist Names:\n");
+            foreach (var file in fileNames)
+                sb.Append($"{file}\n");
+            return await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue);
+        }
+
         public static async Task<Embed> PlaylistFromGameData(Dictionary<string, string> PlayerDict, List<SongData> songs, ulong id, string path, string fileName)
         {
             using var db = new AMQDBContext();

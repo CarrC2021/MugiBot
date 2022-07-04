@@ -77,53 +77,7 @@ namespace PartyBot.Modules
             + "If you don't know what the format for a key looks like use the searchdb command.")]
         public async Task QueueCatboxFromDB([Remainder] string key)
             => await ReplyAsync(embed: await AudioService.QueueCatboxFromDB(key, Context.User as SocketGuildUser, Context.Guild));
-        [Command("RadioOff")]
-        [Summary("Turns the Radio off.")]
-        public async Task TurnRadioOff()
-        => await ReplyAsync(embed: await RadioHandler.TurnOff(RadioHandler.FindRadio(AudioService.radios, Context.Guild)));
-        [Command("RCP")]
-        [Summary("Changes the player name in the Radio to the given argument.")]
-        public async Task ChangePlayerName([Remainder] string playerName = "any")
-        => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).ChangePlayers(playerName, AnilistService));
-        [Command("RCT")]
-        [Summary("Changes the type of song played by the Radio to the given argument.")]
-        public async Task ChangeType(int type)
-        => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).SetType(type, AnilistService));
-        [Command("RCT")]
-        [Summary("Changes the type of song played by the Radio to the given argument.")]
-        public async Task ChangeTypeString([Remainder] string type)
-        => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).SetType(type, DBManager, AnilistService));
-        [Command("RLT")]
-        [Summary("Lists out the types the Radio can use.")]
-        public async Task ListTypes()
-        => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).ListTypes());
-        [Command("RInfo")]
-        [Summary("Print out information about the radio in this server.")]
-        public async Task PrintRadioInfo()
-        => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).PrintRadio());
-        [Command("RAL")]
-        [Summary("This will add to the radio a condition to play the songs from the specified list status. For example, !ral Watching Completed Dropped Paused " +
-            "will play songs that meet those conditions in the database. By default this is set Watching or completed")]
-        public async Task AddRadioListStatus([Remainder] string input)
-        => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).AddListStatus(input.Split(), DBManager, AnilistService));
-        [Command("RDL")]
-        [Summary("This will remove from the radio a condition to play the songs from the specified list status. For example, !rdl Watching Completed Dropped Paused " +
-            "will remove songs that meet those conditions in the database. By default this is set to Watching or completed")]
-        public async Task RemoveRadioListStatus([Remainder] string input)
-        => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).RemoveListStatus(input.Split(), DBManager, AnilistService));
-        [Command("StartRadio")]
-        [Summary("Starts the radio and will keep playing songs until you turn it off.")]
-        public async Task StartRadio()
-        => await ReplyAsync(embed: await AudioService.StartRadio(RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild), Context.User as SocketGuildUser));
-
+ 
         [Command("LoadPlaylist")]
         [Summary("Starts the radio and will keep playing songs until you turn it off.")]
         public async Task LoadPlaylist([Remainder] string name)

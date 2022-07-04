@@ -55,17 +55,15 @@ namespace PartyBot.Handlers
                 Show + " " + Type + " " + songName, author, track.Url, track.Position, track.Duration.Ticks, track.CanSeek, track.IsStream);
             return toReturn;
         }
-        public static async Task<String> QueueRadioSong(SongTableObject sto, SocketGuild guild, LavaNode _lavaNode, string musicPath)
+        public static async Task QueueRadioSong(SongTableObject sto, SocketGuild guild, LavaNode _lavaNode, string musicPath)
         {
             if (sto == null)
             {
                 await LoggingService.LogInformationAsync("QueueRadioSong", "Somehow a null songtableobject was passed.");
-                return "Please ping the creator of this app to show this error message. A null SongTableObject was passed to QueueRadioSong.";
             }
             var track = await DownloadAndMakeTrack(sto, musicPath, _lavaNode);
             var player = _lavaNode.GetPlayer(guild);
             player.Queue.Enqueue(track);
-            return "success";
         }
     }
 }
