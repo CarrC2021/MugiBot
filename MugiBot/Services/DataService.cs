@@ -132,6 +132,7 @@ namespace PartyBot.Services
             {
                 var dataList = await JsonHandler.ConvertJsonToSongData(new FileInfo(fileName));
                 finalList.AddRange(dataList);
+                File.Delete(fileName);
             }
             return await PlaylistHandler.PlaylistFromGameData(await DBManager._rs.GetPlayersTracked(), finalList, id,
             DBManager.mainpath, name);
