@@ -122,7 +122,7 @@ namespace PartyBot.Database
                 if (song.songNumber == 1)
                     await _db.SaveChangesAsync();
 
-                if (song.urls == null)
+                if (song.urls == null || song.annId.Equals(null) || song.annId <= 0)
                     continue;
 
                 // Update the songs since the urls are there.
@@ -287,7 +287,7 @@ namespace PartyBot.Database
             using var _db = new AMQDBContext();
             var toRemove = await _db.SongTableObject
                     .AsTracking()
-                    .Where(f => f.AnnID == 0)
+                    .Where(f => f.AnnID <= 0)
                     .ToListAsync();
 
             _db.RemoveRange(toRemove);  
