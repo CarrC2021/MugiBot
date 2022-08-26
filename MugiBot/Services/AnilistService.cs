@@ -1,6 +1,4 @@
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.Mime;
 using Discord;
 using System;
 using System.Net.Http;
@@ -90,6 +88,18 @@ namespace PartyBot.Services
             using var db = new AMQDBContext();
             var user = await db.DiscordUsers.FindAsync(userID);
             var username = user.AnilistName;
+            var query = "query ($username: String){" + $"{AnilistQuery.MediaListQuery()}" + "}";
+            var request = new GraphQLRequest { Query = query, Variables = new { username } };
+            Console.Write(request);
+            var response = await _graphQLClient.SendQueryAsync<dynamic>(request).ConfigureAwait(false);
+            var UserList = response.Data.ToString();
+            await WriteJsonResponseToFile(UserList, "AniLists", username);
+            return await EmbedHandler.CreateBasicEmbed("Anilist", $"Downloaded a file containing the contents of {username}'s anilist", Color.Green);
+        }
+
+        public async Task<Embed> GetUserListAsync(string anilistName)
+        {
+            var username = anilistName;
             var query = "query ($username: String){" + $"{AnilistQuery.MediaListQuery()}" + "}";
             var request = new GraphQLRequest { Query = query, Variables = new { username } };
             Console.Write(request);

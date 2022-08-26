@@ -35,10 +35,20 @@ namespace PartyBot.Modules
         [Summary("Updates the file containing the user's anilist.")]
         public async Task UpdateUserListAsync()
             => await ReplyAsync(embed: await AnilistService.GetUserListAsync(Context.User.Id));
+        
+        [Command("UpdateAL")]
+        [Summary("A second version of the command that updates the file corresponding to the anilist name that you provide.")]
+        public async Task UpdateUserListAsync2(string anilistName)
+            => await ReplyAsync(embed: await AnilistService.GetUserListAsync(anilistName));
 
         [Command("UpdateMAL")]
         [Summary("Updates the file containing the user's MAL.")]
         public async Task UpdateMALUserListAsync()
             => await ReplyAsync(embed: await MALHandler.UpdateUserListAsync(Context.User.Id));
+
+        [Command("UpdateMAL")]
+        [Summary("A second version of the command that updates the file corresponding to the MAL list name that you provide.")]
+        public async Task UpdateMALUserListAsync2(string malName)
+            => await ReplyAsync(embed: await MALHandler.UpdateUserListAsync(malName));
     }
 }

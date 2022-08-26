@@ -78,6 +78,20 @@ namespace PartyBot.Handlers
             return await EmbedHandler.CreateBasicEmbed("Mal User Lists", $"Downloaded a file containing the contents of {user.MALName}'s list.", Color.Green);
         }
 
+        public static async Task<Embed> UpdateUserListAsync(string malName)
+        {
+            try
+            {
+                await GetMalUserList(malName);
+            }
+            catch (Exception ex)
+            {
+                return await EmbedHandler.CreateErrorEmbed("Mal User Lists", "There was an error finding the MAL user you set. Check to make sure"
+                + "you have spelled it correctly with !printmyinfo.");
+            }
+            return await EmbedHandler.CreateBasicEmbed("Mal User Lists", $"Downloaded a file containing the contents of {malName}'s list.", Color.Green);
+        }
+
         public static async Task<List<SongTableObject>> GetSongsFromMAL(string MALName, List<int> Status)
         {
 
