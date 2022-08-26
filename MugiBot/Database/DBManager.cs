@@ -212,8 +212,6 @@ namespace PartyBot.Database
                 await AddSongsFromQuestion(question);
 
             await _db.SaveChangesAsync();
-            await UpdateSongIDs();
-            await _db.SaveChangesAsync();
             await Task.Run(() => File.Delete(Path.Combine(mainpath, expandLibraryFile)));
             return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);
         }
@@ -250,22 +248,6 @@ namespace PartyBot.Database
                     result.Show = question.Name;
                 }
                 await animeRelationManager.UpdateRelationalMap(question.AnnId);
-            }
-        }
-
-        private async Task UpdateSongIDs()
-        {
-            using var _db = new AMQDBContext();
-            var songs = await _db.SongTableObject
-                .AsTracking()
-                .ToListAsync();
-
-            foreach (SongTableObject song in songs)
-            {
-                if (song.AnnSongID == 0)
-                {
-                    song.AnnSongID = -1;
-                }
             }
         }
 

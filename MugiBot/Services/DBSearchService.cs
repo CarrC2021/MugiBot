@@ -27,19 +27,19 @@ public class DBSearchService
         return await EmbedHandler.PrintSongs(message.Channel, songList);
     }
 
-    public static async Task<Embed> SearchByAuthor(SocketMessage message, string author, string printLinks = "no", bool exact = false)
+    public static async Task<Embed> SearchByArtist(SocketMessage message, string author, string printLinks = "no", bool exact = false)
     {
         using var db = new AMQDBContext();
-        var songList = await SearchHandler.SearchAuthor(db, author, exact);
+        var songList = await SearchHandler.SearchArtist(db, author, exact);
         if (printLinks.Equals("no"))
             return await EmbedHandler.PrintSongs(message.Channel, songList);
         return await EmbedHandler.PrintSongs(message.Channel, songList, true);
     }
 
-    public static async Task<List<SongTableObject>> ReturnSongsByAuthor(string author, bool exact)
+    public static async Task<List<SongTableObject>> ReturnSongsByArtist(string artist, bool exact)
     {
         using var db = new AMQDBContext();
-        return await SearchHandler.SearchAuthor(db, author, exact);
+        return await SearchHandler.SearchArtist(db, artist, exact);
     }
     public static async Task<Embed> ListPlayerStats(ISocketMessageChannel channel, string playerName, string showName, PlayersRulesService rulesService, string type = "any", string exactMatch = "no")
     {

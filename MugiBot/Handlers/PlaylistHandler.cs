@@ -197,7 +197,7 @@ namespace PartyBot.Handlers
             Console.WriteLine(songType);
             // Use the correct search command.
             if (searchType.Equals("artist"))
-                songs = await DBSearchService.ReturnSongsByAuthor(query, exact);
+                songs = await DBSearchService.ReturnSongsByArtist(query, exact);
             if (searchType.Equals("show"))
                 songs = await SearchHandler.ShowSearch(query, songType, exact);
             return songs;

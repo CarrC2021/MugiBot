@@ -92,12 +92,22 @@ namespace PartyBot.Modules
         [Command("SearchArtist")]
         [Summary("Will return every song in the database by that author.")]
         public async Task SearchByArtist([Remainder] string author)
-            => await ReplyAsync(embed: await DBSearchService.SearchByAuthor(Context.Message, author, "no"));
+            => await ReplyAsync(embed: await DBSearchService.SearchByArtist(Context.Message, author, "no"));
+        
+        [Command("SearchArtistExact")]
+        [Summary("Will return every song in the database by that author.")]
+        public async Task SearchByArtistExact([Remainder] string author)
+            => await ReplyAsync(embed: await DBSearchService.SearchByArtist(Context.Message, author, "no", true));
 
         [Command("SearchArtistLinks")]
         [Summary("Will return every song in the database by that author and print the links.")]
         public async Task SearchByArtistLinks([Remainder] string author)
-            => await ReplyAsync(embed: await DBSearchService.SearchByAuthor(Context.Message, author, "yes"));
+            => await ReplyAsync(embed: await DBSearchService.SearchByArtist(Context.Message, author, "yes"));
+        
+        [Command("SearchArtistExactLinks")]
+        [Summary("Will return every song in the database by that author and print the links.")]
+        public async Task SearchByArtistExactLinks([Remainder] string author)
+            => await ReplyAsync(embed: await DBSearchService.SearchByArtist(Context.Message, author, "yes", true));
 
         [Command("ShowStats")]
         [Summary("This will list the total stats from the database for each show that contains the string you specify.")]
