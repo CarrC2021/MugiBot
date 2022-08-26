@@ -8,6 +8,7 @@ using PartyBot.Handlers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using PartyBot.DataStructs;
 
 namespace PartyBot.Services
 {
@@ -57,6 +58,20 @@ namespace PartyBot.Services
             return await DBCalculationHandler.CalcTotalCorrect(_playersRulesService, rule);
         }
 
+        public async Task<Embed> PrintAllLists()
+        {
+            var malLists = Directory.GetFiles(Path.Combine(GlobalData.Config.RootFolderPath, "MALUserLists")).Select(f => Path.GetFileName(f));
+            var anilists = Directory.EnumerateFiles(Path.Combine(GlobalData.Config.RootFolderPath, "AniLists")).Select(f => Path.GetFileName(f));
+            var sb = new StringBuilder();
+            sb.Append("All lists:\n\n My Anime Lists:\n");
+            foreach (string name in malLists)
+                sb.Append($"{name.Replace(".json","")}\n");
+            sb.Append("\nAnilists:\n");
+            foreach (string name in anilists)
+                sb.Append($"{name.Replace(".json","")}\n");
+            return await EmbedHandler.CreateBasicEmbed("User Lists", sb.ToString(), Color.Blue);
+        }
+
         public async Task<Embed> RecommendPracticeSongs(ISocketMessageChannel ch, string name, int numSongs, bool onlyFromList)
         {
             if (numSongs > 30)
@@ -66,7 +81,7 @@ namespace PartyBot.Services
                 return await EmbedHandler.CreateBasicEmbed("Name Error", "Could not find any players by that name in the database.", Color.Red);
 
             return await DBCalculationHandler.RecommendPracticeSongs(ch, players[name], numSongs, onlyFromList);
-        }
+        }   
 
         public async Task<Embed> CreatePlaylist(string name)
         {
@@ -102,14 +117,35 @@ namespace PartyBot.Services
             SongTableObject songObject = await DBSearchService.UseSongKey(key);
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"{songObject.PrintSong()} has been removed from {playlistName}", Color.Blue);
         }
+        public async Task<Embed> CreatePlaylistFromGameData(string name, ulong id, SocketUserMessage message)
+        {
+            if (message.Attachments.Count == 0)
+                return await EmbedHandler.CreateErrorEmbed("Playlists", "You did not attach a file. You need to do that to use this method.");
+            if (File.Exists(Path.Combine(path, "playlists", name)))
+                return await EmbedHandler.CreateErrorEmbed("Playlists", "A playlist with this name already exists, use a different name.");
+            var songs = new List<SongTableObject>(); 
+            await JsonHandler.DownloadJson(message, Path.Combine(path, "jsonsforplaylist"), false);
+            await JsonHandler.DownloadJson(message, Path.Combine(path, DBManager.JsonFiles));
+            await DBManager.AddAllToDatabase();
+            var finalList = new List<SongData>();
+            foreach (string fileName in Directory.EnumerateFiles(Path.Combine(path, "jsonsforplaylist")))
+            {
+                var dataList = await JsonHandler.ConvertJsonToSongData(new FileInfo(fileName));
+                finalList.AddRange(dataList);
+                File.Delete(fileName);
+            }
+            return await PlaylistHandler.PlaylistFromGameData(await DBManager._rs.GetPlayersTracked(), finalList, id,
+            DBManager.mainpath, name);
+        }
+
         public async Task<Embed> PrintPlaylist(string playlistName, ISocketMessageChannel channel)
         {
-            var result = PlaylistHandler.SearchPlaylistDirectories(Path.Combine(path, "playlists"), playlistName);
-            if (result == null)
+            string fileName = Path.Combine(path, "playlists", playlistName);
+            if (fileName == null)
                 return await EmbedHandler.CreateErrorEmbed("Playlist does not exist", $"{playlistName} does not exist");
             var embeds = new List<Embed>();
 
-            var content = await PlaylistHandler.LoadPlaylist(result);
+            var content = await PlaylistHandler.LoadPlaylist(fileName);
 
             var sb = new StringBuilder();
             sb.Append($"{playlistName} songs: \n\n");
@@ -129,8 +165,7 @@ namespace PartyBot.Services
             {
                 await channel.SendMessageAsync(embed: embed);
             }
-            return await EmbedHandler.CreateBasicEmbed("Playlists", $"A total of {content.Count} songs are in {playlistName}. To shuffle the order "
-                + "of the songs use the !shuffleplaylist command.", Color.Blue);
+            return await EmbedHandler.CreateBasicEmbed("Playlists", $"A total of {content.Count} songs are in {playlistName}.", Color.Blue);
         }
     }
 }

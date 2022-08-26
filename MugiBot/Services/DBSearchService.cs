@@ -18,13 +18,13 @@ public class DBSearchService
         return await EmbedHandler.OtherPlayerStats(ch, thing, playerName);
     }
 
-    public static async Task<Embed> SearchForShow(SocketMessage message, string name, string type = "any", bool exactmatch = false, string links = "no")
+    public static async Task<Embed> SearchForShow(SocketMessage message, string name, string type = "any", bool exactmatch = false, bool links = false)
     {
         using var db = new AMQDBContext();
         var songList = await SearchHandler.ShowSearch(name, type, exactmatch);
-        if (links.Equals("no"))
-            return await EmbedHandler.PrintSongs(message.Channel, songList);
-        return await EmbedHandler.PrintSongs(message.Channel, songList, true);
+        if (links)
+            return await EmbedHandler.PrintSongs(message.Channel, songList, true);
+        return await EmbedHandler.PrintSongs(message.Channel, songList);
     }
 
     public static async Task<Embed> SearchByAuthor(SocketMessage message, string author, string printLinks = "no", bool exact = false)

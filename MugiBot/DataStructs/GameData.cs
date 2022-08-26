@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 /// <summary>
@@ -66,6 +67,20 @@ namespace PartyBot.DataStructs
         //answer typed by the player
         [JsonProperty("selfAnswer")]
         public string selfAnswer { get; set; }
+
+        public string MakeSongTableKey()
+        {
+            try
+            {
+                string key = $"{annId} {type.ToLower()} {name.ToLower()} by {artist.ToLower()}";
+                return key;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message, ex.StackTrace, ex.Source);
+                return "Remove From Database";
+            }
+        }
     }
 
     public class Anime

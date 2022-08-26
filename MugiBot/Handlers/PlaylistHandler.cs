@@ -41,7 +41,7 @@ namespace PartyBot.Handlers
                         await File.WriteAllBytesAsync(Path.Combine(filePath, fileName), bytes);
                         client.Dispose();
                         await message.Channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("File Downloads", $"Downloaded a file named {fileName}", Color.Blue));
-                        await message.Channel.SendMessageAsync(embed: await PlaylistHandler.CreatePlaylistFromFile(filePath, fileName, message.Author.Id));
+                        await message.Channel.SendMessageAsync(embed: await PlaylistHandler.AddToPlaylistFromFile(filePath, fileName, message.Author.Id));
                     }
                 }
             }
@@ -51,7 +51,7 @@ namespace PartyBot.Handlers
             }
             Console.WriteLine("Downloads: Does this look like the file you wanted to download? " + fileName);
         }
-        public static async Task<Embed> CreatePlaylistFromFile(string path, string fileName, ulong ID)
+        public static async Task<Embed> AddToPlaylistFromFile(string path, string fileName, ulong ID)
         {
             var filePath = Path.Combine(path, fileName);
             if (!File.Exists(filePath))
@@ -69,10 +69,23 @@ namespace PartyBot.Handlers
                 dict.TryAdd(song.Key, song.PrintSong());
             }
             var creatorName = ID.ToString();
-            if (!await PlaylistHandler.CreatePrivatePlaylist(Path.Combine(path.Replace($"PlaylistDownloads", ""), "playlists", fileName.ToLower().Replace(".txt", "")), creatorName, dict))
-                return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
-            await Task.Run(() => File.Delete(filePath));
-            return await EmbedHandler.CreateBasicEmbed("Playlist", $"Created a playlist with the name {fileName}", Color.Blue);
+            var playlistName = Path.Combine(path.Replace($"PlaylistDownloads", ""), "playlists", fileName.ToLower().Replace(".txt", ""));
+            // If no one has created a playlist with that name we use the create playlist function.
+            if (!File.Exists(playlistName))
+            {
+                await PlaylistHandler.CreatePrivatePlaylist(playlistName, creatorName, dict);
+                await Task.Run(() => File.Delete(filePath));
+                return await EmbedHandler.CreateBasicEmbed("Playlist", $"Created a playlist with the name {fileName}", Color.Blue);
+            }
+            // If someone has already made a playlist with that name, and this person is the owner of the playlist then we update with the new songs
+            Playlist playlistContents = await DeserializePlaylistAsync(fileName);
+            if (creatorName == playlistContents.Author)
+            {
+                await AddMultipleToPlaylist(fileName, playlistContents.Songs.Keys.ToList());
+                await Task.Run(() => File.Delete(filePath));
+                return await EmbedHandler.CreateBasicEmbed("Playlist", $"Added songs to the playlist with the name {fileName}", Color.Blue);
+            }
+            return await EmbedHandler.CreateErrorEmbed("Playlist", $"A playlist exists with the name {fileName} but you are not the author of that file.");
         }
         public static async Task<bool> CreatePrivatePlaylist(string filePath, string playlistCreator, Dictionary<string, string> dict = null)
         {
@@ -121,7 +134,8 @@ namespace PartyBot.Handlers
                 if (!contents.Songs.ContainsKey(key))
                 {
                     var songObject = await DBSearchService.UseSongKey(key);
-                    contents.Songs.Add(key, SongTableObject.PrintSong(songObject));
+                    if (songObject != null)
+                        contents.Songs.Add(key, SongTableObject.PrintSong(songObject));
                 }
             }
             await SerializeAndWrite(contents, filePath);
@@ -176,23 +190,6 @@ namespace PartyBot.Handlers
             await File.WriteAllTextAsync(filePath, jsonObject);
         }
 
-        public static string SearchPlaylistDirectories(string path, string query)
-        {
-            var list = new List<string>();
-            if (File.Exists(Path.Combine(path, "artists", query)))
-                list.Add(Path.Combine(path, "artists", query));
-
-            if (File.Exists(Path.Combine(path, "shows", query)))
-                list.Add(Path.Combine(path, "shows", query));
-
-            if (File.Exists(Path.Combine(path, query)))
-                list.Add(Path.Combine(path, query));
-
-            if (list.Count == 0)
-                return null;
-            return list.FirstOrDefault();
-        }
-
         // This function should be moved into DBSearchService or into searchhandler
         public static async Task<List<SongTableObject>> LoadSongsForQuery(string query, string searchType, string songType = "any", bool exact = false)
         {
@@ -204,6 +201,49 @@ namespace PartyBot.Handlers
             if (searchType.Equals("show"))
                 songs = await SearchHandler.ShowSearch(query, songType, exact);
             return songs;
+        }
+
+        public static async Task<Embed> PrintAllPlaylists(string path) 
+        {
+            var fileNames = Directory.EnumerateFiles(Path.Combine(path, "playlists"));
+            var sb = new StringBuilder();
+            sb.Append("Playlist Names:\n");
+            foreach (var file in fileNames)
+                sb.Append($"{file}\n");
+            return await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue);
+        }
+
+        public static async Task<Embed> PlaylistFromGameData(Dictionary<string, string> PlayerDict, List<SongData> songs, ulong id, string path, string fileName)
+        {
+            using var db = new AMQDBContext();
+            var user = await db.DiscordUsers.FindAsync(id);
+            if (user == null || user.DatabaseName == null)
+                return await EmbedHandler.CreateErrorEmbed("Playlist Creation", "You have not set your database information. To do so use the !setdbusername command.");
+            try
+            {
+                var newPlaylist = new Playlist();
+                newPlaylist.Author = user.DatabaseName;
+                newPlaylist.AutomaticallyGenerated = true;
+                foreach (SongData song in songs)
+                {
+                    foreach (Player player in song.players)
+                    {
+                        // Only add songs that the player heard and got wrong
+                        if (PlayerDict[player.name] != user.DatabaseName || player.correct)
+                            continue;
+                        var tempObject = await db.SongTableObject.FindAsync(song.MakeSongTableKey());
+                        newPlaylist.Songs.Add(tempObject.Key, tempObject.PrintSong());
+                    }
+                }
+                await SerializeAndWrite(newPlaylist, Path.Combine(path, "playlists", fileName));
+                return await EmbedHandler.CreateBasicEmbed("Playlists", $"Created a playlist named {fileName} where the songs are the songs you missed in the files provided.", Color.Blue);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                return await EmbedHandler.CreateErrorEmbed("Playlists", "Something went wrong while trying to create the new playlist.");
+            }
         }
     }
 }

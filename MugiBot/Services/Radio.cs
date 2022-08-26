@@ -10,6 +10,7 @@ using PartyBot.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using PartyBot.DataStructs;
+using System.IO;
 
 public class Radio
 {
@@ -23,7 +24,7 @@ public class Radio
     public Dictionary<string, int> listStatus = new Dictionary<string, int>();
     public Dictionary<int, string> listStatusReverse = new Dictionary<int, string>();
     private List<SongTableObject> SongSelection = new List<SongTableObject>();
-    private Queue<SongTableObject> Queue = new Queue<SongTableObject>();
+    public Queue<SongTableObject> Queue = new Queue<SongTableObject>();
     private readonly Random rnd;
     public Radio(IMessageChannel c, SocketGuild g)
     {
@@ -55,19 +56,29 @@ public class Radio
         SongTypes = list;
         RadioMode = false;
     }
-    public async Task<Embed> ChangePlayers(string players, DBManager _db, AnilistService _as = null)
+    private string CurrentPlayersString()
     {
-        var playersTracked = await _db._rs.GetPlayersTracked();
+        return String.Join("  ", CurrPlayers);
+    }
+    private string CurrentTypeString()
+    {
+        return String.Join("  ", CurrType);
+    }
+    public async Task<Embed> ChangePlayers(string players, AnilistService _as = null)
+    {
         var playerArr = players.Split();
+        var fileList = Directory.GetFiles(Path.Combine(GlobalData.Config.RootFolderPath, "AniLists")).Select(f => Path.GetFileName(f)).ToList();
+        fileList.AddRange((Directory.GetFiles(Path.Combine(GlobalData.Config.RootFolderPath, "MALUserLists")).Select(f => Path.GetFileName(f))));
         foreach (string player in playerArr)
         {
-            if (!playersTracked.ContainsKey(player))
-                return await EmbedHandler.CreateErrorEmbed("Radio Service", $"Could not find {player} in the database. Radio is still set to {CurrPlayers}.");
+            if (!fileList.Contains($"{player}.json"))
+                return await EmbedHandler.CreateErrorEmbed("Radio Service", $"Could not find {player}'s list in the database. To see the lists in the bot's database use !printlists. "+
+                $"Radio is still set to {CurrentPlayersString()}.");
         }
         CurrPlayers = players.Split().ToList();
 
-        await UpdatePotentialSongs(_db, _as);
-        return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {String.Join("  ", CurrPlayers)}", Color.Blue);
+        await UpdatePotentialSongs(_as);
+        return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio player now set to {CurrentPlayersString()}", Color.Blue);
     }
     public string GetPlayers()
     {
@@ -76,22 +87,22 @@ public class Radio
             sb.Append($"{player} ");
         return sb.ToString();
     }
-    public async Task<Embed> SetType(int type, DBManager _db, AnilistService _as = null)
+    public async Task<Embed> SetType(int type, AnilistService _as = null)
     {
         if (type > 0)
             CurrType = SongTypes[type - 1];
         else
             CurrType = SongTypes[type];
 
-        await UpdatePotentialSongs(_db, _as);
-        return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio song type now set to {String.Join("  ", CurrType)}", Color.Blue);
+        await UpdatePotentialSongs(_as);
+        return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio song type now set to {CurrentTypeString()}", Color.Blue);
     }
     public async Task<Embed> SetType(string type, DBManager _db, AnilistService _as = null)
     {
         if (SongTypes.Contains(type.Split().ToList()))
             CurrType = type.Split().ToList();
-        await UpdatePotentialSongs(_db, _as);
-        return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio song type now set to {String.Join("  ", CurrType)}", Color.Blue);
+        await UpdatePotentialSongs(_as);
+        return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio song type now set to {CurrentTypeString()}", Color.Blue);
     }
     public async Task<Embed> AddListStatus(string[] listArray, DBManager _db, AnilistService _as = null)
     {
@@ -105,7 +116,7 @@ public class Radio
         foreach (int thing in ListNums)
             toPrint.Append($"{listStatusReverse[thing]}\n");
 
-        await UpdatePotentialSongs(_db, _as);
+        await UpdatePotentialSongs(_as);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint.ToString()}", Color.Blue);
     }
     public async Task<Embed> RemoveListStatus(string[] listArray, DBManager _db, AnilistService _as = null)
@@ -120,7 +131,7 @@ public class Radio
         foreach (int thing in ListNums)
             toPrint.Append($"{listStatusReverse[thing]}\n");
 
-        await UpdatePotentialSongs(_db, _as);
+        await UpdatePotentialSongs(_as);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint.ToString()}", Color.Blue);
     }
     public async Task<Embed> PrintRadio()
@@ -169,10 +180,6 @@ public class Radio
     {
         await Task.Run(() => Queue.TryDequeue(out var result));
     }
-    public void DeQueueAll()
-    {
-        Queue.Clear();
-    }
     public bool IsQueueEmpty()
     {
         if (Queue.Count > 0)
@@ -193,38 +200,27 @@ public class Radio
     {
         return Queue.ToList();
     }
-    public async Task UpdatePotentialSongs(DBManager _db, AnilistService _as = null)
+    public async Task UpdatePotentialSongs(AnilistService _as = null)
     {
         List<SongTableObject> final = new List<SongTableObject>();
         List<SongTableObject> temp = new List<SongTableObject>();
         if (_as != null)
-            temp.AddRange(await SongsFromAnimeListsAsync(_db, _as));
+            temp.AddRange(await SongsFromAnimeListsAsync(_as));
         foreach (string type in CurrType)
             final.AddRange(temp.Where(x => x.Type.ToLower().Contains(type.ToLower())));
         final = final.Distinct().ToList();
         SongSelection = final;
     }
-    public async Task<List<SongTableObject>> SongsFromAnimeListsAsync(DBManager manager, AnilistService _as)
+    public async Task<List<SongTableObject>> SongsFromAnimeListsAsync(AnilistService _as)
     {
         var songs = new List<SongTableObject>();
-        var users = new List<DiscordUser>();
         var userAnilists = new List<UserAnilist>();
-        using var db = new AMQDBContext();
-        var playersTracked = await manager._rs.GetPlayersTracked();
         foreach (string name in CurrPlayers)
         {
-            var list = await db.DiscordUsers
-                        .AsNoTracking()
-                        .Where(y => y.DatabaseName == playersTracked[name])
-                        .ToListAsync();
-            users.AddRange(list);
-        }
-        foreach (DiscordUser user in users)
-        {
-            if (user.AnilistName != null)
-                userAnilists.Add(await _as.ReturnUserAnilistAsync(user.AnilistName, user.ID));
-            if (user.MALName != null)
-                songs.AddRange(await MALHandler.GetSongsFromMAL(user.MALName, ListNums));
+            if (File.Exists(Path.Combine(GlobalData.Config.RootFolderPath, "AniLists", $"{name}.json")))
+                userAnilists.Add(await _as.ReturnUserAnilistAsync(name, 0));
+            if (File.Exists(Path.Combine(GlobalData.Config.RootFolderPath, "MALUserLists", $"{name}.json")))
+                songs.AddRange(await MALHandler.GetSongsFromMAL(name, ListNums));
         }
         songs.AddRange(await _as.ReturnSongsFromLists(userAnilists, ListNums));
         return songs;

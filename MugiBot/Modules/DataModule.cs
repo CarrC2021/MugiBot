@@ -77,6 +77,11 @@ namespace PartyBot.Modules
         [Summary("Adds a playlist of the given name.")]
         public async Task CreatePlaylist([Remainder] string name)
             => await ReplyAsync(embed: await DataService.CreatePlaylist(name));
+        
+        [Command("CreatePlaylistFromGame")]
+        [Summary("Creates a playlist that contains all of the songs you missed in the attached file. This method requires a file attachment to the message.")]
+        public async Task CreatePlaylistFromGame([Remainder] string name)
+            => await ReplyAsync(embed: await DataService.CreatePlaylistFromGameData(name, Context.User.Id, Context.Message));
 
         [Command("CreatePrivatePlaylist")]
         [Summary("Creates a private playlist of the given name. This means that only the owner"
@@ -104,8 +109,14 @@ namespace PartyBot.Modules
         public async Task UpdateRelationalMap()
             => await DataService.DBManager.animeRelationManager.UpdateRelationalMapUsingSongTable();
 
-        [Command("GetMalUserList")]
-        public async Task GetMalUserList([Remainder] string userName)
-            => await MALHandler.GetMalUserList(userName);
+        [Command("PrintLists")]
+        [Summary("This command will print all MAL and Anilists that the bot has saved.")]
+        public async Task PrintLists()
+            => await ReplyAsync(embed: await DataService.PrintAllLists());    
+        
+        [Command("PrintPlaylists")]
+        [Summary("This command will print all playlists that the bot has saved. This command takes no arguments.")]
+        public async Task PrintPlaylists()
+            => await ReplyAsync(embed: await PlaylistHandler.PrintAllPlaylists(DataService.path));
     }
 }
