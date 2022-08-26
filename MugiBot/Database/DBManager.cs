@@ -269,6 +269,7 @@ namespace PartyBot.Database
             using var _db = new AMQDBContext();
             var toRemove = await _db.SongTableObject
                     .AsTracking()
+                    .Where(f => f.Key.StartsWith("-1"))
                     .Where(f => f.AnnID <= 0)
                     .ToListAsync();
 
@@ -283,6 +284,11 @@ namespace PartyBot.Database
             await _db.SaveChangesAsync();
             
             return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue);            
+        }
+
+        public string FixString(string toFix)
+        {
+            return toFix.Replace("ū","uu").Replace("ō","ou").Replace("Ō","Oo");
         }
 
     }

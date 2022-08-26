@@ -118,5 +118,10 @@ namespace PartyBot.Modules
         [Summary("This command will print all playlists that the bot has saved. This command takes no arguments.")]
         public async Task PrintPlaylists()
             => await ReplyAsync(embed: await PlaylistHandler.PrintAllPlaylists(DataService.path));
+
+        [Command("CleanDatabase")]
+        [Summary("This command will print all playlists that the bot has saved. This command takes no arguments.")]
+        public async Task CleanDatabase()
+            => await ReplyAsync(embed: await DataService.CleanDatabaseAsync());
     }
 }

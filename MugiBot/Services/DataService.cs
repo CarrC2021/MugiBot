@@ -9,6 +9,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using PartyBot.DataStructs;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace PartyBot.Services
 {
@@ -166,6 +168,54 @@ namespace PartyBot.Services
                 await channel.SendMessageAsync(embed: embed);
             }
             return await EmbedHandler.CreateBasicEmbed("Playlists", $"A total of {content.Count} songs are in {playlistName}.", Color.Blue);
+        }
+
+        public async Task<Embed> CleanDatabaseAsync()
+        {
+            using var _db = new AMQDBContext();
+            var toClean = await _db.SongTableObject
+                    .AsTracking()
+                    .Where(f => f.Key.Contains("ū") || f.Key.Contains("ō") || f.Key.Contains("Ō"))
+                    .ToListAsync();
+            Console.Write(toClean.Count);
+            foreach (SongTableObject song in toClean)
+            {
+                var newSong = new SongTableObject(FixString(song.SongName), FixString(song.Artist),
+                song.Type, FixString(song.Show), FixString(song.Romaji), song.MP3, song.AnnID,
+                song._720, song.AnnSongID);
+                string key = newSong.Key;
+                var output = await _db.SongTableObject.FindAsync(key);
+                if (output != null)
+                {
+                    _db.Remove(song);
+                    continue;
+                }
+                try
+                {
+                    await _db.AddAsync(newSong);
+                    await _db.SaveChangesAsync();
+                }
+                catch(Exception ex)
+                {
+                    Console.Write(newSong.Key);
+                }
+            }
+            var toUpdate = await _db.SongTableObject
+                    .AsTracking()
+                    .Where(f => f.Show.Contains("ū") || f.Show.Contains("ō") || f.Show.Contains("Ō") || f.Romaji.Contains("ū") || f.Romaji.Contains("ō") || f.Romaji.Contains("Ō"))
+                   .ToListAsync();
+            foreach (SongTableObject song in toUpdate)
+            {
+                song.Show = FixString(song.Show);
+                song.Romaji = FixString(song.Romaji);
+            }
+            await _db.SaveChangesAsync();
+
+            return await EmbedHandler.CreateBasicEmbed("Data, Songs", $"There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs.", Color.Blue); 
+        }
+        public string FixString(string toFix)
+        {
+            return toFix.Replace("ū","uu").Replace("ō","ou").Replace("Ō","Oo");
         }
     }
 }
