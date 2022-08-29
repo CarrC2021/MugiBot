@@ -222,14 +222,16 @@ namespace PartyBot.Handlers
             try
             {
                 var newPlaylist = new Playlist();
+                Console.WriteLine("Got to the playlist creation step.");
                 newPlaylist.Author = user.DatabaseName;
+                Console.WriteLine(newPlaylist.Author);
                 newPlaylist.AutomaticallyGenerated = true;
                 foreach (SongData song in songs)
                 {
                     foreach (Player player in song.players)
                     {
                         // Only add songs that the player heard and got wrong
-                        if (PlayerDict[player.name] != user.DatabaseName || player.correct)
+                        if (!PlayerDict.ContainsKey(player.name) || PlayerDict[player.name] != user.DatabaseName || player.correct)
                             continue;
                         var tempObject = await db.SongTableObject.FindAsync(song.MakeSongTableKey());
                         newPlaylist.Songs.Add(tempObject.Key, tempObject.PrintSong());

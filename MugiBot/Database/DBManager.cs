@@ -66,7 +66,7 @@ namespace PartyBot.Database
                     songsOnly = true;
                 await AddToDatabase(s.Name, songsOnly);
                 // After the file has been used we can move it to archived files
-                File.Move(Path.Combine(JsonFiles, s.Name), Path.Combine(ArchivedFiles, s.Name), true);
+                await Task.Run( () => File.Move(Path.Combine(JsonFiles, s.Name), Path.Combine(ArchivedFiles, s.Name), true));
             }
             return await EmbedHandler.CreateBasicEmbed("Data", "All songs from the Json Files have been added to the Database and player stats were updated." 
                 + $"\n\t There are now {await _db.SongTableObject.AsAsyncEnumerable().CountAsync()} songs in the database.", Color.Blue);

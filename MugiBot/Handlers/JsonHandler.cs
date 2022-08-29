@@ -20,25 +20,25 @@ namespace PartyBot.Handlers
             string fileName = "";
             try
             {
+                var tasks = new List<Task>();
                 for (int i = 0; i < message.Attachments.Count; i++)
                 {
                     fileName = message.Attachments.ElementAt(i).Filename;
                     if (!fileName.EndsWith("json"))
                         continue;
                      // Create a WebClient and download the attached file
-                        using var client = new WebClient();
-
+                    using var client = new WebClient();
                     // If this file is an expand library export we want to download it to somewhere else.
                     if (fileName.ToLower().Contains("expand library") || fileName.ToLower().Contains("expandlibrary"))
-                        await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
+                        tasks.Add(client.DownloadFileTaskAsync(new Uri(message.Attachments.ElementAt(i).Url),
                             Path.Combine(JsonFolder.Replace($"{separator}LocalJson", ""), fileName)));
                     else
-                        await Task.Run(() => client.DownloadFileAsync(new Uri(message.Attachments.ElementAt(i).Url),
+                        tasks.Add(client.DownloadFileTaskAsync(new Uri(message.Attachments.ElementAt(i).Url),
                             Path.Combine(JsonFolder, fileName)));
-                    client.Dispose();
                     if (printMessage)
                         await message.Channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("File Downloads", $"Downloaded a file named {fileName}.", Color.Blue));
                 }
+                await Task.WhenAll(tasks);
             }
             catch (Exception ex)
             {

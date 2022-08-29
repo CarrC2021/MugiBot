@@ -125,13 +125,13 @@ namespace PartyBot.Services
                 return await EmbedHandler.CreateErrorEmbed("Playlists", "You did not attach a file. You need to do that to use this method.");
             if (File.Exists(Path.Combine(path, "playlists", name)))
                 return await EmbedHandler.CreateErrorEmbed("Playlists", "A playlist with this name already exists, use a different name.");
-            var songs = new List<SongTableObject>(); 
+            
             await JsonHandler.DownloadJson(message, Path.Combine(path, "jsonsforplaylist"), false);
-            await JsonHandler.DownloadJson(message, Path.Combine(path, DBManager.JsonFiles));
-            await DBManager.AddAllToDatabase();
             var finalList = new List<SongData>();
             foreach (string fileName in Directory.EnumerateFiles(Path.Combine(path, "jsonsforplaylist")))
             {
+                Console.WriteLine(fileName);
+                // will this work is this a literal path?
                 var dataList = await JsonHandler.ConvertJsonToSongData(new FileInfo(fileName));
                 finalList.AddRange(dataList);
                 File.Delete(fileName);
