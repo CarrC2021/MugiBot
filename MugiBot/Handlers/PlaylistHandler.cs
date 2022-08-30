@@ -5,7 +5,6 @@ using Discord;
 using Discord.WebSocket;
 using System.IO;
 using PartyBot.DataStructs;
-using PartyBot.Handlers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using PartyBot.Database;
@@ -203,13 +202,21 @@ namespace PartyBot.Handlers
             return songs;
         }
 
-        public static async Task<Embed> PrintAllPlaylists(string path) 
+        public static async Task<Embed> PrintAllPlaylists(string path, ISocketMessageChannel channel) 
         {
             var fileNames = Directory.EnumerateFiles(Path.Combine(path, "playlists"));
             var sb = new StringBuilder();
-            sb.Append("Playlist Names:\n");
+            sb.Append("Playlist Names: \n");
             foreach (var file in fileNames)
+            {
+                if (2048 <= sb.Length+ $"{file}\n".Length)
+                {
+                    await channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue));
+                    sb.Clear();
+                    sb.Append("Playlist Names: \n");
+                }
                 sb.Append($"{file}\n");
+            }
             return await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue);
         }
 
