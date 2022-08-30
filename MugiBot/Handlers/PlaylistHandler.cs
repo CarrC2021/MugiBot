@@ -204,19 +204,27 @@ namespace PartyBot.Handlers
 
         public static async Task<Embed> PrintAllPlaylists(string path, ISocketMessageChannel channel) 
         {
+            char separator = Path.DirectorySeparatorChar;
             var fileNames = Directory.EnumerateFiles(Path.Combine(path, "playlists"));
+            var sortedFiles = new List<string>();
             var sb = new StringBuilder();
-            sb.Append("Playlist Names: \n");
+            sb.Append("Playlist Names: \n\n");
             foreach (var file in fileNames)
             {
-                List<string> fileName = file.Split('/').ToList();
-                if (2048 <= sb.Length+ $"{fileName[fileName.Count - 1]}\n".Length)
+
+                List<string> fileName = file.Split(separator).ToList();
+                sortedFiles.Add(fileName[fileName.Count - 1]);
+            }
+            sortedFiles.Sort();
+            foreach (var name in sortedFiles)
+            {
+                if (2048 <= sb.Length+ $"{name}\n\n".Length)
                 {
                     await channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue));
                     sb.Clear();
-                    sb.Append("Playlist Names: \n");
+                    sb.Append("Playlist Names: \n\n");
                 }
-                sb.Append($"{fileName[fileName.Count - 1]}\n");
+                sb.Append($"{name}\n\n");
             }
             return await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue);
         }
