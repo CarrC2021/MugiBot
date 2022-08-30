@@ -210,13 +210,13 @@ namespace PartyBot.Handlers
             foreach (var file in fileNames)
             {
                 List<string> fileName = file.Split('/').ToList();
-                if (2048 <= sb.Length+ $"{fileName[-1]}\n".Length)
+                if (2048 <= sb.Length+ $"{fileName[fileName.Count - 1]}\n".Length)
                 {
                     await channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue));
                     sb.Clear();
                     sb.Append("Playlist Names: \n");
                 }
-                sb.Append($"{fileName[-1]}\n");
+                sb.Append($"{fileName[fileName.Count - 1]}\n");
             }
             return await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue);
         }
