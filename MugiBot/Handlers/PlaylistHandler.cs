@@ -209,13 +209,14 @@ namespace PartyBot.Handlers
             sb.Append("Playlist Names: \n");
             foreach (var file in fileNames)
             {
-                if (2048 <= sb.Length+ $"{file}\n".Length)
+                List<string> fileName = file.Split('/').ToList();
+                if (2048 <= sb.Length+ $"{fileName[-1]}\n".Length)
                 {
                     await channel.SendMessageAsync(embed: await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue));
                     sb.Clear();
                     sb.Append("Playlist Names: \n");
                 }
-                sb.Append($"{file}\n");
+                sb.Append($"{fileName[-1]}\n");
             }
             return await EmbedHandler.CreateBasicEmbed("Playlists", sb.ToString(), Color.Blue);
         }
