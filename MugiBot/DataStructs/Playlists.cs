@@ -7,7 +7,7 @@ namespace PartyBot.DataStructs
     {
         // Creator of the playlist.
         [JsonProperty("Author")]
-        public string Author { get; set; }
+        public ulong Author { get; set; }
 
         // Setting to indicate if this is a private playlist
         [JsonProperty("Private")]
@@ -27,12 +27,12 @@ namespace PartyBot.DataStructs
 
         public Playlist()
         {
-            Author = "public";
+            Author = 500;
             Private = false;
             Songs = new Dictionary<string, string>();
             Viewable = true;
         }
-        public Playlist(string a, Dictionary<string, string> dict)
+        public Playlist(ulong a, Dictionary<string, string> dict)
         {
             Author = a;
             Private = false;
@@ -40,13 +40,13 @@ namespace PartyBot.DataStructs
             Viewable = true;
             AutomaticallyGenerated = false;
         }
-        public Playlist(string a, Dictionary<string, string> dict, bool p)
+        public Playlist(ulong a, Dictionary<string, string> dict, bool p)
         {
             Author = a;
             Songs = dict;
             Private = p;
         }
-        public Playlist(string a, Dictionary<string, string> dict, bool view, bool p)
+        public Playlist(ulong a, Dictionary<string, string> dict, bool view, bool p)
         {
             Author = a;
             Private = p;

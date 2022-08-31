@@ -21,7 +21,7 @@ namespace PartyBot.Handlers
                 return false;
             if (dict == null)
                 dict = new Dictionary<string, string>();
-            await SerializeAndWrite(new Playlist("public", dict), filePath);
+            await SerializeAndWrite(new Playlist(500, dict), filePath);
             return true;
         }
         public static async Task DownloadPlaylistFile(SocketMessage message, string filePath)
@@ -67,7 +67,7 @@ namespace PartyBot.Handlers
                 }
                 dict.TryAdd(song.Key, song.PrintSong());
             }
-            var creatorName = ID.ToString();
+            var creatorName = ID;
             var playlistName = Path.Combine(path.Replace($"PlaylistDownloads", ""), "playlists", fileName.ToLower().Replace(".txt", ""));
             // If no one has created a playlist with that name we use the create playlist function.
             if (!File.Exists(playlistName))
@@ -86,7 +86,7 @@ namespace PartyBot.Handlers
             }
             return await EmbedHandler.CreateErrorEmbed("Playlist", $"A playlist exists with the name {fileName} but you are not the author of that file.");
         }
-        public static async Task<bool> CreatePrivatePlaylist(string filePath, string playlistCreator, Dictionary<string, string> dict = null)
+        public static async Task<bool> CreatePrivatePlaylist(string filePath, ulong playlistCreator, Dictionary<string, string> dict = null)
         {
             if (File.Exists(filePath))
                 return false;
@@ -239,7 +239,7 @@ namespace PartyBot.Handlers
             {
                 var newPlaylist = new Playlist();
                 Console.WriteLine("Got to the playlist creation step.");
-                newPlaylist.Author = user.DatabaseName;
+                newPlaylist.Author = id;
                 Console.WriteLine(newPlaylist.Author);
                 newPlaylist.AutomaticallyGenerated = true;
                 foreach (SongData song in songs)

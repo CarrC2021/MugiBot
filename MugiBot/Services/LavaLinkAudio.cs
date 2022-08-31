@@ -190,7 +190,7 @@ namespace PartyBot.Services
                 var trackNum = 1;
                 if (player.PlayerState is PlayerState.Playing)
                 {
-                    title = $"Now Playing: {player.Track.Title}\n";
+                    title = $"Now Playing: {player.Track.Title} by {player.Track.Author}\n";
                     trackNum = 2;
                 }
                 foreach (LavaTrack track in player.Queue)
@@ -242,8 +242,8 @@ namespace PartyBot.Services
                         await player.SkipAsync();
                         return await EmbedHandler.CreateBasicEmbed("Music Skip", $"I have successfully skipped {currentTrack.Title}\n Now playing {player.Track.Title} by {player.Track.Author}", Color.Blue);
                     }
-                    //If the radio is off then just return StopAsync
-                    if (!radio.RadioMode)
+                    //If the radio is not set to autoplay then just return StopAsync
+                    if (!radio.Autoplay)
                         return await StopAsync(guild);
 
                     await StopAsync(guild);
@@ -373,7 +373,7 @@ namespace PartyBot.Services
             await CheckDeleteTempMusicFile(args.Track, guildRadio);
             
             string toPrint = "Now Playing:";
-            if (guildRadio != null && args.Player.Queue.Count < 3)
+            if (guildRadio != null && args.Player.Queue.Count < 2)
             {
                 await RadioQueue(guildRadio);
                 if (!guildRadio.CurrPlayers.Equals("any"))
@@ -382,13 +382,15 @@ namespace PartyBot.Services
 
             if (!args.Player.Queue.TryDequeue(out var queueable))
             {
-                await args.Player.TextChannel.SendMessageAsync("Playback Finished.");
+                await args.Player.TextChannel.SendMessageAsync(
+                embed: await EmbedHandler.CreateBasicEmbed("Queue over", "Playback has finished", Color.Blue));
                 return;
             }
 
             if (!(queueable is LavaTrack track))
             {
-                await args.Player.TextChannel.SendMessageAsync("Next item in queue is not a track.");
+                await args.Player.TextChannel.SendMessageAsync(
+                    embed: await EmbedHandler.CreateErrorEmbed("Lavalink Error", "Next item in queue is not a track"));
                 return;
             }
             await args.Player.PlayAsync(track);
@@ -412,7 +414,7 @@ namespace PartyBot.Services
                     if (Uri.IsWellFormedUriString(nextSong.MP3, UriKind.Absolute))
                         return await PlayAsync(user, radio.Guild, nextSong.MP3, nextSong);
                 }
-                radio.RadioMode = true;
+                radio.Autoplay = true;
                 var song = radio.GetRandomSong();
                 if (Uri.IsWellFormedUriString(song.MP3, UriKind.Absolute))
                     return await PlayAsync(user, radio.Guild, song.MP3, song);
@@ -436,8 +438,8 @@ namespace PartyBot.Services
                     await CatboxHandler.QueueRadioSong(nextSong, radio.Guild, _lavaNode, path);
                     return;
                 }
-                // If there is nothing then try to queue from the random radio selection.
-                if (radio.RadioMode)
+                // If there is nothing in the queue and autoplay is on then queue a random song from the song selection.
+                if (radio.Autoplay)
                 {
                     nextSong = radio.GetRandomSong();
                     await CatboxHandler.QueueRadioSong(nextSong, radio.Guild, _lavaNode, path);
@@ -455,9 +457,6 @@ namespace PartyBot.Services
 
         public async Task CheckDeleteTempMusicFile(LavaTrack track, Radio radio = null)
         {
-            // if (radio.Queue != null)
-            //     var list = radio.Queue.Where(f => f.)
-
             if (track.Url.Contains($"{separator}tempMusic"))
             {
                 try
@@ -540,7 +539,7 @@ namespace PartyBot.Services
             {
                 foreach (SongTableObject song in currRadioQueue)
                 {
-                    radio.Queue.Enqueue(song);
+                    radio.Queue.Append(song);
                 }
             }
 

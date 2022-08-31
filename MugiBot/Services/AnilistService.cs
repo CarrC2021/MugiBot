@@ -154,6 +154,16 @@ namespace PartyBot.Services
             var userlist = JsonConvert.DeserializeObject<UserAnilist>(await File.ReadAllTextAsync(fileLocation), settings);
             return userlist;
         }
+        /// <summary>
+        /// This is an asynchronous function that returns all <see cref="SongTableObject>"/> objects from a 
+        /// list of <see cref="PartyBot.DataStructs.UserAnilist>"/>. It uses the parameter validListNums to filter
+        /// out songs not to be selected such as when the user does not want to retrieve watching shows or dropped shows.
+        /// <summary>
+        /// <param name="anilists"> A list of <see cref="PartyBot.DataStructs.UserAnilist>"/> containing all relevant data from the anilist of the user.
+        /// </param>
+        /// <param name="validListNums"> A list of <see cref="Int32"/> representing the desired list status of shows.
+        /// </param>
+        /// <returns> a list of <see cref="PartyBot.Database.SongTableObject>"/> objects once the asynchronous task is completed. </returns>
         public async Task<List<SongTableObject>> ReturnSongsFromList(UserAnilist anilist, List<int> validListNums)
         {
             var entries = new List<Entry>();
@@ -182,6 +192,16 @@ namespace PartyBot.Services
             return SongsToReturn;
         }
 
+        /// <summary>
+        /// This is an asynchronous function that returns all <see cref="SongTableObject>"/> objects from a 
+        /// list of <see cref="PartyBot.DataStructs.UserAnilist>"/>. It uses the parameter validListNums to filter
+        /// out songs not to be selected such as when the user does not want to retrieve watching shows or dropped shows.
+        /// <summary>
+        /// <param name="anilists"> A list of <see cref="PartyBot.DataStructs.UserAnilist>"/> containing all relevant data from the anilist of the user.
+        /// </param>
+        /// <param name="validListNums"> A list of <see cref="Int32"/> representing the desired list status of shows.
+        /// </param>
+        /// <returns> a list of <see cref="PartyBot.Database.SongTableObject>"/> objects once the asynchronous task is completed. </returns>
         public async Task<List<SongTableObject>> ReturnSongsFromLists(List<UserAnilist> anilists, List<int> validListNums)
         {
             var entries = new List<Entry>();

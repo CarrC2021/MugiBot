@@ -14,7 +14,7 @@ using System.IO;
 
 public class Radio
 {
-    public bool RadioMode;
+    public bool Autoplay;
     public List<string> CurrType;
     public List<string> CurrPlayers;
     private readonly List<List<string>> SongTypes;
@@ -24,7 +24,7 @@ public class Radio
     public Dictionary<string, int> listStatus = new Dictionary<string, int>();
     public Dictionary<int, string> listStatusReverse = new Dictionary<int, string>();
     private List<SongTableObject> SongSelection = new List<SongTableObject>();
-    public Queue<SongTableObject> Queue = new Queue<SongTableObject>();
+    public List<SongTableObject> Queue = new List<SongTableObject>();
     private readonly Random rnd;
     public Radio(IMessageChannel c, SocketGuild g)
     {
@@ -34,6 +34,9 @@ public class Radio
         CurrType = new List<string>{"Opening", "Ending"};
         CurrPlayers = new List<string>{"any"};
         ListNums.AddRange(new int[] { 1, 2, 3, 4, 5 });
+
+        // Unfortunately we need to use these integers to specify list status 
+        // since anilist and mal are not consistent in naming convention.
         listStatus = new Dictionary<string, int>
         {
             { "watching", 1 },
@@ -54,7 +57,7 @@ public class Radio
             new List<string>{"Opening", "Ending"}, new List<string>{"Ending"}, new List<string>{"Opening", "Ending", "Insert"}, new List<string>{"Insert"},
              new List<string>{"Opening", "Insert"}, new List<string>{"Ending", "Insert"}};
         SongTypes = list;
-        RadioMode = false;
+        Autoplay = false;
     }
     private string CurrentPlayersString()
     {
@@ -64,6 +67,14 @@ public class Radio
     {
         return String.Join("  ", CurrType);
     }
+    /// <summary>
+    /// This is an asynchronous function to set the current players to what the user provides. If one of the names
+    /// provided in the string has not had their list downloaded then there will be an error message.
+    /// <summary>
+    /// <param name="players"> A string representing the name of players who have their lists downloaded by the project,
+    /// where each player is separated by a space character and whose list will be used by the bot to play music off.
+    /// </param>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
     public async Task<Embed> ChangePlayers(string players, AnilistService _as = null)
     {
         var playerArr = players.Split();
@@ -87,6 +98,12 @@ public class Radio
             sb.Append($"{player} ");
         return sb.ToString();
     }
+    /// <summary>
+    /// This is an asynchronous function to set the type of songs to be played to what the user provides.
+    /// <summary>
+    /// <param name="type"> An int representing the type of songs that the user wants played.
+    /// </param>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
     public async Task<Embed> SetType(int type, AnilistService _as = null)
     {
         if (type > 0)
@@ -97,43 +114,65 @@ public class Radio
         await UpdatePotentialSongs(_as);
         return await EmbedHandler.CreateBasicEmbed("Radio Service", $"Radio song type now set to {CurrentTypeString()}", Color.Blue);
     }
-    public async Task<Embed> SetType(string type, DBManager _db, AnilistService _as = null)
+    /// <summary>
+    /// This is an asynchronous function to set the type of songs to be played to what the user provides.
+    /// <summary>
+    /// <param name="type"> A string representing the type of songs that the user wants played.
+    /// </param>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
+    public async Task<Embed> SetType(string type, AnilistService _as = null)
     {
         if (SongTypes.Contains(type.Split().ToList()))
             CurrType = type.Split().ToList();
         await UpdatePotentialSongs(_as);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio song type now set to {CurrentTypeString()}", Color.Blue);
     }
-    public async Task<Embed> AddListStatus(string[] listArray, DBManager _db, AnilistService _as = null)
+    /// <summary>
+    /// This is an asynchronous function to add the list status that the user specifies and then update the song selection.
+    /// <summary>
+    /// <param name="listArray"> A list of strings representing list status of shows to add to the selection.
+    /// </param>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
+    public async Task<Embed> AddListStatus(string[] listArray, AnilistService _as = null)
     {
         foreach (string listType in listArray)
         {
+            // Add the list status if it is not already in the list
             listStatus.TryGetValue(listType.ToLower(), out int value);
             if (!ListNums.Contains(value))
                 ListNums.Add(value);
         }
         StringBuilder toPrint = new StringBuilder();
-        foreach (int thing in ListNums)
-            toPrint.Append($"{listStatusReverse[thing]}\n");
+        foreach (int num in ListNums)
+            toPrint.Append($"{listStatusReverse[num]}\n");
 
         await UpdatePotentialSongs(_as);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint.ToString()}", Color.Blue);
     }
-    public async Task<Embed> RemoveListStatus(string[] listArray, DBManager _db, AnilistService _as = null)
+    /// <summary>
+    /// This is an asynchronous function to remove the list status that the user specifies and then update the song selection.
+    /// <summary>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
+    public async Task<Embed> RemoveListStatus(string[] listArray, AnilistService _as = null)
     {
         foreach (string listType in listArray)
         {
+            // If the current listStatus contains of the status the user specifies then remove it
             listStatus.TryGetValue(listType.ToLower(), out int outVal);
             if (ListNums.Contains(outVal))
                 ListNums.Remove(outVal);
         }
-        StringBuilder toPrint = new StringBuilder();
+        var toPrint = new StringBuilder();
         foreach (int thing in ListNums)
             toPrint.Append($"{listStatusReverse[thing]}\n");
 
         await UpdatePotentialSongs(_as);
         return await EmbedHandler.CreateBasicEmbed("Radio", $"Radio player now set to play songs that are of the following list status \n{toPrint.ToString()}", Color.Blue);
     }
+    /// <summary>
+    /// This is an asynchronous function to return an embed telling the user the current state of the Radio object.
+    /// <summary>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
     public async Task<Embed> PrintRadio()
     {
         var sb = new StringBuilder();
@@ -148,6 +187,10 @@ public class Radio
             sb.Append($"{listStatusReverse[num]}\n");
         return await EmbedHandler.CreateBasicEmbed("Radio", sb.ToString(), Color.Blue);
     }    
+    /// <summary>
+    /// This is an asynchronous function to return an embed telling the user which integer 1-6 correspond to which list types.
+    /// <summary>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
     public async Task<Embed> ListTypes()
     {
         StringBuilder toPrint = new StringBuilder();
@@ -159,26 +202,23 @@ public class Radio
         }
         return await EmbedHandler.CreateBasicEmbed("Radio", toPrint.ToString(), Color.Blue);
     }
+    /// <summary>
+    /// This is an asynchronous function that populates the queue using the given list of <see cref="PartyBot.DataStructs.SongTableObject"/>.
+    /// <summary>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
     public async Task<Embed> PopulateQueue(List<SongTableObject> songs)
     {
         if (songs.Count == 0)
             return await EmbedHandler.CreateErrorEmbed("Radio", "No songs were found in this list.");
-
-        Random rnd = new Random();
-        for (int i = 0; i < songs.Count; i++)
-        {
-            int k = rnd.Next(0, i);
-            var key = songs[k];
-            songs[k] = songs[i];
-            songs[i] = key;
-        }
+        // randomize the order of the songs
+        songs = songs.OrderBy (x => rnd.Next()).ToList();
         foreach (SongTableObject song in songs)
-            await Task.Run(() => Queue.Enqueue(song));
+            Queue.Add(song);
         return await EmbedHandler.CreateBasicEmbed("Radio", "The radio queue has been populated with songs use the !startradio command to begin listening.", Color.Blue);
     }
     public async Task DeQueue()
     {
-        await Task.Run(() => Queue.TryDequeue(out var result));
+        await Task.Run(() => Queue.RemoveAt(0));
     }
     public bool IsQueueEmpty()
     {
@@ -186,19 +226,37 @@ public class Radio
             return false;
         return true;
     }
+    
+    /// <summary>
+    /// This is an asynchronous function that returns a song at the top of the queue in the radio's queue.
+    /// <summary>
+    /// <returns> a <see cref="PartyBot.DataStructs.SongTableObject"/> once the asynchronous task is completed. </returns>
     public async Task<SongTableObject> NextSong()
     {
-        Queue.TryPeek(out var result);
-        if (result != null)
+        try
         {
+            var toReturn = Queue[0];
             await DeQueue();
-            return result;
+            return toReturn;
         }
-        return null;
+        catch (Exception ex)
+        {
+            await LoggingService.LogCriticalAsync(ex.Source, ex.Message);
+            return null;
+        }
+    }
+    /// <summary>
+    /// This is an asynchronous function that shuffles the radio's queue.
+    /// <summary>
+    /// <returns> a <see cref="Discord.Embed"/> once the asynchronous task is completed. </returns>
+    public async Task<Embed> ShuffleQueue()
+    {
+        Queue = Queue.OrderBy (x => rnd.Next()).ToList();
+        return await EmbedHandler.CreateBasicEmbed("Radio Queue", "The radio queue has been shuffled, use !queue to confirm.", Color.Blue);
     }
     public List<SongTableObject> GetQueue()
     {
-        return Queue.ToList();
+        return Queue;
     }
     public async Task UpdatePotentialSongs(AnilistService _as = null)
     {
@@ -211,14 +269,22 @@ public class Radio
         final = final.Distinct().ToList();
         SongSelection = final;
     }
+    /// <summary>
+    /// This is an asynchronous function that retrieves the list of potential songs to be played by the radio,
+    /// from the CurrPlayers anime lists. This is either retrieved from data in the form of
+    /// a <see cref="PartyBot.DataStructs.UserAnilist"/> or <see cref="PartyBot.DataStructs.MalUserList"/>.
+    /// <summary>
+    /// <returns> a list of <see cref="SongTableObject>"/> objects once the asynchronous task is completed. </returns>
     public async Task<List<SongTableObject>> SongsFromAnimeListsAsync(AnilistService _as)
     {
         var songs = new List<SongTableObject>();
         var userAnilists = new List<UserAnilist>();
         foreach (string name in CurrPlayers)
         {
+            // retrieve data from any matching UserAnilist
             if (File.Exists(Path.Combine(GlobalData.Config.RootFolderPath, "AniLists", $"{name}.json")))
                 userAnilists.Add(await _as.ReturnUserAnilistAsync(name, 0));
+            // retrieve data from any matching MalUserList
             if (File.Exists(Path.Combine(GlobalData.Config.RootFolderPath, "MALUserLists", $"{name}.json")))
                 songs.AddRange(await MALHandler.GetSongsFromMAL(name, ListNums));
         }

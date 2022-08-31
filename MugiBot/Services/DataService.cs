@@ -94,8 +94,7 @@ namespace PartyBot.Services
 
         public async Task<Embed> CreatePrivatePlaylist(string name, ulong ID)
         {
-            var creatorName = ID.ToString();
-            if (!await PlaylistHandler.CreatePrivatePlaylist(Path.Combine(path, "playlists", name.ToLower()), creatorName))
+            if (!await PlaylistHandler.CreatePrivatePlaylist(Path.Combine(path, "playlists", name.ToLower()), ID))
                 return await EmbedHandler.CreateErrorEmbed("Playlist", "Playlist already exists");
             return await EmbedHandler.CreateBasicEmbed("Playlist", $"A private playlist with the name {name} now exists", Color.Blue);
         }
@@ -131,7 +130,7 @@ namespace PartyBot.Services
             foreach (string fileName in Directory.EnumerateFiles(Path.Combine(path, "jsonsforplaylist")))
             {
                 Console.WriteLine(fileName);
-                // will this work is this a literal path?
+                // will this work if this a literal path?
                 var dataList = await JsonHandler.ConvertJsonToSongData(new FileInfo(fileName));
                 finalList.AddRange(dataList);
                 File.Delete(fileName);

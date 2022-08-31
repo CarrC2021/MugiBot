@@ -36,7 +36,7 @@ namespace PartyBot.Modules
         [Summary("Changes the type of song played by the Radio to the given argument.")]
         public async Task ChangePlayerNameString([Remainder] string type)
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).SetType(type, DBManager, AnilistService));
+                AudioService.radios, Context.Channel, Context.Guild).SetType(type, AnilistService));
         [Command("RLT")]
         [Summary("Lists out the types the Radio can use.")]
         public async Task ListTypes()
@@ -52,13 +52,13 @@ namespace PartyBot.Modules
             "will play songs that meet those conditions in the database. By default this is set Watching or completed")]
         public async Task AddRadioListStatus([Remainder] string input)
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).AddListStatus(input.Split(), DBManager, AnilistService));
+                AudioService.radios, Context.Channel, Context.Guild).AddListStatus(input.Split(), AnilistService));
         [Command("RDL")]
         [Summary("This will remove from the radio a condition to play the songs from the specified list status. For example, !rdl Watching Completed Dropped Paused " +
             "will remove songs that meet those conditions in the database. By default this is set to Watching or completed")]
         public async Task RemoveRadioListStatus([Remainder] string input)
         => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
-                AudioService.radios, Context.Channel, Context.Guild).RemoveListStatus(input.Split(), DBManager, AnilistService));
+                AudioService.radios, Context.Channel, Context.Guild).RemoveListStatus(input.Split(), AnilistService));
         [Command("StartRadio")]
         [Summary("Starts the radio and will keep playing songs until you turn it off.")]
         public async Task StartRadio()
@@ -140,6 +140,13 @@ namespace PartyBot.Modules
             => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
                 AudioService.radios, Context.Channel, Context.Guild).PopulateQueue(
                 await PlaylistHandler.LoadSongsForQuery(show, "show", "Opening", true)));
+
+        [Command("Shuffle")]
+        [Summary("Shuffles all songs that have been loaded using the radio commands or loadshow commands."
+        +"(Unfortunately this will not work on songs loaded using the !playkey or !play commands.)")]
+        public async Task ShuffleQueue()
+            => await ReplyAsync(embed: await RadioHandler.FindOrCreateRadio(
+                AudioService.radios, Context.Channel, Context.Guild).ShuffleQueue());
     
     }
 }
