@@ -25,6 +25,10 @@
 2. Next run dotnet ef migrations add initial
 3. Finally run dotnet ef database update. You should cd into the Database folder to confirm that you have MugiBotDatbase.db
 
+### Important Note.
+There may be pathing errors when the bot is attempting to save files to some folder that is not located in this git page. The 
+folders are LocalJson, archivedJsons, Anilists, tempMusic, MALUserLists, and playlists.
+
 ## Authors
 
 * **Draxis** - *Initial work* - [Drax](https://github.com/joelp53/)
