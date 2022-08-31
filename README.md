@@ -16,7 +16,7 @@
 5. It should be able to connect to servers now
 
 ## To have the bot play music make sure to have a lavalink server open.
-1. First use a terminal and cd into the directory containing a Lavalink.jar file
+1. First use a terminal and cd into the directory containing a Lavalink.jar file, the latest release can be found here https://github.com/Cog-Creators/Lavalink-Jars/releases
 2. Then run java -jar Lavalink.jar
 3. After that launch the bot, it should automatically connect to the lavalink server if the application.yml file is correct.
 
