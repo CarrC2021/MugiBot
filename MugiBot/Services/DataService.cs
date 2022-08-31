@@ -146,9 +146,7 @@ namespace PartyBot.Services
             if (fileName == null)
                 return await EmbedHandler.CreateErrorEmbed("Playlist does not exist", $"{playlistName} does not exist");
             var embeds = new List<Embed>();
-
             var content = await PlaylistHandler.LoadPlaylist(fileName);
-
             var sb = new StringBuilder();
             sb.Append($"{playlistName} songs: \n\n");
             foreach (string key in content)
@@ -160,7 +158,7 @@ namespace PartyBot.Services
                     sb.Clear();
                     sb.Append($"{playlistName} songs: \n\n");
                 }
-                sb.Append(SongTableObject.PrintSong(tableObject) + "\n\n");
+                sb.Append($"{SongTableObject.PrintSong(tableObject)} key: {key}\n\n");
             }
             embeds.Add(await EmbedHandler.CreateBasicEmbed("Playlist", sb.ToString(), Color.Blue));
             foreach (Embed embed in embeds)

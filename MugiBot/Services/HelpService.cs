@@ -78,5 +78,10 @@ namespace PartyBot.Services
         {
             return await EmbedHandler.CreateBasicEmbed("Radio Help", help.RadioHelpString, Color.Green);
         }
+
+        public async Task<Embed> PlaylistHelp()
+        {
+            return await EmbedHandler.CreateBasicEmbed("Playlist Help", help.PlaylistHelpString, Color.Green);
+        }
     }
 }

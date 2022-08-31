@@ -48,6 +48,11 @@ namespace PartyBot.Modules
         [Summary("Prints out helpful information for the radio.")]
         public async Task RadioHelp()
             => await ReplyAsync(embed: await HelpService.RadioHelp());
+
+        [Command("PlaylistHelp")]
+        [Summary("Prints out helpful information for working with playlists.")]
+        public async Task PlaylistHelp()
+            => await ReplyAsync(embed: await HelpService.PlaylistHelp());
         
     }
 }

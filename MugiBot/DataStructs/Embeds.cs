@@ -69,6 +69,15 @@ namespace PartyBot.DataStructs
         + "Step 2: Familiarize yourself with the list of all search commands:\n !searchdb and !searchdbexact\n !searchop and !searchopexact\n "
         + "!searched and !searchedexact\n !searchins and !searchinsexact\n !searchartist and !searchartistexact.";
         
+        public readonly string PlaylistHelpString = 
+        "Step 1: There are two ways to manually create playlists, familiarize yourself with the search commands before going further (use !searchhelp to read more).\n\n"
+        + " Step 2 option 1: For every song you want in a playlist copy and paste its songkey to a .txt file\n\n"
+        + " Step 3 option 1: Then name the .txt file what you would like to name the playlist and upload it to file-uploads. That's it!\n\n"
+        + " Step 2 option 2: If you want instead then you can create a playlist with either !createplaylist {name} or !createprivateplaylist {name}\n\n"
+        + " Adding or removing songs to a playlist:\n"
+        + " To add a song to a playlist you can use !addtoplaylist {playlist name} {song key} or !removefromplaylist {playlist name} {song key}\n\n"
+        + " Alternatively, you can add multiple songs to a playlist using the same method as before, where you copy and paste songkeys"
+        + " to a .txt file, this time with the same name as the playlist you want to add to, and then upload to file-uploads";
         
         public readonly Embed AudioHelpEmbed;
         public readonly Embed DatabaseTrackingHelpEmbed;
