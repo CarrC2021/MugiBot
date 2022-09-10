@@ -2,7 +2,6 @@
 using PartyBot.Handlers;
 using PartyBot.Services;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace PartyBot.Modules
 {
@@ -65,10 +64,6 @@ namespace PartyBot.Modules
         public async Task UpdateSongLink(string newLink, [Remainder] string songkey)
             => await ReplyAsync(embed: await DataService.DBManager.UpdateSongLink(songkey, newLink, Context.User.Id));
 
-        [Command("TestEmbed")]
-        public async Task TestEmbed()
-            => await ReplyAsync(embed: await EmbedHandler.TestingEmbedStuff());
-
         [Command("SearchAnilist")]
         public async Task TestAnilist()
             => await DataService.anilistService.GetCoverArtAsync("Show By Rock!!", 16311);
@@ -104,10 +99,10 @@ namespace PartyBot.Modules
         public async Task PrintPlaylist([Remainder] string playlistName)
             => await ReplyAsync(embed: await DataService.PrintPlaylist(playlistName.ToLower(), Context.Channel));
 
-        [Command("urm")]
-        [Summary("Converts playlists to the new format.")]
-        public async Task UpdateRelationalMap()
-            => await DataService.DBManager.animeRelationManager.UpdateRelationalMapUsingSongTable();
+        // [Command("urm")]
+        // [Summary("Converts playlists to the new format.")]
+        // public async Task UpdateRelationalMap()
+        //     => await DataService.DBManager.animeRelationManager.UpdateRelationalMapUsingSongTable();
 
         [Command("PrintLists")]
         [Summary("This command will print all MAL and Anilists that the bot has saved.")]
@@ -118,10 +113,5 @@ namespace PartyBot.Modules
         [Summary("This command will print all playlists that the bot has saved. This command takes no arguments.")]
         public async Task PrintPlaylists()
             => await ReplyAsync(embed: await PlaylistHandler.PrintAllPlaylists(DataService.path, Context.Channel));
-
-        [Command("CleanDatabase")]
-        [Summary("This command will print all playlists that the bot has saved. This command takes no arguments.")]
-        public async Task CleanDatabase()
-            => await ReplyAsync(embed: await DataService.CleanDatabaseAsync());
     }
 }

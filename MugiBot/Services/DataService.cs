@@ -157,7 +157,7 @@ namespace PartyBot.Services
                     sb.Clear();
                     sb.Append($"{playlistName} songs: \n\n");
                 }
-                sb.Append($"{SongTableObject.PrintSong(tableObject)} key: {key}\n\n");
+                sb.Append($"{SongTableObject.PrintSong(tableObject)} \n key: {key}\n\n");
             }
             embeds.Add(await EmbedHandler.CreateBasicEmbed("Playlist", sb.ToString(), Color.Blue));
             foreach (Embed embed in embeds)
