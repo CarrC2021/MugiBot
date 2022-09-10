@@ -194,7 +194,7 @@ namespace PartyBot.Services
                 }
                 catch(Exception ex)
                 {
-                    await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                    await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                     Console.Write(newSong.Key);
                 }
             }

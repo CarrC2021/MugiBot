@@ -212,7 +212,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 return await EmbedHandler.CreateErrorEmbed("Music, List", ex.Message);
             }
 
@@ -260,7 +260,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 return await EmbedHandler.CreateErrorEmbed("Music, Skip", ex.Message);
             }
 
@@ -289,7 +289,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 return await EmbedHandler.CreateErrorEmbed("Music, Stop", ex.Message);
             }
         }
@@ -321,7 +321,7 @@ namespace PartyBot.Services
             }
             catch (InvalidOperationException ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 return ex.Message;
             }
         }
@@ -342,7 +342,7 @@ namespace PartyBot.Services
             }
             catch (InvalidOperationException ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 return ex.Message;
             }
         }
@@ -360,7 +360,7 @@ namespace PartyBot.Services
             }
             catch (InvalidOperationException ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 return ex.Message;
             }
         }
@@ -426,7 +426,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
             }
             return await EmbedHandler.CreateErrorEmbed("Radio", "Seems like I could not find any songs that meet the search criteria.");
         }
@@ -453,7 +453,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 await radio.Channel.SendMessageAsync(embed: await
                     EmbedHandler.CreateErrorEmbed("Radio", $"Something went wrong trying to queue a song from the radio. The song that failed was "
                     +$"{nextSong.PrintSong()}.\n It's url is {nextSong.MP3}"));
@@ -471,7 +471,7 @@ namespace PartyBot.Services
                 }
                 catch (Exception ex)
                 {
-                    await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                    await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 }
             }
         }
@@ -528,7 +528,7 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
+                await LoggingService.LogAsync(ex.Source, LogSeverity.Debug, ex.Message, ex);
                 return await EmbedHandler.CreateErrorEmbed("Playlists", ex.Message);
             }
         }
