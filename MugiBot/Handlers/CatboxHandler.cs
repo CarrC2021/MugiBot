@@ -17,8 +17,8 @@ namespace PartyBot.Handlers
         internal static readonly HttpClient HttpClient = new HttpClient();
         public static async Task<string> DownloadMP3(string query, string musicPath)
         {
-            Console.WriteLine("where to download");
-            Console.WriteLine(Path.Combine(musicPath, "tempMusic"));
+            //Console.WriteLine("where to download");
+            //Console.WriteLine(Path.Combine(musicPath, "tempMusic"));
 
             using var client = new HttpClient();
             HttpResponseMessage response = await client.GetAsync(query);
