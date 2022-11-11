@@ -122,7 +122,7 @@ namespace PartyBot.Database
                 if (song.songNumber == 1)
                     await _db.SaveChangesAsync();
 
-                if (song.urls == null || song.annId.Equals(null) || song.annId <= 0)
+                if (song.annId.Equals(null) || song.urls.catbox._0 == null || song.urls.catbox._0.Equals("") || song.annId <= 0)
                     continue;
 
                 // Update the songs since the urls are there.
@@ -224,7 +224,7 @@ namespace PartyBot.Database
             using var _db = new AMQDBContext();
             foreach (Song song in question.Songs)
             {
-                if (song.Examples.Mp3 == null)
+                if (song.Examples.Mp3 == null  || song.Examples.Mp3.Equals(""))
                     continue;
                 string Type = song.Number > 0 ? $"{TypeConversion[song.Type]} {song.Number}" : $"{TypeConversion[song.Type]}";
                 // Need to work on incorporating the artist ID for this not to be a nightmare.

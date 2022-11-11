@@ -64,12 +64,12 @@ namespace PartyBot.Modules
         [Summary("Type the name of a show or a substring of it's name in English or Romaji form and this will return" +
             "the inserts that match the query.")]
         public async Task SearchInsert([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", true));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", false));
         [Command("SearchINSLinks")]
         [Summary("Type the name of a show or a substring of it's name in English or Romaji form and this will return" +
             "the inserts that match the query.")]
         public async Task SearchInsertLinks([Remainder] string showName)
-            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", true, true));
+            => await ReplyAsync(embed: await DBSearchService.SearchForShow(Context.Message, showName, "insert", false, true));
         [Command("SearchINSExact")]
         [Summary("Type the exact name of a show in English or Romaji form and this will return" +
             "the inserts that match the query.")]
