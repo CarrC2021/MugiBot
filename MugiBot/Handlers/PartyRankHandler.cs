@@ -22,7 +22,7 @@ namespace PartyBot.Handlers
             if (artistSongs.Count == 0)
                 return await EmbedHandler.CreateErrorEmbed(artist, "Found no songs for that artist.");
             var sb = new StringBuilder();
-            sb.Append("Song Name, Anime, Type, Link");
+            sb.AppendLine("Song Name, Anime, Type, Link");
             foreach(SongTableObject song in artistSongs)
             {
                 var newLine = $"{song.SongName}, {song.Show}, {song.Type}, {song.MP3}";
