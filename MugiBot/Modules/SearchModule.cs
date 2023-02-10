@@ -157,6 +157,16 @@ namespace PartyBot.Modules
         [Summary("This will list the stats for the specified artist on all songs done by the artist.")]
         public async Task ArtistStats([Remainder] string artist)
             => await ReplyAsync(embed: await DBSearchService.StatsByArtist(Context.Channel, artist));
+
+        [Command("ArtistCSV")]
+        [Summary("This will create a csv for the Artist specified and will contain information for party ranks.")]
+        public async Task ArtistCSV([Remainder] string artist)
+            => await ReplyAsync(embed: await PartyRankHandler.CreateArtistCSV(artist, Context.Channel));
+
+        [Command("ArtistCSVExact")]
+        [Summary("This will create a csv for the Artist specified and will contain information for party ranks.")]
+        public async Task ArtistCSVExact([Remainder] string artist)
+            => await ReplyAsync(embed: await PartyRankHandler.CreateArtistCSV(artist, Context.Channel, true));
     }
 
 }
