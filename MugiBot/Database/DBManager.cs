@@ -209,8 +209,8 @@ namespace PartyBot.Database
             using var _db = new AMQDBContext();
             if(!DatabaseAdminIds.Contains(user.Id))
                 return await EmbedHandler.CreateErrorEmbed("Data, Songs", $"You do not have the privileges necessary to use this method.");
-            AMQExpandData data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
-            foreach (Question question in data.Questions)
+            List<Question> data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
+            foreach (Question question in data)
                 await AddSongsFromQuestion(question);
 
             await _db.SaveChangesAsync();

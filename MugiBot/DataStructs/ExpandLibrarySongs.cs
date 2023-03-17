@@ -94,14 +94,4 @@ namespace PartyBot.DataStructs
         [JsonProperty("songs")]
         public List<Song> Songs { get; } = new List<Song>();
     }
-
-    public class AMQExpandData
-    {
-        [JsonProperty("success")]
-        public bool Success { get; set; }
-
-        [JsonProperty("questions")]
-        public List<Question> Questions { get; } = new List<Question>();
-    }
-
 }

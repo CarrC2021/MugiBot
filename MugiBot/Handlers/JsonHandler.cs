@@ -70,7 +70,7 @@ namespace PartyBot.Handlers
             }
             return returnList;
         }
-        public static async Task<AMQExpandData> ConvertJsonToAMQExpandData(FileInfo info)
+        public static async Task<List<Question>> ConvertJsonToAMQExpandData(FileInfo info)
         {
             string contents = File.ReadAllText(info.FullName);
             var settings = new JsonSerializerSettings
@@ -79,7 +79,7 @@ namespace PartyBot.Handlers
                 MissingMemberHandling = MissingMemberHandling.Ignore
             };
             var data = await Task.Run(() =>
-                JsonConvert.DeserializeObject<AMQExpandData>(contents, settings));
+                JsonConvert.DeserializeObject<List<Question>>(contents, settings));
             return data;
         }
         public static async Task<List<SongListData>> ConvertJsonToSongList(FileInfo info)
