@@ -85,6 +85,7 @@ namespace PartyBot.DataStructs
 
     public class Question
     {
+        // This class represents one anime and contains its id, name, and the songs from the show.
         [JsonProperty("annId")]
         public int AnnId { get; set; }
 

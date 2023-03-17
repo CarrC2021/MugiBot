@@ -48,26 +48,26 @@ namespace PartyBot.Database
             Key = MakeSongTableKey(0, t, song, art);
             AnnID = 0;
         }
-        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, int songAnnId)
+        public SongTableObject(string song, string art, string t, string Showname, string Roma, string url, int Id, string _720link, int songAnnId)
         {
             SongName = song;
             Artist = art;
             Type = t;
             Show = Showname;
             Romaji = Roma;
-            MP3 = u;
+            MP3 = url;
             _720 = _720link;
             Key = MakeSongTableKey(Id, t, song, art);
             AnnID = Id;
         }
-        public SongTableObject(string song, string art, string t, string Showname, string Roma, string u, int Id, string _720link, string _480link, int annSongId)
+        public SongTableObject(string song, string art, string t, string Showname, string Roma, string url, int Id, string _720link, string _480link, int annSongId)
         {
             SongName = song;
             Artist = art;
             Type = t;
             Show = Showname;
             Romaji = Roma;
-            MP3 = u;
+            MP3 = url;
             _720 = _720link;
             _480 = _480link;
             Key = MakeSongTableKey(Id, t, song, art);

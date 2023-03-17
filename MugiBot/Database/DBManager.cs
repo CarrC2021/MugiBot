@@ -194,7 +194,7 @@ namespace PartyBot.Database
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        await LoggingService.LogAsync(ex.Source, LogSeverity.Error, ex.Message);
                     }
                 }
             }
@@ -211,7 +211,10 @@ namespace PartyBot.Database
                 return await EmbedHandler.CreateErrorEmbed("Data, Songs", $"You do not have the privileges necessary to use this method.");
             List<Question> data = await JsonHandler.ConvertJsonToAMQExpandData(new FileInfo(Path.Combine(mainpath, expandLibraryFile)));
             foreach (Question question in data)
+            {
+                //await LoggingService.LogInformationAsync("expand data", $"AnnID: {question.AnnId} and Show name: {question.Name}");
                 await AddSongsFromQuestion(question);
+            }
 
             await _db.SaveChangesAsync();
             await Task.Run(() => File.Delete(Path.Combine(mainpath, expandLibraryFile)));
@@ -221,6 +224,7 @@ namespace PartyBot.Database
         // This function updates the database using the file you receive when exporting all songs from expand library.
         private async Task AddSongsFromQuestion(Question question)
         {
+            await animeRelationManager.UpdateRelationalMap(question.AnnId, question.Name);
             using var _db = new AMQDBContext();
             foreach (Song song in question.Songs)
             {
@@ -234,7 +238,7 @@ namespace PartyBot.Database
                     try
                     {
                         await _db.SongTableObject.AddAsync(new SongTableObject(song.Name, song.Artist, Type,
-                        question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.Examples._480, song.AnnSongId));
+                        question.Name, "", song.Examples.Mp3, question.AnnId, song.Examples._720, song.AnnSongId));
                     }
                     catch (Exception ex)
                     {
@@ -249,8 +253,8 @@ namespace PartyBot.Database
                     result.MP3 = song.Examples.Mp3;
                     result.Show = question.Name;
                 }
-                await animeRelationManager.UpdateRelationalMap(question.AnnId);
             }
+            await _db.SaveChangesAsync();
         }
 
         public async Task<Embed> UpdateSongLink(string songKey, string newLink, ulong messengerID)
