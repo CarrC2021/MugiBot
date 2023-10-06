@@ -22,7 +22,7 @@ namespace PartyBot.Database
             var connectionStringBuilder = new SqliteConnectionStringBuilder
             {
                 DataSource =
-                Path.Combine(mainpath, "Database", "MugiBotDatbase.db")
+                Path.Combine(mainpath, "Database", "MugiBotDatabase.db")
             };
             var connectionString = connectionStringBuilder.ToString();
             var connection = new SqliteConnection(connectionString);
