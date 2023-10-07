@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,7 +23,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.6" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
-	  <PackageReference Include="Victoria" Version="5.1.11" />
+    <PackageReference Include="Victoria" Version="5.1.11" />
   </ItemGroup>
 
 </Project>

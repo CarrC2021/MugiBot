@@ -7,6 +7,7 @@ using PartyBot.Handlers;
 using System;
 using System.Threading.Tasks;
 using Victoria;
+using Victoria.EventArgs;
 
 namespace PartyBot.Services
 {
@@ -81,8 +82,15 @@ namespace PartyBot.Services
         private void SubscribeLavaLinkEvents()
         {
             _lavaNode.OnLog += LogAsync;
-            _lavaNode.OnTrackEnded += _audioService.TrackEnded;
+            _lavaNode.OnTrackStuck += _audioService.OnTrackStuck;
+            // _lavaNode.OnPlayerUpdated += LogPlayerUpdateAsync;
+            _lavaNode.OnTrackEnded += _audioService.OnTrackEnded;
         }
+
+        // private async Task LogPlayerUpdateAsync(PlayerUpdateEventArgs args)
+        // {
+        //     await LoggingService.LogAsync("OnPlayerUpdated", LogSeverity.Verbose, $"Player State:{args.Player.PlayerState}\n Position: {args.Position}\n Track {args.Track}");
+        // }
 
         private void SubscribeDiscordEvents()
         {

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
+using Victoria.Responses;
 using Victoria.Responses.Rest;
 
 namespace PartyBot.Services
@@ -368,41 +369,49 @@ namespace PartyBot.Services
             }
         }
 
-        public async Task TrackEnded(TrackEndedEventArgs args)
+        public async Task OnTrackStuck(TrackStuckEventArgs args)
         {
+            await LoggingService.LogInformationAsync("TrackStuck", $"{args.Track.Title} by {args.Track.Author} stuck");
+        }
+
+        public async Task OnTrackEnded(TrackEndedEventArgs args)
+        {
+            await LoggingService.LogInformationAsync("TrackEnded", $"{args.Track.Title} by {args.Track.Author} ended for reason: {args.Reason}.");
             if (!args.Reason.ShouldPlayNext())
                 return;
 
+            var player = args.Player;
             Radio guildRadio = RadioHandler.FindRadio(
                     radios,
-                    args.Player.TextChannel.Guild as SocketGuild
+                    player.TextChannel.Guild as SocketGuild
                 );
 
             await CheckDeleteTempMusicFile(args.Track, guildRadio);
+            await LoggingService.LogInformationAsync("TrackEnded", $"Removed the file for {args.Track}");
             
             string toPrint = "Now Playing:";
-            if (guildRadio != null && args.Player.Queue.Count < 2)
+            if (guildRadio != null && player.Queue.Count < 2)
             {
                 await RadioQueue(guildRadio);
                 if (!guildRadio.CurrPlayers.Equals("any"))
                     toPrint = $"You are Listening to {guildRadio.GetPlayers()} Radio. Now Playing:";
             }
 
-            if (!args.Player.Queue.TryDequeue(out var queueable))
+            if (!player.Queue.TryDequeue(out var queueable))
             {
-                await args.Player.TextChannel.SendMessageAsync(
-                embed: await EmbedHandler.CreateBasicEmbed("Queue over", "Playback has finished", Color.Blue));
+                await player.TextChannel.SendMessageAsync(
+                embed: await EmbedHandler.CreateBasicEmbed("Queue Empty", "Playback has finished", Color.Blue));
                 return;
             }
 
-            if (!(queueable is LavaTrack track))
+            if (queueable is not LavaTrack track)
             {
-                await args.Player.TextChannel.SendMessageAsync(
+                await player.TextChannel.SendMessageAsync(
                     embed: await EmbedHandler.CreateErrorEmbed("Lavalink Error", "Next item in queue is not a track"));
                 return;
             }
-            await args.Player.PlayAsync(track);
-            await args.Player.TextChannel.SendMessageAsync(
+            await player.PlayAsync(track);
+            await player.TextChannel.SendMessageAsync(
                 embed: await EmbedHandler.CreateBasicEmbed(toPrint, $"{track.Title} by {track.Author}", Color.Blue));
         }
 
