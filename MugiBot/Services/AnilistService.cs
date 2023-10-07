@@ -23,6 +23,7 @@ namespace PartyBot.Services
     {
         private Anilist4Net.Client _anilistClient;
         private GraphQLHttpClient _graphQLClient { get; set; }
+        private readonly HttpClient _httpClient;
         private readonly char separator = Path.DirectorySeparatorChar;
         public string path { get; set; }
         private readonly Dictionary<string, string> FolderToExtension;
@@ -36,6 +37,7 @@ namespace PartyBot.Services
         public AnilistService()
         {
             _anilistClient = new Client(new HttpClient());
+            _httpClient = new HttpClient();
 
             FolderToExtension = new Dictionary<string, string>
             {
@@ -63,7 +65,9 @@ namespace PartyBot.Services
         public AnilistService(string rootPath)
         {
             _anilistClient = new Client(new HttpClient());
+            _httpClient = new HttpClient();
             path = rootPath;
+
             FolderToExtension = new Dictionary<string, string>
             {
                 {"CoverImages", ".png"},
@@ -77,7 +81,7 @@ namespace PartyBot.Services
             };
             _graphQLClient = new GraphQLHttpClient(options, new SystemTextJsonSerializer(), new HttpClient());
         }
-        public async Task<string> GetCoverArtAsync(string show, int annId)
+        public async Task<string> GetCoverArtAsync(string show, int annID)
         {
             Media response = await GetMediaAsync(show);
             Console.WriteLine(response.Title.ToString());
@@ -87,33 +91,28 @@ namespace PartyBot.Services
         {
             using var db = new AMQDBContext();
             var user = await db.DiscordUsers.FindAsync(userID);
-            var username = user.AnilistName;
-            var query = "query ($username: String){" + $"{AnilistQuery.MediaListQuery()}" + "}";
-            var request = new GraphQLRequest { Query = query, Variables = new { username } };
-            Console.Write(request);
-            var response = await _graphQLClient.SendQueryAsync<dynamic>(request).ConfigureAwait(false);
-            var UserList = response.Data.ToString();
-            await WriteJsonResponseToFile(UserList, "AniLists", username);
-            return await EmbedHandler.CreateBasicEmbed("Anilist", $"Downloaded a file containing the contents of {username}'s anilist", Color.Green);
+            return await GetUserListAsync(user.AnilistName);
         }
 
         public async Task<Embed> GetUserListAsync(string anilistName)
         {
             var username = anilistName;
-            var query = "query ($username: String){" + $"{AnilistQuery.MediaListQuery()}" + "}";
-            var request = new GraphQLRequest { Query = query, Variables = new { username } };
-            Console.Write(request);
-            var response = await _graphQLClient.SendQueryAsync<dynamic>(request).ConfigureAwait(false);
-            var UserList = response.Data.ToString();
-            await WriteJsonResponseToFile(UserList, "AniLists", username);
-            return await EmbedHandler.CreateBasicEmbed("Anilist", $"Downloaded a file containing the contents of {username}'s anilist", Color.Green);
+            try 
+            {
+                var query = "query ($username: String){" + $"{AnilistQuery.MediaListQuery()}" + "}";
+                var request = new GraphQLRequest { Query = query, Variables = new { username } };
+                var response = await _graphQLClient.SendQueryAsync<dynamic>(request).ConfigureAwait(false);
+                var UserList = response.Data.ToString();
+                await WriteJsonResponseToFile(UserList, "AniLists", username);
+                return await EmbedHandler.CreateBasicEmbed("Anilist", $"Updated {username}'s anilist", Color.Green);
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogCriticalAsync("GetUserListAsync", $"Message: {ex.Message}\n Source: {ex.Source}", ex);
+                return await EmbedHandler.CreateErrorEmbed("Anilist", $"Something went wrong trying to download {username}'s anilist");
+            }
         }
 
-        public async Task DownloadMediaAsync(string Show, string folder, int annId)
-        {
-            Media media = await GetMediaAsync(Show);
-            await DownloadFromURL(media.SiteUrl, folder, $"{annId}");
-        }
         public async Task<Media> GetMediaAsync(string Show)
         {
             Media response = null;
@@ -123,22 +122,17 @@ namespace PartyBot.Services
             }
             catch (Exception ex)
             {
-                await LoggingService.LogAsync(ex.Source, LogSeverity.Verbose, ex.Message, ex);
-                Console.WriteLine(ex.StackTrace, ex.Message);
+                await LoggingService.LogCriticalAsync(ex.Source, ex.Message);
             }
             return response;
         }
-        public async Task DownloadFromURL(string urlToDownload, string folder, string fileName)
-        {
-            using var client = new HttpClient();
-            HttpResponseMessage responseMessage = await client.GetAsync(urlToDownload);
-            responseMessage.EnsureSuccessStatusCode();
-            var body = await responseMessage.Content.ReadAsStringAsync();
-            Console.WriteLine(body);
-            using var wc = new WebClient();
-            string jsonResponse = await wc.DownloadStringTaskAsync(new Uri(urlToDownload));
-            await WriteJsonResponseToFile(jsonResponse, folder, fileName);
-        }
+        // public async Task DownloadFromURL(string urlToDownload, string folder, string fileName)
+        // {
+        //     HttpResponseMessage responseMessage = await _httpClient.GetAsync(urlToDownload);
+        //     responseMessage.EnsureSuccessStatusCode();
+        //     string jsonResponse = await _httpClient.GetStringAsync(new Uri(urlToDownload));
+        //     await WriteJsonResponseToFile(jsonResponse, folder, fileName);
+        // }
 
         public async Task WriteJsonResponseToFile(string jsonResponse, string folder, string fileName)
         {
@@ -204,7 +198,6 @@ namespace PartyBot.Services
         /// <returns> a list of <see cref="PartyBot.Database.SongTableObject>"/> objects once the asynchronous task is completed. </returns>
         public async Task<List<SongTableObject>> ReturnSongsFromLists(List<UserAnilist> anilists, List<int> validListNums)
         {
-            var entries = new List<Entry>();
             var SongsToReturn = new List<SongTableObject>();
             foreach (UserAnilist anilist in anilists)
                 SongsToReturn.AddRange(await ReturnSongsFromList(anilist, validListNums));
