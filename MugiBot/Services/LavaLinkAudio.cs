@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,15 +21,21 @@ namespace PartyBot.Services
     public sealed class LavaLinkAudio
     {
         private readonly LavaNode _lavaNode;
+        private readonly HttpClient client;
         private readonly char separator = Path.DirectorySeparatorChar;
         public string path;
-        private readonly DBManager _db;
         public List<Radio> radios;
 
-        public LavaLinkAudio(LavaNode lavaNode, DBManager _dbmanager)
+        public string UserAgent { get; }
+
+        public LavaLinkAudio(LavaNode lavaNode)
         {
             _lavaNode = lavaNode;
-            _db = _dbmanager;
+            client = new HttpClient()
+            {
+                BaseAddress = new Uri("https://files.catbox.moe"),
+            };
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0");
             radios = new List<Radio>();
         }
 
@@ -60,7 +67,7 @@ namespace PartyBot.Services
             SearchResponse search;
             if (query.Contains("catbox.moe"))
             {
-                var localpath = await CatboxHandler.DownloadMP3(query, path);
+                var localpath = await CatboxHandler.DownloadMP3(query, path, client);
                 search = await _lavaNode.SearchAsync(localpath);
             }
             else
@@ -109,7 +116,7 @@ namespace PartyBot.Services
                 }
                 else
                 {
-                    track = await CatboxHandler.DownloadAndMakeTrack(sto, path, _lavaNode);
+                    track = await CatboxHandler.DownloadAndMakeTrack(sto, path, _lavaNode, client);
                 }
                 //If the Bot is already playing music, or if it is paused but still has music in the playlist, Add the requested track to the queue.
                 if (player.Track != null && player.PlayerState is PlayerState.Playing || player.PlayerState is PlayerState.Paused)
@@ -461,14 +468,14 @@ namespace PartyBot.Services
                 if (!radio.IsQueueEmpty())
                 {
                     nextSong = await radio.NextSong();
-                    await CatboxHandler.QueueRadioSong(nextSong, radio.Guild, _lavaNode, path);
+                    await CatboxHandler.QueueRadioSong(nextSong, radio.Guild, _lavaNode, path, client);
                     return;
                 }
                 // If there is nothing in the queue and autoplay is on then queue a random song from the song selection.
                 if (radio.Autoplay)
                 {
                     nextSong = radio.GetRandomSong();
-                    await CatboxHandler.QueueRadioSong(nextSong, radio.Guild, _lavaNode, path);
+                    await CatboxHandler.QueueRadioSong(nextSong, radio.Guild, _lavaNode, path, client);
                 }
 
             }
