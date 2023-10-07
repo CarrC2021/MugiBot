@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Victoria;
 
@@ -15,30 +17,39 @@ namespace PartyBot.Handlers
     public static class CatboxHandler
     {
         internal static readonly HttpClient HttpClient = new HttpClient();
-        public static async Task<string> DownloadMP3(string query, string musicPath)
+        public static async Task<String> DownloadMP3(string query, string musicPath)
         {
-            //Console.WriteLine("where to download");
-            //Console.WriteLine(Path.Combine(musicPath, "tempMusic"));
-
-            using var client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync(query);
-            response.EnsureSuccessStatusCode();
-
+            await LoggingService.LogAsync("DownloadMP3", LogSeverity.Verbose, $"Attempting to download {query}.");
             string cutString = query[(query.LastIndexOf(".moe") + 5)..];
-
             string localpath = Path.Combine(musicPath, "tempMusic", cutString);
-
-            using var wc = new WebClient();
-            Uri tempurl = new Uri(query);
-            var audio = await wc.DownloadDataTaskAsync(tempurl);
-            await File.WriteAllBytesAsync(localpath, audio);
-            return localpath;
+            using var client = new WebClient();
+            client.Headers["User-Agent"] = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0";
+            try 
+            {
+                await client.DownloadFileTaskAsync(query, localpath);
+                await LoggingService.LogAsync("DownloadMP3", LogSeverity.Verbose, $"Successfully Downloaded {query}");
+                // var response = await HttpClient.GetByteArrayAsync(query);
+                // await File.WriteAllBytesAsync(localpath, response);
+                // await LoggingService.LogAsync("DownloadMP3", LogSeverity.Verbose, $"Successfully Downloaded {query}");
+                return localpath;
+            }
+            catch (HttpRequestException ex) 
+            {
+                await LoggingService.LogAsync("DownloadMP3", LogSeverity.Critical, $"Failed to download {query}.\n Error Source: {ex.Source} \n Error message: {ex.Message} \n Error Stack Trace {ex.StackTrace}");
+                await LoggingService.LogAsync("DownloadMP3", LogSeverity.Critical, $"Help Link: {ex.HelpLink}\n Status Code: {ex.HResult}\n method that threw exception: {ex.TargetSite}");
+                return "failed to download";
+            }
+            catch (WebException ex)
+            {
+                await LoggingService.LogAsync("DownloadMP3", LogSeverity.Critical, $"Failed to download {query}.\n Error Source: {ex.Source} \n Error message: {ex.Message} \n Error Stack Trace {ex.StackTrace}");
+                await LoggingService.LogAsync("DownloadMP3", LogSeverity.Critical, $"Help Link: {ex.HelpLink}\n Status Code: {ex.HResult}\n method that threw exception: {ex.TargetSite}");
+                return "failed to download";
+            }
         }
         public static async Task<LavaTrack> DownloadAndMakeTrack(SongTableObject song, string musicPath, LavaNode _lavaNode)
         {
-            string MP3Link = await DownloadMP3(song.MP3, musicPath);
-            Console.WriteLine(MP3Link);
-            var search = await _lavaNode.SearchAsync(MP3Link);
+            var path = await DownloadMP3(song.MP3, musicPath);
+            var search = await _lavaNode.SearchAsync(path);
             if (search.Tracks.FirstOrDefault() == null)
                 await LoggingService.LogCriticalAsync("Lavanode.SearchAsync", "returned a null track");
             LavaTrack track = search.Tracks.FirstOrDefault();

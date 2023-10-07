@@ -42,10 +42,12 @@ namespace PartyBot.Services
             try
             {
                 await _lavaNode.JoinAsync(voiceState.VoiceChannel, textChannel);
+                await LoggingService.LogInformationAsync("Music, Join", $"Joined {voiceState.VoiceChannel.Name}.");
                 return await EmbedHandler.CreateBasicEmbed("Music, Join", $"Joined {voiceState.VoiceChannel.Name}.", Color.Green);
             }
             catch (Exception ex)
             {
+                await LoggingService.LogCriticalAsync("Join command", ex.Message, ex);
                 return await EmbedHandler.CreateErrorEmbed("Music, Join", ex.Message);
             }
         }
@@ -57,8 +59,8 @@ namespace PartyBot.Services
             SearchResponse search;
             if (query.Contains("catbox.moe"))
             {
-                query = await CatboxHandler.DownloadMP3(query, path);
-                search = await _lavaNode.SearchAsync(query);
+                var localpath = await CatboxHandler.DownloadMP3(query, path);
+                search = await _lavaNode.SearchAsync(localpath);
             }
             else
             {
@@ -74,6 +76,7 @@ namespace PartyBot.Services
             //Get the first track from the search results.
             //TODO: Add a 1-5 list for the user to pick from. (Like Fredboat)
             track = search.Tracks.FirstOrDefault();
+            await LoggingService.LogInformationAsync("Music, Find", $"Found track {track.Title} by {track.Author}.");
             return track;
         }
 
@@ -120,9 +123,9 @@ namespace PartyBot.Services
                 await LoggingService.LogInformationAsync("Music", $"Bot Now Playing: {track.Title}");
                 return await EmbedHandler.CreateBasicEmbed("Music", $"Now Playing: {track.Title} by {track.Author}", Color.Blue);
             }
-            //If after all the checks we did, something still goes wrong. Tell the user about it so they can report it back to us.
             catch (Exception ex)
             {
+                await LoggingService.LogCriticalAsync("Music, Play", $"Error Message: {ex.Message}\n Error Source: {ex.Source}");
                 return await EmbedHandler.CreateErrorEmbed("Music, Play", $"{ex.Message} \n {query}");
             }
 
@@ -139,7 +142,7 @@ namespace PartyBot.Services
 
                 //If The Player has not been created then tell the user that.
                 if (player == null)
-                    return await EmbedHandler.CreateBasicEmbed("Music", $"I was never even a voice channel to begin with leave me alone.", Color.Red);
+                    return await EmbedHandler.CreateBasicEmbed("Music", $"Not connected to a voice channel.", Color.Red);
 
                 //If The Player is playing, Stop it.
                 if (player.PlayerState is PlayerState.Playing)
@@ -153,14 +156,14 @@ namespace PartyBot.Services
                 await LoggingService.LogInformationAsync("Music", $"Bot has left.");
                 return await EmbedHandler.CreateBasicEmbed("Music", $"I've left. Thank you for playing music.", Color.Blue);
             }
-            //Tell the user about the error so they can report it back to us.
             catch (InvalidOperationException ex)
             {
+                await LoggingService.LogCriticalAsync("Music, Leave", ex.Message, ex);
                 return await EmbedHandler.CreateErrorEmbed("Music, Leave", ex.Message);
             }
         }
 
-        /*This is ran when a user uses the command List 
+        /*This is ran when a user uses the command Queue
             Task Returns an Embed which is used in the command call. */
         public async Task<Embed> QueueAsync(SocketGuild guild, ISocketMessageChannel channel)
         {
@@ -195,20 +198,20 @@ namespace PartyBot.Services
                 }
                 foreach (LavaTrack track in player.Queue)
                 {
-                    if (($"{title} {descriptionBuilder.ToString()}\n" + $"{trackNum}: {track.Title}\n").Length >= 2048)
+                    if (($"{title} {descriptionBuilder}\n" + $"{trackNum}: {track.Title}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {track.Title}\n");
                     trackNum++;
                 }
                 foreach (SongTableObject song in queue)
                 {
-                    if (($"{title} {descriptionBuilder.ToString()}\n" + $"{trackNum}: {song.PrintSong()}\n").Length >= 2048)
+                    if (($"{title} {descriptionBuilder}\n" + $"{trackNum}: {song.PrintSong()}\n").Length >= 2048)
                         break;
                     descriptionBuilder.Append($"{trackNum}: {song.PrintSong()}\n");
                     trackNum++;
                 }
 
-                return await EmbedHandler.CreateBasicEmbed("Music, List", $"{title} \n{descriptionBuilder.ToString()}\n", Color.Blue);
+                return await EmbedHandler.CreateBasicEmbed("Music, List", $"{title} \n{descriptionBuilder}\n", Color.Blue);
             }
             catch (Exception ex)
             {
@@ -406,7 +409,16 @@ namespace PartyBot.Services
         public async Task<Embed> QueueCatboxFromDB(string key, SocketGuildUser user, IGuild guild)
         {
             var song = await DBSearchService.UseSongKey(key);
-            return await PlayAsync(user, guild, song.MP3, song);
+            try
+            {
+                var embed = await PlayAsync(user, guild, song.MP3, song);
+                return embed;
+            }
+            catch (Exception ex)
+            {
+                await LoggingService.LogCriticalAsync("QueueCatboxFromDB", ex.Message, ex);
+                return await EmbedHandler.CreateErrorEmbed("Catbox Song", "Something went terribly wrong");
+            }
         }
 
         public async Task<Embed> StartRadio(Radio radio, SocketGuildUser user)
