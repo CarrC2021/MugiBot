@@ -67,15 +67,18 @@ namespace PartyBot.Services
             SearchResponse search;
             if (query.Contains("catbox.moe") || query.Contains("catbox.video"))
             {
+                var song = await SearchHandler.SearchByLink(query);
+                if (song != null)
+                {
+                    return await CatboxHandler.DownloadAndMakeTrack(song, path, _lavaNode, client);
+                }
                 var localpath = await CatboxHandler.DownloadMP3(query, path, client);
                 search = await _lavaNode.SearchAsync(localpath);
+                return search.Tracks.FirstOrDefault();
             }
-            else
-            {
-                search = Uri.IsWellFormedUriString(query, UriKind.Absolute) ?
-                await _lavaNode.SearchAsync(query)
-                : await _lavaNode.SearchYouTubeAsync(query);
-            }
+            search = Uri.IsWellFormedUriString(query, UriKind.Absolute) ? await _lavaNode.SearchAsync(query)
+            : await _lavaNode.SearchYouTubeAsync(query);
+            
 
             //If we couldn't find anything, tell the user.
             if (search.LoadStatus == LoadStatus.NoMatches)

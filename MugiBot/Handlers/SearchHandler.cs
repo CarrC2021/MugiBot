@@ -213,6 +213,19 @@ namespace PartyBot.Handlers
             return Shows.Union(Romajis, new SongTableObjectComparer()).ToList();
         }
 
+        public static async Task<SongTableObject> SearchByLink(string link)
+        {
+            using var _db = new AMQDBContext();
+            List<SongTableObject> Shows = await _db.SongTableObject
+                        .AsNoTracking()
+                        .Where(x => x.MP3.Equals(link))
+                        .ToListAsync();
+
+            if (Shows.Count == 0)
+                return null;
+            return Shows.First();
+        }
+
         public static async Task<List<SongTableObject>> ShowSearch(string name, string type, bool exactMatch)
         {
             using var db = new AMQDBContext();
