@@ -65,7 +65,7 @@ namespace PartyBot.Services
             //Find The Track the User requested.
             LavaTrack track;
             SearchResponse search;
-            if (query.Contains("catbox.moe"))
+            if (query.Contains("catbox.moe") || query.Contains("catbox.video"))
             {
                 var localpath = await CatboxHandler.DownloadMP3(query, path, client);
                 search = await _lavaNode.SearchAsync(localpath);

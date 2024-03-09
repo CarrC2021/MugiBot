@@ -19,7 +19,16 @@ namespace PartyBot.Handlers
         public static async Task<String> DownloadMP3(string query, string musicPath, HttpClient httpClient)
         {
             await LoggingService.LogAsync("DownloadMP3", LogSeverity.Verbose, $"Attempting to download {query}.");
-            string cutString = query[(query.LastIndexOf(".moe") + 5)..];
+            string cutString;
+            if (query.Contains("catbox.moe"))
+            {
+                cutString = query[(query.LastIndexOf(".moe") + 5)..];
+            }
+            else 
+            {
+                cutString = query[(query.LastIndexOf(".video") + 5)..];
+            }
+
             string localpath = Path.Combine(musicPath, "tempMusic", cutString);
             try 
             {
