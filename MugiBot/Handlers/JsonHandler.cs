@@ -78,9 +78,10 @@ namespace PartyBot.Handlers
                 NullValueHandling = NullValueHandling.Ignore,
                 MissingMemberHandling = MissingMemberHandling.Ignore
             };
+            
             var data = await Task.Run(() =>
-                JsonConvert.DeserializeObject<List<Question>>(contents, settings));
-            return data;
+                JsonConvert.DeserializeObject<QuestionResponse>(contents, settings));
+            return data.Questions;
         }
         public static async Task<List<SongListData>> ConvertJsonToSongList(FileInfo info)
         {

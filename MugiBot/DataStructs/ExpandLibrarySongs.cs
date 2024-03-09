@@ -83,6 +83,16 @@ namespace PartyBot.DataStructs
         public Versions Versions { get; set; }
     }
 
+    public class QuestionResponse 
+    
+    {
+        [JsonProperty("success")]
+        public string SuccessString { get; set; } 
+
+        [JsonProperty("questions")]
+        public List<Question> Questions { get; set; }
+    }
+
     public class Question
     {
         // This class represents one anime and contains its id, name, and the songs from the show.
